@@ -1,0 +1,87 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+    height: 100vh;
+    width: 100vw;
+    font-size: 16px;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent;    
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 2px solid white; /* Angleichen mit Hintergrundfarbe-nicht transparent! */
+  background-color: rgba(0, 0, 0, .5);
+  }  
+
+/*::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  background: rgba(255,0,0,0.8); 
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+background: rgba(255,0,0,0.4); 
+}*/
+
+// simpler to remember for scrolling center boxes
+.center-only {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-in-rows {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.center-in-columns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.fill-parent {
+    width: 100%;
+    height: 100%;
+}
+
+.maximize {
+  width: 100vw;
+  height: 100vh;
+}
+
+.noselect {
+  user-select: none;
+}
+
+.notapcolor {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clickable {
+  cursor: pointer;
+}

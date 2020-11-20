@@ -1,0 +1,504 @@
+<template>
+    <div class="fill-parent">
+        <div class="header-accent"></div>
+        <div class="benchmark-container fill-parent">
+            <div class="headline-container center-in-rows">Benchmark</div>
+            <div class="item-container center-in-rows">
+                <div class="weight-container center-in-rows">
+                    <div>
+                        Weight: <WeightDisplay class="weight-text" format="%.3f" :pipeline="getPipeline()" /> kg
+                    </div>
+                </div>
+                <div class="time-container center-in-rows">Time: {{getElapsedString()}}s</div>
+                <div class="hold-container center-in-rows">
+                    <table style="margin: auto">
+                        <tr v-if="setupData.selectedHolds.left">
+                            <td style="text-align: right">Left:</td>
+                            <td style="text-align: left; padding-left: 10px">{{setupData.selectedHolds.left.name}}</td>
+                        </tr>
+                        <tr v-if="setupData.selectedHolds.right">
+                            <td style="text-align: right">Right:</td>
+                            <td style="text-align: left; padding-left: 10px">{{setupData.selectedHolds.right.name}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="max-weight-container center-in-rows">
+                    <MaxWeightGoals ref="weightGoals" :elapsedTime="getActiveTime()" />
+                </div>
+                <!--div class="max-time-container center-in-rows">
+                    <UserTimeline ref="timeline" :elapsedTime="getActiveTime()" />
+                </div-->
+            </div>
+            <div class="graph-container">
+                <!--input type="range" min="0" max="100" value="5" class="" v-model.number="lag" />
+                <input type="range" min="0" max="10000" value="3500" class="" v-model.number="threshold" />
+                <input type="range" min="0" max="10000" value="500" class="" v-model.number="influence" /-->
+                <BenchmarkGraph ref="graph" />
+            </div>
+        </div>
+        <div class="center-in-rows result-overlay-container fill-parent">
+            <div v-if="state.showResult" class="report fill-parent">
+                <div class="result-container center-in-rows">
+                    <div class="headline">Result</div>
+                    <div class="results center-in-rows">
+                        <div class="values center-in-rows">
+                            <div class="table">
+                                <div class="row">
+                                    <div class="cell align-right">Time:</div>
+                                    <div class="cell">{{state.elapsedActiveTime.toFixed(2)}}s</div>
+                                </div>
+                                <div class="row">
+                                    <div class="cell align-right">Weight:</div>
+                                    <div class="cell">{{state.weight.toFixed(3)}} kg</div>
+                                </div>
+                                <div class="row">
+                                    <div class="cell align-right">Holds:</div>
+                                    <div class="cell center-in-rows">
+                                        <div v-if="setupData.selectedHolds.left">
+                                            Left {{setupData.selectedHolds.left.name}}
+                                        </div>
+                                        <div v-if="setupData.selectedHolds.right">
+                                            Right {{setupData.selectedHolds.right.name}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--div class="row">
+                                    <div class="cell align-right">Place (time):</div>
+                                    <div class="cell">12<span class="rel-change bad"> (-2)</span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="cell align-right">Place (weight):</div>
+                                    <div class="cell">12<span class="rel-change"> (0)</span>, 8 <span class="rel-change good"> (+1)</span></div>
+                                </div-->
+                            </div>
+                        </div>
+                        <!--img class="graph-image" :src="getGraphImage()" alt="graph" /-->
+                        <div class="buttons center-in-columns">
+                            <Button class="save " @onClick="onClickSaveReport()">Save</Button>
+                            <Button class="save " @onClick="onClickRetryReport()" minClicks=2>Retry</Button>
+                            <Button class="" @onClick="onClickRestartReport()" minClicks=2>Restart</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="state.showFixIt" class="center-in-rows fill-parent fixit">
+                <div class="error">Error</div>
+                <div class="text">The scale is not at zero, please remove the weight.</div>
+                <Button @onClick="onClickRetryAfterFix()">Retry</Button>
+            </div>            
+        </div>
+    </div>
+</template>
+
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import ProgressBar from '@/components/ProgressBar.vue'
+import UserTimeline from '@/components/benchmark/UserTimeline.vue'
+import MaxWeightGoals from '@/components/benchmark/MaxWeightGoals.vue'
+import WeightDisplay from '@/components/benchmark/WeightDisplay.vue'
+import BenchmarkGraph from '@/components/benchmark/BenchmarkGraph.vue'
+import Button from '@/components/Button.vue'
+import moment from 'moment';
+import { HangboardScale } from '@/core/hangboardscale';
+import { WeightMessage, ScaleOptions } from '@/core/sensorreader';
+import { sum, round, pipe, guard, movingAverage, tared } from '@/core/messagetransformer';
+import { BenchmarkController, ProgressInfo, BenchmarkData, PeakData } from '@/components/benchmark/ts/BenchmarkController'
+import { DataHistory } from '../../core/history'
+import { AddLocalUploadSave, LocalUploadSave } from '../../core/localstore'
+import { LocalSaveUploader, getProp } from '../../core/util'
+import { Hangboards, LocalBenchmarkSaveData, BenchmarkSetupData } from '../typeexports'
+import { GlobalConfig } from '../../config'
+import GoalBar from './GoalBar.vue'
+
+@Component({
+    components: {
+        ProgressBar,
+        UserTimeline,
+        MaxWeightGoals,
+        WeightDisplay,
+        BenchmarkGraph,
+        Button,
+        GoalBar
+    }
+})
+export default class Benchmark extends Vue {
+    @Prop({default: () => {}}) setupData!:BenchmarkSetupData;
+    scaleBackend:HangboardScale;
+    bc!:BenchmarkController;
+    benchmarkGraph:BenchmarkGraph|null = null;
+    weightGoals!:MaxWeightGoals;
+    timeline!:UserTimeline;
+    updateTimeout:any = null;
+    state = {
+        elapsedActiveTime: 0,
+        showFixIt: false,
+        showResult: false,
+        graphImage: "",
+        weight: 0
+    }
+    constructor(){
+        super();
+        this.scaleBackend = this.$root.$data.scaleBackend;
+        console.log(JSON.stringify(this.setupData));
+    }
+
+    mounted() {
+        this.benchmarkGraph = this.$refs.graph as BenchmarkGraph;
+        this.weightGoals = this.$refs.weightGoals as MaxWeightGoals;
+        this.timeline = this.$refs.timeline as UserTimeline;
+        this.bc = new BenchmarkController(
+            this.scaleBackend, 
+            this.onStart,
+            this.onFinish,
+            this.onFixInitial,
+            this.onData,
+            this.onResult,
+            this.setupData.tareWeights
+        );
+    }
+
+    beforeDestroy() {
+        this.bc.stop();
+    }
+
+    onStart(info:BenchmarkData) {
+        console.log("onStart()");
+    }
+    onFinish(info:BenchmarkData) {
+        console.log("onFinish()");
+        console.log("time(f): ", info.peaks.end!.x - info.peaks.start!.x);
+    }    
+    onFixInitial(info:BenchmarkData) {
+        //console.log(info);
+        //console.log("onFixInitial()");
+        this.state.showFixIt = true;
+    }
+    onData(info:BenchmarkData) {
+        if(info.peaks.start && info.peaks.end) {
+            this.state.elapsedActiveTime = info.peaks.end.x - info.peaks.start.x;
+        } else if(info.peaks.start) {
+            this.state.elapsedActiveTime = info.time[info.time.length - 1] - info.peaks.start.x;
+        }
+
+        // graph update stuff
+        if(this.updateTimeout !== null) {
+            return;
+        }
+        this.updateTimeout = setTimeout(() => {
+            if(this.benchmarkGraph) {
+                this.benchmarkGraph.setData(info);
+            }
+            this.updateTimeout = null;
+        }, 100);
+    }
+    onResult(info:BenchmarkData) {
+        console.log("onResult()");
+        if(info.peaks.start && info.peaks.end) {
+            this.state.elapsedActiveTime = info.peaks.end.x - info.peaks.start.x;
+            console.log("time(r): ", info.peaks.end!.x - info.peaks.start!.x);
+        }
+        this.state.weight = info.avgWeight;
+        if(this.benchmarkGraph) {
+            this.benchmarkGraph.setData(info);
+        }
+        setTimeout(() => {
+            if(this.benchmarkGraph) {
+                this.state.graphImage = this.benchmarkGraph.getGraphImage();
+            }
+            this.state.showResult = true;
+        }, 10);
+    }
+    onClickRetryAfterFix() {
+        this.bc.restart();
+        this.state.showFixIt = false;
+    }
+    onClickSaveReport() {
+        let reportData = this.bc.generateGraphData();
+        let saveData: LocalBenchmarkSaveData = {
+            boardId: Hangboards.twinPeaksReference.id,
+            leftId: getProp(this.setupData.selectedHolds, "left.id"),
+            rightId: getProp(this.setupData.selectedHolds, "right.id"),
+            userWeight: this.setupData.userWeight,
+            hangWeight: this.state.weight,
+            activeTime: this.state.elapsedActiveTime,
+            data: {
+                date: new Date(),
+                time: reportData.time,
+                weight: reportData.weight,
+                temperatureInfo: this.scaleBackend.getLastTempSensorData()
+            }
+        }
+        let save:LocalUploadSave = {
+            type: "save-benchmark",
+            params: [],
+            date: new Date(),
+            compressData: GlobalConfig.compressLocalSaves,
+            data: saveData
+        };
+        AddLocalUploadSave(save);
+        let uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
+        uploader.uploadLocalSaves();
+        this.reset();
+    }
+
+    onClickRetryReport() {
+        this.reset();
+    }
+
+    reset() {
+        this.bc.restart();
+        this.state.showResult = false;
+        this.state.elapsedActiveTime = 0;
+        if(this.benchmarkGraph) {
+            this.benchmarkGraph.setData(this.bc.generateGraphData());
+        }
+    }
+
+    onClickRestartReport() {
+        this.$emit("restartBenchmark");
+    }
+
+    getElapsedString() {
+        return this.state.elapsedActiveTime.toFixed(2);
+    }
+
+    getActiveTime() {
+        return this.state.elapsedActiveTime;
+    }
+
+    //TODO: can we do this differently?
+    getPipeline() {
+        return pipe(tared(this.setupData.tareWeights.left, this.setupData.tareWeights.right), sum(8), round(0.1));
+    }
+
+    getgraphImageStyle() {
+        return {
+            backgroundImage: `url(${this.state.graphImage})`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "230px",
+            backgroundPosition: "center"
+        }
+    }
+
+    getGraphImage() {
+        return this.state.graphImage;
+    }
+
+    getHoldString() {
+        let holds = this.setupData.selectedHolds;
+        let out = "";
+        if(holds.left) {
+            out += `L${holds.left.depth}`;
+        }
+        if(holds.right) {
+            if(out !== "") {
+                out += "/";
+            }
+            out += `R${holds.right.depth}`;
+        }
+        return out;
+    }
+
+    canAskForLeave() {
+        if (!this.bc.datasets.peaks.start) {
+            return true;
+        }
+        else if(this.bc.datasets.peaks.start && !this.bc.datasets.peaks.end) {
+            return false;
+        }
+        else if(this.bc.datasets.peaks.start && this.bc.datasets.peaks.end) {
+            return true;
+        }
+    }
+
+}
+</script>
+
+<style lang="scss" scoped>
+
+///////////////////////////////////////
+.header-accent {
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height : 2px;
+    background-color: #FDD835;
+}
+
+.benchmark-container {
+    display: flex;
+    flex-direction: column;
+}
+
+////////////////////////////////////////
+
+.headline-container {
+    //font-weight: bolder;
+    font-size: 2em;
+    font-weight: 300;
+    padding: 10px;
+    margin-bottom: 10px;
+    //background-color: bisque;
+}
+
+////////////////////////////////////////
+
+.item-container {
+    flex-grow: 1;
+}
+
+////////////////////////////////////////
+
+.weight-container {
+    //margin: 10px;
+    font-size: 1.5em;
+    font-weight: 300;
+    //flex-grow: 1;
+    //background-color: gainsboro;
+    margin-bottom: 20px;
+    .weight-text {
+        display: inline-block;
+    }
+}
+////////////////////////////////////////
+
+.time-container {
+    //margin: 10px;
+    font-size: 1.5em;
+    font-weight: 300;
+    margin-bottom: 20px;
+    //flex-grow: 1;
+    //background-color: floralwhite;
+}
+
+////////////////////////////////////////
+
+.hold-container {
+    //flex-grow: 1;
+    font-size: 1.5em;
+    font-weight: 300;
+    //position: absolute;
+    //top: 5px;
+    //left: 5px;
+}
+
+////////////////////////////////////////
+
+.max-weight-container {
+    width: 80%;
+    //margin: 10px;
+    flex-grow: 1;
+    //background-color: blanchedalmond;
+}
+
+////////////////////////////////////////
+
+.max-time-container {
+    width: 80%;
+    min-height: 120px;
+    flex-grow: 1;
+    position: relative;
+    //background-color: azure;
+}
+
+////////////////////////////////////////
+
+.graph-container {
+    width: 100%;
+    height: 25vh;
+    //border-top: 1px solid lightgray;
+}
+
+///////////////////////////////////////
+
+.result-overlay-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    //z-index: 1;
+    .fixit {
+        background-color: rgba(0, 0, 0, 0.9);
+        font-weight: 300;
+        color: white;
+        .error {
+            font-weight: 400;
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: red;
+        }
+        .text {
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+    }
+    .report {
+        display: flex;
+        align-items: center;
+        flex-direction: column;        
+        justify-content: center;
+        //padding-top: 50px;
+        background-color: rgba(0, 0, 0, 0.25);
+        .result-container {
+            background-color: rgba(255, 255, 255, 1);
+            border-radius: 50px;
+            color: black;
+            font-weight: 300;
+            padding-top: 10px;
+            padding-bottom: 50px;
+            border: 1px solid lightgray;
+            .headline {
+                font-size: 3em;
+                margin-bottom: 20px;
+            }
+            .results {
+                font-weight: 400;
+                .values {
+                    margin-bottom: 30px;
+                    .highscore {
+                        font-size: 1.5em;
+                        margin-top:10px;
+                        margin-bottom: 10px;
+                    }
+                    .table {
+                        display: table;
+                        .row {
+                            display: table-row;
+                            height: 30px;
+                            .cell {
+                                display: table-cell;
+                                vertical-align: middle;
+                                padding-right: 10px;
+                                .rel-change {
+                                    font-size: 0.85em;
+                                }
+                                .good {
+                                    color: green;
+                                }
+                                .bad {
+                                    color: red;
+                                }
+                            }
+                            .align-right {
+                                text-align: right;
+                            }
+                        }
+                    }
+                }
+                .graph-image {
+                    max-width:90%;
+                }
+                .buttons {
+                    width: 90%;
+                    .save {
+                        margin-right: 10px;
+                    }   
+                }
+            }
+        }
+    }
+}
+
+/////////////////////////////////////////////////////// 
+
+</style>
