@@ -1,3 +1,5 @@
+import { runInContext } from 'lodash';
+import { BluetoothLE, CordovaBluetoothLE, WebBluetoothLE } from './bluetoothle';
 import { StopWatch } from './stopwatch';
 
 export const ScaleOptions = {
@@ -48,6 +50,104 @@ export interface SensorReaderInterface {
     removeTempSensorCallback(cb: TempSensorCallback): void;
     registerChannelInfoCallback(cb: ChannelInfoCallback): void ;
     removeChannelInfoCallback(cb: ChannelInfoCallback): void;
+}
+
+export class BluetoothSensorReader implements SensorReaderInterface 
+{
+    bleBackend:BluetoothLE;
+    weightListener: Array<WeightMessageCallback> = [];
+    tempListener: Array<TempSensorCallback> = [];
+    channelInfoListener: Array<ChannelInfoCallback> = [];    
+    receivedPackages = 0;
+    ppsLimitWatch: StopWatch = new StopWatch();
+    activeResetWatch: StopWatch = new StopWatch(false);
+
+    constructor() {
+        if(window.hasOwnProperty("cordova")) {
+            this.bleBackend = new CordovaBluetoothLE("NimBLE", "24:6F:28:7B:A5:BE");
+        } else {
+            this.bleBackend = new WebBluetoothLE();
+        }
+        this.run();
+    }
+
+    private async run() {
+        await this.bleBackend.connect("24:6F:28:7B:A5:BE");
+        await this.bleBackend.subscribe("0x2a98", (data:string) => {
+            if(this.ppsLimitWatch.elapsed() > 1) {
+                this.receivedPackages = 0;
+            }
+            if(this.receivedPackages > 100) {
+                console.log("too many messages/s, ignoring");
+                return;
+            }
+            if(data.length == 0) {
+                console.log("empty message, ignoring");
+                return;
+            }
+            const messageType = data[0];
+            const payload = data.substr(1);
+            if(messageType === 'w') {
+                const params = payload.split(" ");
+                if(params.length < 4) {
+                    return;
+                }
+                const msg: WeightMessageInterface = new WeightMessage(+params[2], +params[3], (+params[2]) + (+params[3]), (+params[1]) / 1000000, false);
+                for(const cb of this.weightListener) {
+                    cb(msg);
+                }
+                this.receivedPackages++;
+                this.activeResetWatch.restart();
+            } else if (messageType === 't') {
+                const params = payload.split(" ");
+                if(params.length < 3) {
+                    return;
+                }
+                for(const cb of this.tempListener) {
+                    const obj: TempSensorInterface = {
+                        //time: +tempData[0],
+                        time: new Date(),
+                        temp: +params[0],
+                        humidity: +params[1],
+                        pressure: +params[2]
+                    };
+                    cb(obj);
+                }
+                this.receivedPackages++;
+                this.activeResetWatch.restart();
+            } else {
+                console.log("unknown message");
+            }
+            
+        });
+    }
+
+    public selectChannel(channel: string): void {
+
+    }
+
+    public isChannelActive(): boolean {
+        return this.activeResetWatch.isStarted() &&  this.activeResetWatch.elapsed() < 1;
+    }
+
+    public registerWeightListener(cb: WeightMessageCallback): void {
+        this.weightListener.push(cb);
+    }
+    public removeWeightListener(cb: WeightMessageCallback): void {
+        this.weightListener = this.weightListener.filter((e) => e !== cb);
+    }
+    public registerTempSensorCallback(cb: TempSensorCallback): void {
+        this.tempListener.push(cb);
+    }
+    public removeTempSensorCallback(cb: TempSensorCallback): void {
+        this.tempListener = this.tempListener.filter((e) => e !== cb);
+    }
+    public registerChannelInfoCallback(cb: ChannelInfoCallback): void {
+        this.channelInfoListener.push(cb);
+    }
+    public removeChannelInfoCallback(cb: ChannelInfoCallback): void {
+        this.channelInfoListener = this.channelInfoListener.filter((e) => e !== cb);
+    }
 }
 
 export class WebsocketSensorReader implements SensorReaderInterface {

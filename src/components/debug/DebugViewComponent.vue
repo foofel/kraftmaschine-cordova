@@ -1,23 +1,106 @@
 <template>
     <div class="page">
         <!--textarea class="text" v-model="textString" ref="ta"></textarea-->
-        <div class="graph-container" @click="startConnect">
+        <div class="graph-container">
             <BenchmarkGraph ref="graph" />
         </div>        
     </div>
 </template>
 
-<script lang="ts">
+<script>
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { VueNavigation } from '../vuenavigation';
 import BenchmarkGraph from '@/components/benchmark/BenchmarkGraph.vue'
 import { WeightMessage } from '@/core/sensorreader';
-import { BluetoothLE } from './bluetoothle'
-import { CordovaBluetoothLE } from './cordova-bluetoothle'
-import { WebBluetoothLE } from './web-bluetoothle'
+import { HangboardScale } from '@/core/hangboardscale';
+import { pipe, tared, passTrough } from '@/core/messagetransformer';
 //import WC from '@/components/hangboardtimer/WeightCalibration.vue'
 
-@Component({
+class Data {
+    textData = [];
+    timeBuffer = [];
+    weightBuffer = [];
+    gradientBuffer = [];
+    bufferLengthSeconds = 3600;
+}
+
+export default {
+    name: "DebugViewComponent",
+    components: {
+        BenchmarkGraph
+    },
+    dataObject: new Data(),
+    data() { return {
+        scaleBackend: null,
+        interval: null,
+        benchmarkGraph: null
+    }},    
+    created() {
+        this.scaleBackend = this.$root.scaleBackend;
+        const self = this;
+        this.scaleBackend.registerWeightCallback((wm) => { 
+            self.$options.onNewData(self, wm);
+        }, passTrough);
+    },
+    mounted() {
+        this.benchmarkGraph = this.$refs.graph;
+        this.$options.startRedraw(this);
+    },
+    beforeDestroy() {
+        this.scaleBackend.removeWeightCallback(this.$options.onNewData);
+        this.stopUpdate = true;
+        if(this.interval) {
+            clearInterval(this.interval);
+        }        
+    },
+    startRedraw(self) {
+        const doRedraw = () => {
+            if(self.benchmarkGraph) {
+                const data = self.$options.dataObject;
+                self.benchmarkGraph.setData(data.timeBuffer, data.weightBuffer, data.gradientBuffer, []);
+            }
+            if(self.stopUpdate) {
+                return;
+            }
+            setTimeout(() => {
+                requestAnimationFrame(doRedraw);
+            }, 1000)
+        }
+        requestAnimationFrame(doRedraw)
+    },
+    onNewData(self, wm) {
+        const data = self.$options.dataObject
+        data.timeBuffer.push(wm.ts);
+        data.weightBuffer.push(wm.combined);                    
+        const endIdx = data.timeBuffer.length - 1;
+        if(data.timeBuffer.length === 1) {
+            data.gradientBuffer.push(0);
+        } else {
+            const tDiff = (data.timeBuffer[endIdx] - data.timeBuffer[endIdx - 1]);
+            const wGrad = (data.weightBuffer[endIdx] - data.weightBuffer[endIdx - 1]) / tDiff;
+            data.gradientBuffer.push(wGrad);
+        }
+        const bufferDurationSeconds = (data.timeBuffer[data.timeBuffer.length - 1] - data.timeBuffer[0]);
+        let count = 0;
+        if(bufferDurationSeconds > data.bufferLengthSeconds) {
+            const latestTime = data.timeBuffer[data.timeBuffer.length - 1];
+            for(; count < data.timeBuffer.length; count++) {
+                const sampleAge = latestTime - data.timeBuffer[count];
+                if(sampleAge > data.bufferLengthSeconds) {
+                    continue;
+                }
+                break;
+            }
+        }
+        if(count > 0) {
+            data.timeBuffer.splice(0, count);
+            data.weightBuffer.splice(0, count);
+            data.gradientBuffer.splice(0, count);
+        }
+    }
+}
+
+/*@Component({
     components: {
         //WC
         BenchmarkGraph
@@ -25,233 +108,85 @@ import { WebBluetoothLE } from './web-bluetoothle'
 })
 export default class DebugViewComponent extends VueNavigation {
     interval: any = null;
-    textString = "init;"
-    textData: Array<string> = [];
-    timeBuffer: Array<number> = [];
-    weightBuffer: Array<number> = [];
-    gradientBuffer: Array<number> = [];
-    //textArea!:HTMLTextAreaElement;
     benchmarkGraph!: BenchmarkGraph;
-    bufferLengthSeconds = 3600;
     stopUpdate = false;
-    ble:BluetoothLE|null = null;
+    scaleBackend: HangboardScale;
+    dataObject:Data|undefined = undefined;
 
     constructor() {
         super();
-        if(window.hasOwnProperty("cordova")) {
-            this.ble = new CordovaBluetoothLE("NimBLE", "24:6F:28:7B:A5:BE");
-        } else {
-            this.ble = new WebBluetoothLE();
-        }        
+        this.scaleBackend = this.$root.$data.scaleBackend;
     }
 
-    async startConnect() {
-        if(this.ble) {
-            await this.ble.connect("24:6F:28:7B:A5:BE");
-            /*const looper = () => {
-                const skipCount = 10;
-                let count = skipCount;
-                const loop = () => {
-                    if(this.stopUpdate) {
-                        return;
-                    }
-                    count++;
-                    if(count >= skipCount) {
-                        if(this.benchmarkGraph) {
-                            this.benchmarkGraph.setData(this.timeBuffer, this.weightBuffer, this.gradientBuffer, []);
-                        }
-                        count = 0;
-                    }
-                    requestAnimationFrame(loop);
-                };
-                requestAnimationFrame(loop);
-            };
-            requestAnimationFrame(looper); */
-            this.ble.subscribe("24:6F:28:7B:A5:BE", (data:string) => {
-                // cut off w|t at the beginning
-                const weightData:Array<string> = data.substr(1).split(" ");
-                if(weightData.length < 4) {
-                    return;
-                }
-                const wm = new WeightMessage(+weightData[2], +weightData[3], (+weightData[2]) + (+weightData[3]), (+weightData[1]), false);
-                this.injectWeightMessage(wm);
-            });
-            const doRedraw = () => {
-                if(this.benchmarkGraph) {
-                    this.benchmarkGraph.setData(this.timeBuffer, this.weightBuffer, this.gradientBuffer, []);
-                }
-                if(this.stopUpdate) {
-                    return;
-                }
-                setTimeout(() => {
-                    requestAnimationFrame(doRedraw);
-                }, 1000)
+    created() {
+        this.dataObject = new Data();
+        this.dataObject = Object.freeze(this.dataObject);
+        debugger;
+    }
+
+    get data(): Data {
+        return (this as any).dataObject;
+    }
+
+    mounted() { 
+        this.scaleBackend.registerWeightCallback(this.onWeightMessage, passTrough);
+        this.benchmarkGraph = this.$refs.graph as BenchmarkGraph;
+        this.startRedraw();
+    }
+
+    beforeDestroy() {
+        this.scaleBackend.removeWeightCallback(this.onWeightMessage);
+        this.stopUpdate = true;
+        if(this.interval) {
+            clearInterval(this.interval);
+        }
+    }    
+
+    startRedraw() {
+        const doRedraw = () => {
+            if(this.benchmarkGraph) {
+                this.benchmarkGraph.setData(this.dataObject!.timeBuffer, this.dataObject!.weightBuffer, this.dataObject!.gradientBuffer, []);
             }
-            requestAnimationFrame(doRedraw)
+            if(this.stopUpdate) {
+                return;
+            }
+            setTimeout(() => {
+                requestAnimationFrame(doRedraw);
+            }, 1000)
         }
+        requestAnimationFrame(doRedraw)
     }
 
-    injectWeightMessage(wm:WeightMessage) {
-        this.timeBuffer.push(wm.ts / 1000000);
-        this.weightBuffer.push(wm.combined);                    
-        const endIdx = this.timeBuffer.length - 1;
-        if(this.timeBuffer.length === 1) {
-            this.gradientBuffer.push(0);
+    onWeightMessage(wm:WeightMessage) {
+        this.dataObject!.timeBuffer.push(wm.ts / 1000000);
+        this.dataObject!.weightBuffer.push(wm.combined);                    
+        const endIdx = this.dataObject!.timeBuffer.length - 1;
+        if(this.dataObject!.timeBuffer.length === 1) {
+            this.dataObject!.gradientBuffer.push(0);
         } else {
-            const tDiff = (this.timeBuffer[endIdx] - this.timeBuffer[endIdx - 1]);
-            const wGrad = (this.weightBuffer[endIdx] - this.weightBuffer[endIdx - 1]) / tDiff;
-            this.gradientBuffer.push(wGrad);
+            const tDiff = (this.dataObject!.timeBuffer[endIdx] - this.dataObject!.timeBuffer[endIdx - 1]);
+            const wGrad = (this.dataObject!.weightBuffer[endIdx] - this.dataObject!.weightBuffer[endIdx - 1]) / tDiff;
+            this.dataObject!.gradientBuffer.push(wGrad);
         }
-        const bufferDurationSeconds = (this.timeBuffer[this.timeBuffer.length - 1] - this.timeBuffer[0]);
+        const bufferDurationSeconds = (this.dataObject!.timeBuffer[this.dataObject!.timeBuffer.length - 1] - this.dataObject!.timeBuffer[0]);
         let count = 0;
-        if(bufferDurationSeconds > this.bufferLengthSeconds) {
-            const latestTime = this.timeBuffer[this.timeBuffer.length - 1];
-            for(; count < this.timeBuffer.length; count++) {
-                const sampleAge = latestTime - this.timeBuffer[count];
-                if(sampleAge > this.bufferLengthSeconds) {
+        if(bufferDurationSeconds > this.dataObject!.bufferLengthSeconds) {
+            const latestTime = this.dataObject!.timeBuffer[this.dataObject!.timeBuffer.length - 1];
+            for(; count < this.dataObject!.timeBuffer.length; count++) {
+                const sampleAge = latestTime - this.dataObject!.timeBuffer[count];
+                if(sampleAge > this.dataObject!.bufferLengthSeconds) {
                     continue;
                 }
                 break;
             }
         }
         if(count > 0) {
-            this.timeBuffer.splice(0, count);
-            this.weightBuffer.splice(0, count);
-            this.gradientBuffer.splice(0, count);
+            this.dataObject!.timeBuffer.splice(0, count);
+            this.dataObject!.weightBuffer.splice(0, count);
+            this.dataObject!.gradientBuffer.splice(0, count);
         }
     }
-
-    mounted() {
-        //this.textArea = this.$refs.ta as HTMLTextAreaElement;
-        this.benchmarkGraph = this.$refs.graph as BenchmarkGraph;
-        const bluetoothle: any = (window as any).bluetoothle;
-        this.startConnect();
-        /*if(bluetoothle) {
-            bluetoothle.initialize((e:any) => { 
-                console.log(e); 
-            }, { "request": true, "statusReceiver": false, "restoreKey" : "bluetoothleplugin" });
-            setTimeout(() => {
-                bluetoothle.disconnect((e:any) => console.log(e), (e:any) => console.log(e), {
-                    "address": "24:6F:28:7B:A5:BE"
-                });                
-            }, 1000);
-            setTimeout(() => {
-                bluetoothle.close((e:any) => console.log(e), (e:any) => console.log(e), {
-                    "address": "24:6F:28:7B:A5:BE"
-                });                
-            }, 2000);
-            setTimeout(() => {
-                bluetoothle.connect((e:any) => console.log(e), (e:any) => console.log(e), {
-                    "address": "24:6F:28:7B:A5:BE"
-                });                
-            }, 3000);
-            setTimeout(() => {
-                bluetoothle.discover((e:any) => console.log(e), (e:any) => console.log(e), {
-                    "address": "24:6F:28:7B:A5:BE",
-                    "clearCache": true
-                });           
-            }, 4000);
-            setTimeout(() => {
-                bluetoothle.mtu((e:any) => console.log(e), (e:any) => console.log(e), {
-                    "address": "24:6F:28:7B:A5:BE",
-                    "mtu" : 50
-                });            
-            }, 5000);
-            setTimeout(() => {
-                bluetoothle.subscribe((e:any) => {
-                    if(!e.hasOwnProperty('value')) {
-                        return;
-                    }
-                    const recvData:string = atob(e.value);
-                    //console.log(recvData);
-                    const weightData:Array<string> = recvData.split(" ");
-                    if(weightData.length < 4) {
-                        return;
-                    }
-                    //console.log(this, this.timeBuffer, this.weightBuffer, this.gradientBuffer);
-                    let wm = new WeightMessage(+weightData[2], +weightData[3], (+weightData[2]) + (+weightData[3]), (+weightData[1]), false);
-                    this.timeBuffer.push(wm.ts / 1000000);
-                    this.weightBuffer.push(wm.combined);                    
-                    let endIdx = this.timeBuffer.length - 1;
-                    if(this.timeBuffer.length === 1) {
-                        this.gradientBuffer.push(0);
-                    } else {
-                        let tDiff = (this.timeBuffer[endIdx] - this.timeBuffer[endIdx - 1]);
-                        let wGrad = (this.weightBuffer[endIdx] - this.weightBuffer[endIdx - 1]) / tDiff;
-                        this.gradientBuffer.push(wGrad);
-                    }
-                    let bufferDurationSeconds = (this.timeBuffer[this.timeBuffer.length - 1] - this.timeBuffer[0]);
-                    let count = 0;
-                    if(bufferDurationSeconds > this.bufferLengthSeconds) {
-                        let latestTime = this.timeBuffer[this.timeBuffer.length - 1];
-                        for(; count < this.timeBuffer.length; count++) {
-                            let sampleAge = latestTime - this.timeBuffer[count];
-                            if(sampleAge > this.bufferLengthSeconds) {
-                                continue;
-                            }
-                            break;
-                        }
-                    }
-                    if(count > 0) {
-                        this.timeBuffer.splice(0, count);
-                        this.weightBuffer.splice(0, count);
-                        this.gradientBuffer.splice(0, count);
-                    }
-                }, (e:any) => console.log(e), {
-                    "address": "24:6F:28:7B:A5:BE",
-                    "service": "181d",
-                    "characteristic": "1234"
-                });                  
-            }, 6000);
-            setTimeout(() => {
-                /setInterval(() => {
-                    if(this.benchmarkGraph) {
-                        this.benchmarkGraph.setData(this.timeBuffer, this.weightBuffer, this.gradientBuffer, []);
-                    }
-                }, 30);/
-                const loop = () => {
-                    if(this.stopUpdate) {
-                        return
-                    }
-                    if(this.benchmarkGraph) {
-                        //this.benchmarkGraph.setData(this.timeBuffer, this.weightBuffer, this.gradientBuffer, []);
-                    }
-                    requestAnimationFrame(loop);
-                };
-                requestAnimationFrame(loop);
-                
-            }, 7000);
-            /setTimeout(() => {
-                this.interval = setInterval(() => {
-                    bluetoothle.read((e:any) => {
-                        let val = atob(e.value);
-                        this.textData += val + "\n";
-                        this.textArea.scrollTop = this.textArea.scrollHeight;
-                    }, (e:any) => console.log(e), {
-                        "address": "24:6F:28:7B:A5:BE",
-                        "service": "181d",
-                        "characteristic": "1234"
-                    });            
-                }, 1000);
-            }, 10000);/
-        }*/
-    }
-
-    beforeDestroy() {
-        this.stopUpdate = true;
-        if(this.interval) {
-            clearInterval(this.interval);
-        }
-        const bluetoothle: any = (window as any).bluetoothle;
-        if(bluetoothle) {
-            bluetoothle.unsubscribe((e: any) => console.log(e), (e: any) => console.log(e), {
-                "address": "24:6F:28:7B:A5:BE",
-                "service": "181d",
-                "characteristic": "1234"
-            });
-        }
-    }
-}
+}*/
 </script>
 
 <style lang="scss" scoped>

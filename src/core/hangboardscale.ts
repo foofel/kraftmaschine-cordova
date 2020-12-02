@@ -1,5 +1,5 @@
 import { MessageTransformerIntrerface, pipe, sum } from "./messagetransformer";
-import { SensorReaderInterface, WebsocketSensorReader, WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, ChannelInfoCallback } from "./sensorreader";
+import { SensorReaderInterface, WebsocketSensorReader, WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, ChannelInfoCallback, BluetoothSensorReader } from "./sensorreader";
 import { BackendServers } from '../config';
 
 export type ScaleCallbackEntry = { cb: WeightMessageCallback; transformer: MessageTransformerIntrerface };
@@ -17,7 +17,8 @@ export class HangboardScale {
 
     constructor(private initialChannel: string) {
         console.log("starting core");
-        this.dataReader = new WebsocketSensorReader(BackendServers.webscaleServer(), initialChannel);
+        //this.dataReader = new WebsocketSensorReader(BackendServers.webscaleServer(), initialChannel);
+        this.dataReader = new BluetoothSensorReader();
         this.dataReader.registerWeightListener((msg) => this.onWeightMessage(msg));
         this.dataReader.registerTempSensorCallback((msg) => this.onTempMessage(msg));
         this.dataReader.registerChannelInfoCallback((channel, state) => this.onChannelInfoMessage(channel, state));

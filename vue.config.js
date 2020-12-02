@@ -1,4 +1,5 @@
 var webpack = require('webpack');
+var fs = require('fs');
 
 module.exports = {
   publicPath: '',
@@ -33,5 +34,11 @@ module.exports = {
         // options[0].fileBlacklist = [/\.files/, /\.to/, /\.exclude/]
         return options
     })
+  },
+  devServer: {
+    https: {
+      key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
+      cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
+    }
   }  
 }
