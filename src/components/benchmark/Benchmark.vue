@@ -161,20 +161,20 @@ import { avg } from '../../core/math'
     }
 })
 export default class Benchmark extends Vue {
-    @Prop({default: () => {}}) setupData!:BenchmarkSetupData;
-    @Prop({default: () => {}}) highscoreData!:Array<HighscoreEntry>;
-    scaleBackend:HangboardScale;
-    bc!:SimpleBenchmarkController;
-    benchmarkGraph:BenchmarkGraph|null = null;
+    @Prop({default: () => {}}) setupData!: BenchmarkSetupData;
+    @Prop({default: () => {}}) highscoreData!: Array<HighscoreEntry>;
+    scaleBackend: HangboardScale;
+    bc!: SimpleBenchmarkController;
+    benchmarkGraph: BenchmarkGraph|null = null;
     //weightGoals:MaxWeightGoals|null = null;
     //timeline:UserTimeline|null = null;
-    updateTimeout:any = null;
+    updateTimeout: any = null;
     state = this.initialState();
-    benchmarkInfoData:BenchmarkVisualModel|undefined = undefined;
-    currentWeight:WeightData = new WeightData(0, 0, 0);
-    startTime:number = 0;
-    startIndex:number = 0;
-    done:boolean = false;
+    benchmarkInfoData: BenchmarkVisualModel|undefined = undefined;
+    currentWeight: WeightData = new WeightData(0, 0, 0);
+    startTime = 0;
+    startIndex = 0;
+    done = false;
 
     constructor() {
         super();
@@ -214,12 +214,12 @@ export default class Benchmark extends Vue {
         let lastCount = 0;
         this.updateTimeout = setInterval(() => {
             if(this.benchmarkGraph) {
-                let { time, weight, gradient } = this.bc.getBuffers();
+                const { time, weight, gradient } = this.bc.getBuffers();
                 if(time.length === lastCount) {
                     return;
                 }
                 lastCount = time.length;
-                let lines = this.bc.getDebugLines();
+                const lines = this.bc.getDebugLines();
                 this.benchmarkGraph.setData(time, weight, gradient, lines);
             }
             this.updateTimeout = null;
@@ -231,13 +231,13 @@ export default class Benchmark extends Vue {
     }
 
     buildBenchmarkInfoData() {
-        let highscore = [];
-        let hsCount = this.highscoreData.length;
+        const highscore = [];
+        const hsCount = this.highscoreData.length;
         for(let i = 0; i < hsCount; i++) {
-            let hse = this.highscoreData[i];
+            const hse = this.highscoreData[i];
             highscore.push({ id: hse.id, name: hse.userAlias, time: hse.activeTime, percentile: hse.percentile, rank: hse.rank, priority: 0 });
         }
-        let timeMarkers = [
+        const timeMarkers = [
             { time: 0, text: "0s", bgColor: "#fb4b4b", borderColor: "#fb4b4b", priority: 0, drawName: true, draw: true },
             { time: 3, text: "3s", bgColor: "#ffa879", borderColor: "#ffa879", priority: 0 , drawName: true, draw: true },
             { time: 5, text: "5s", bgColor: "#ffc163", borderColor: "#ffc163", priority: 0 , drawName: true, draw: true },
@@ -247,13 +247,13 @@ export default class Benchmark extends Vue {
         for(let i = 15; i <= 300; i += 5) {
             timeMarkers.push({ time: i, text: `${i}s`, bgColor: "#a9d845", borderColor: "#a9d845", priority: 0 , drawName: true, draw: true });
         }
-        let percentileMarkers = [];
+        const percentileMarkers = [];
         if(highscore.length > 1) {
             percentileMarkers.push({ time: 0, text: `<10`, bgColor: "#4eb5e5", borderColor: "#4eb5e5", priority: 0, drawName: false, draw: false  });
-            let percentilePOI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 0.99, 1];
+            const percentilePOI = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 0.99, 1];
             let poiIndex = 0;
             for(let i = 0; i < hsCount; i++) {
-                let hs = highscore[i];
+                const hs = highscore[i];
                 if(hs.percentile >= percentilePOI[poiIndex]) {
                     percentileMarkers.push({ time: hs.time, text: `>${(percentilePOI[poiIndex] * 100).toFixed(0)}`, bgColor: "#4eb5e5", borderColor: "#4eb5e5", priority: 0, drawName: false, draw: true  });
                     poiIndex++;
@@ -271,7 +271,7 @@ export default class Benchmark extends Vue {
             clockMarkers:[]
         }
     }
-    onWeightMessage(msg:WeightMessage) {
+    onWeightMessage(msg: WeightMessage) {
         if(this.done){
             return;
         }
@@ -288,37 +288,37 @@ export default class Benchmark extends Vue {
         return this.state.elapsedActiveTime;
     }
     getCurrentPlace() {
-        let current = findNextHighscoreUser(this.benchmarkInfoData!.highscore, this.state.elapsedActiveTime);
+        const current = findNextHighscoreUser(this.benchmarkInfoData!.highscore, this.state.elapsedActiveTime);
         if(current.next) {
             return current.next.rank + 1;
         }
         return 1;
     }
     saveData() {
-        let data = JSON.stringify(this.bc.getBuffers());
-        var blob = new Blob([data], {type: "text/plain;charset=utf-8"});
+        const data = JSON.stringify(this.bc.getBuffers());
+        const blob = new Blob([data], {type: "text/plain;charset=utf-8"});
         saveAs(blob, "data.txt");
     }
-    onStart(time:number, index:number) {
+    onStart(time: number, index: number) {
         this.startTime = time;
         this.startIndex = index;
     }
-    onEnd(time:number, index:number) {
-        let duration = time - this.startTime;
-        let data = this.bc.getBuffers();
-        let ws = this.setupData.userWeight
-        let wh = avg(data.weight.slice(this.startIndex, index + 1));
-        let wd = wh / ws * 100;
+    onEnd(time: number, index: number) {
+        const duration = time - this.startTime;
+        const data = this.bc.getBuffers();
+        const ws = this.setupData.userWeight
+        const wh = avg(data.weight.slice(this.startIndex, index + 1));
+        const wd = wh / ws * 100;
         console.log(`weight diff: ${(wd).toFixed(2)}%, ws: ${ws.toFixed(2)}, wh: ${wh.toFixed(2)}`)
         console.log(`time diff: ${this.state.elapsedActiveTime - duration}`);
         this.done = true;
         this.state.showResult = true;
         this.saveReport();
     }    
-    onUpdate(elapsed:number) {
-        const findPMarker = (markers:Array<BenchmarkVisualModelMarker>, time:number) => {
+    onUpdate(elapsed: number) {
+        const findPMarker = (markers: Array<BenchmarkVisualModelMarker>, time: number) => {
             for(let i = markers.length - 1; i >= 0; i--) {
-                let current = markers[i];
+                const current = markers[i];
                 if(time >= current.time) {
                     return current;
                 }
@@ -326,22 +326,22 @@ export default class Benchmark extends Vue {
             return markers[markers.length - 1];
         }        
         this.state.elapsedActiveTime = elapsed;
-        let pn = findNextHighscoreUser(this.benchmarkInfoData!.highscore, this.state.elapsedActiveTime);
-        let pm = findPMarker(this.benchmarkInfoData!.percentileMarkers, this.state.elapsedActiveTime);
+        const pn = findNextHighscoreUser(this.benchmarkInfoData!.highscore, this.state.elapsedActiveTime);
+        const pm = findPMarker(this.benchmarkInfoData!.percentileMarkers, this.state.elapsedActiveTime);
         let percText = pm.text;
         if(!pn.next) {
             percText = "100"
         }
         this.state.currentPercentile = percText;
     }
-    onError(info:string, code:number) {
-        let error = `${info} (${code})`;
+    onError(info: string, code: number) {
+        const error = `${info} (${code})`;
         console.log(`error: ${error}`);
         this.state.controllerError = info;
     }
     saveReport() {
-        let reportData = this.bc.getBuffers();
-        let saveData: LocalBenchmarkSaveData = {
+        const reportData = this.bc.getBuffers();
+        const saveData: LocalBenchmarkSaveData = {
             boardId: Hangboards.twinPeaksReference.id,
             leftId: getProp(this.setupData.selectedHolds, "left.id"),
             rightId: getProp(this.setupData.selectedHolds, "right.id"),
@@ -355,7 +355,7 @@ export default class Benchmark extends Vue {
                 temperatureInfo: this.scaleBackend.getLastTempSensorData()
             }
         }
-        let save:LocalUploadSave = {
+        const save: LocalUploadSave = {
             type: "save-benchmark",
             params: [],
             date: new Date(),
@@ -363,7 +363,7 @@ export default class Benchmark extends Vue {
             data: saveData
         };
         AddLocalUploadSave(save);
-        let uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
+        const uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
         uploader.uploadLocalSaves();
     }
 

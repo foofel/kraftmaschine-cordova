@@ -79,11 +79,11 @@ export default class AccountOptions extends VueNavigation {
         email: "",
         secret: ""
     }
-    cfg:ConfigFile = this.$root.$data.cfg;
-    enableUuidValidation:boolean= true;
+    cfg: ConfigFile = this.$root.$data.cfg;
+    enableUuidValidation= true;
     backend = this.$root.$data.backend;
-    validateRegex:RegExp = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
-    expertMode:boolean = false;
+    validateRegex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+    expertMode = false;
     constructor() {
         super();
     }
@@ -115,7 +115,7 @@ export default class AccountOptions extends VueNavigation {
         if(this.expertMode) {
             this.cfg.secret = this.model.secret;
         }
-        let result = await EasyRemoteApiHelpers.updateUserData(this.backend, this.model.name, this.model.email, null);
+        const result = await EasyRemoteApiHelpers.updateUserData(this.backend, this.model.name, this.model.email, null);
         if(result) {
             this.cfg.alias = result[0].alias;
             this.cfg.name = result[0].name;
@@ -128,7 +128,7 @@ export default class AccountOptions extends VueNavigation {
         }
     }
 
-    validUuid(uuid:string) {
+    validUuid(uuid: string) {
         if(this.expertMode) {
             if(this.enableUuidValidation) {
                 return this.validateRegex.test(uuid)

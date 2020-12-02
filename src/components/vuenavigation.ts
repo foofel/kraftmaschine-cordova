@@ -5,7 +5,7 @@ export class VueNavigation extends Vue implements NavigationComponent {
     constructor() {
         super();
     }
-    canLeaveComponent():NavigationLeaveResponse  {
+    canLeaveComponent(): NavigationLeaveResponse  {
         return "ok";
     }
     onBeforeShowDialog(): void {}

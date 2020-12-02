@@ -25,7 +25,7 @@ import { HangTimerGraphData } from '@/components/typeexports'
     }
 })
 export default class ActiveTimeDisplay extends Vue {
-    @Prop({}) graphData!:HangTimerGraphData;
+    @Prop({}) graphData!: HangTimerGraphData;
 }
 </script>
 

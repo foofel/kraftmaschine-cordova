@@ -2,15 +2,15 @@ import { GetLocalUploadSaves, DeleteLocalUploadSave, GetConfigObject, SaveConfig
 import { LocalBenchmarkSaveData, SelectedHolds, BenchmarkVisualHighscoreEntry } from '../components/typeexports';
 import { BackendServers, RequiredBackendVersion } from '../config'
 
-export function uuidv4():string {
-    let str = ""+[1e7]+-1e3+-4e3+-8e3+-1e11;
-    return str.replace(/[018]/g, (c:any) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+export function uuidv4(): string {
+    const str = ""+[1e7]+-1e3+-4e3+-8e3+-1e11;
+    return str.replace(/[018]/g, (c: any) => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
 }
 
-export function makeid(length:number) {
+export function makeid(length: number) {
     let result           = '';
-    let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
+    const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
@@ -26,13 +26,13 @@ export function makeid(length:number) {
 export type RemoteAPIMethod = "GET" | "POST" | "PUT" | "DELETE"
 
 export class RemoteAPI {
-    connectionString:string = BackendServers.backend();
-    authenticated:boolean = false;
+    connectionString: string = BackendServers.backend();
+    authenticated = false;
     constructor() {
     }
-    async authBackend(secret:string):Promise<any> {
-        let res = await this.authenticate(secret);
-        let obj = await res.json();
+    async authBackend(secret: string): Promise<any> {
+        const res = await this.authenticate(secret);
+        const obj = await res.json();
         if(res.status === 200) {
             this.authenticated = true;
             return { result: res, data: obj, authenticated: true };
@@ -43,52 +43,52 @@ export class RemoteAPI {
     isAuthenticated() {
         return this.authenticated;
     }
-    async getVersion():Promise<Response> {
-        let response = this.makeCall("GET", "")
+    async getVersion(): Promise<Response> {
+        const response = this.makeCall("GET", "")
         return response;
     }    
-    async createAccount(alias:string):Promise<Response> {
-        let response = this.makeCall("POST", "create-account", { 
+    async createAccount(alias: string): Promise<Response> {
+        const response = this.makeCall("POST", "create-account", { 
             alias: alias
         });
         return response;
     }    
-    async userExists(alias:string):Promise<Response> {
-        let response = this.makeCall("GET", "user-exists", { alias: alias });
+    async userExists(alias: string): Promise<Response> {
+        const response = this.makeCall("GET", "user-exists", { alias: alias });
         return response;
     }       
-    private async authenticate(secret:string):Promise<Response> {
-        let response = this.makeCall("POST", "authenticate", { secret: secret });
+    private async authenticate(secret: string): Promise<Response> {
+        const response = this.makeCall("POST", "authenticate", { secret: secret });
         return response;
     }
-    async getTrainings():Promise<Response> {
-        let response = this.makeCall("GET", "trainings/me")
+    async getTrainings(): Promise<Response> {
+        const response = this.makeCall("GET", "trainings/me")
         return response;
     }
-    async addTraining(data:any):Promise<Response> {
-        let response = this.makeCall("POST", "trainings/me", data)
+    async addTraining(data: any): Promise<Response> {
+        const response = this.makeCall("POST", "trainings/me", data)
         return response;
     }
-    async deleteTraining(id:string):Promise<Response> {
-        let response = this.makeCall("DELETE", `trainings/me/${id}`);
+    async deleteTraining(id: string): Promise<Response> {
+        const response = this.makeCall("DELETE", `trainings/me/${id}`);
         return response;
     }
-    async updateUserData(name:String|null, email:String|null, options:any|null):Promise<Response> {
-        let response = this.makeCall("PUT", `users/me`, { name: name, email: email, options: options });
+    async updateUserData(name: string|null, email: string|null, options: any|null): Promise<Response> {
+        const response = this.makeCall("PUT", `users/me`, { name: name, email: email, options: options });
         return response;
     }
-    async getReferenceHighscore(order:"wabs"|"wrel"|"time"):Promise<Response> {
-        let response = this.makeCall("GET", "highscore/reference", {
+    async getReferenceHighscore(order: "wabs"|"wrel"|"time"): Promise<Response> {
+        const response = this.makeCall("GET", "highscore/reference", {
             order: order
         });
         return response;
     }
     async getInitialData() {
-        let response = this.makeCall("GET", `init/all`);
+        const response = this.makeCall("GET", `init/all`);
         return response;
     }
-    async getHighscore(board:number, left:number|null, right:number|null, minTime:number|null, order:Array<["depth", "wrel"|"wabs"|"time"]>):Promise<Response> {
-        let response = this.makeCall("GET", "highscore", { 
+    async getHighscore(board: number, left: number|null, right: number|null, minTime: number|null, order: Array<["depth", "wrel"|"wabs"|"time"]>): Promise<Response> {
+        const response = this.makeCall("GET", "highscore", { 
             board: board, 
             left: left, 
             right: right, 
@@ -97,8 +97,8 @@ export class RemoteAPI {
         });
         return response;
     }    
-    async addBenchmark(boardId:number, leftId:number|null, rightId:number|null, userWeight: number, hangWeight:number, activeTime:number, data:any):Promise<Response> {
-        let response = this.makeCall("POST", "benchmarks/me", { 
+    async addBenchmark(boardId: number, leftId: number|null, rightId: number|null, userWeight: number, hangWeight: number, activeTime: number, data: any): Promise<Response> {
+        const response = this.makeCall("POST", "benchmarks/me", { 
             boardId: boardId, 
             leftId: leftId, 
             rightId: rightId, 
@@ -109,24 +109,24 @@ export class RemoteAPI {
         });
         return response;
     }
-    async getCurrentExclusiveBenchmarkAccess():Promise<Response> {
-        let response = this.makeCall("GET", "benchmark/exclusive-acces/query");
+    async getCurrentExclusiveBenchmarkAccess(): Promise<Response> {
+        const response = this.makeCall("GET", "benchmark/exclusive-acces/query");
         return response;
     }
-    async requestExclusiveBenchmarkAccess():Promise<Response> {
-        let response = this.makeCall("GET", "benchmark/exclusive-acces/request");
+    async requestExclusiveBenchmarkAccess(): Promise<Response> {
+        const response = this.makeCall("GET", "benchmark/exclusive-acces/request");
         return response;
     }
-    async releaseExclusiveBenchmarkAccess():Promise<Response> {
-        let response = this.makeCall("GET", "benchmark/exclusive-acces/release");
+    async releaseExclusiveBenchmarkAccess(): Promise<Response> {
+        const response = this.makeCall("GET", "benchmark/exclusive-acces/release");
         return response;
     }    
-    async forceEndExclusiveBenchmarkAccess():Promise<Response> {
-        let response = this.makeCall("GET", "benchmark/exclusive-acces/force-reset");
+    async forceEndExclusiveBenchmarkAccess(): Promise<Response> {
+        const response = this.makeCall("GET", "benchmark/exclusive-acces/force-reset");
         return response;
     }            
-    private async makeCall(method:RemoteAPIMethod, endpoint:string, payload:any = undefined):Promise<Response> {
-        var url = new URL(`${this.connectionString}${endpoint}`);
+    private async makeCall(method: RemoteAPIMethod, endpoint: string, payload: any = undefined): Promise<Response> {
+        const url = new URL(`${this.connectionString}${endpoint}`);
         // HEAD/GET can not have payload therefore we convert those to query params
         if(method === "GET" && payload != null) {
             Object.keys(payload).forEach(key => url.searchParams.append(key, payload[key]))
@@ -147,29 +147,29 @@ export class RemoteAPI {
 }
 
 export class EasyRemoteApiHelpers {
-    public static async authenticate(api:RemoteAPI, secret:string):Promise<any> {
+    public static async authenticate(api: RemoteAPI, secret: string): Promise<any> {
         try {
-            let res = await api.authBackend(secret);
+            const res = await api.authBackend(secret);
             return res;
         } catch(e) {
             return { result: { status: 0 }, data: {}, authenticated: false };
         }
     }
-    public static async getVersion(api:RemoteAPI):Promise<{ versionNumber:number, versionString:string }|false> {
+    public static async getVersion(api: RemoteAPI): Promise<{ versionNumber: number; versionString: string }|false> {
         try {
-            let result = await api.getVersion();
+            const result = await api.getVersion();
             if(result.status !== 200) {
                 return false;
             }
-            let data = await result.json();
+            const data = await result.json();
             return data;
         } catch (error) {
             return false;
         }
     }
-    public static async createAccount(api:RemoteAPI, alias:string):Promise<any> {
+    public static async createAccount(api: RemoteAPI, alias: string): Promise<any> {
         try {
-            let result = await api.createAccount(alias);
+            const result = await api.createAccount(alias);
             if(result.status === 200) {
                 return await result.json();
             }
@@ -178,11 +178,11 @@ export class EasyRemoteApiHelpers {
             return null;
         }
     }
-    public static async userExists(api:RemoteAPI, alias:string):Promise<any> {
+    public static async userExists(api: RemoteAPI, alias: string): Promise<any> {
         try {
-            let result = await api.userExists(alias);
+            const result = await api.userExists(alias);
             if(result.status === 200) {
-                let data = await result.json();
+                const data = await result.json();
                 return { result: result, data: data, userExists: data.exists };
             }
             return { result: result, data: {}, userExists: false };
@@ -201,21 +201,21 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }*/    
-    public static async getTrainings(api:RemoteAPI):Promise<any> {
+    public static async getTrainings(api: RemoteAPI): Promise<any> {
         try {
-            let result = await api.getTrainings();
+            const result = await api.getTrainings();
             if(result.status !== 200) {
                 return [];
             }
-            let data = await result.json();
+            const data = await result.json();
             return data;
         } catch (error) {
             return [];
         }
     } 
-    public static async addTraining(api:RemoteAPI, data:any):Promise<boolean> {
+    public static async addTraining(api: RemoteAPI, data: any): Promise<boolean> {
         try {
-            let result = await api.addTraining(data);
+            const result = await api.addTraining(data);
             if(result.status !== 200) {
                 return false;
             }
@@ -224,9 +224,9 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }
-    public static async updateUserData(api:RemoteAPI, name:String|null, email:String|null, options:any|null):Promise<any> {
+    public static async updateUserData(api: RemoteAPI, name: string|null, email: string|null, options: any|null): Promise<any> {
         try {
-            let result = await api.updateUserData(name, email, options);
+            const result = await api.updateUserData(name, email, options);
             if(result.status !== 200) {
                 return false;
             }
@@ -235,21 +235,21 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }
-    public static async getReferenceHighscore(api:RemoteAPI, order:"wabs"|"wrel"|"time"):Promise<any> {
+    public static async getReferenceHighscore(api: RemoteAPI, order: "wabs"|"wrel"|"time"): Promise<any> {
         try {
-            let result = await api.getReferenceHighscore(order);
+            const result = await api.getReferenceHighscore(order);
             if(result.status !== 200) {
                 return [];
             }
-            let data = await result.json();
+            const data = await result.json();
             return data;
         } catch (error) {
             return [];
         }
     }
-    public static async addBenchmark(api:RemoteAPI, board:number, left:number|null, right:number|null, userWeight: number, hangWeight:number, activeTime:number, data:any):Promise<any> {
+    public static async addBenchmark(api: RemoteAPI, board: number, left: number|null, right: number|null, userWeight: number, hangWeight: number, activeTime: number, data: any): Promise<any> {
         try {
-            let result = await api.addBenchmark(board, left, right, userWeight, hangWeight, activeTime, data);
+            const result = await api.addBenchmark(board, left, right, userWeight, hangWeight, activeTime, data);
             if(result.status !== 200) {
                 return true;
             }
@@ -258,23 +258,23 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }
-    public static async getInitialData(api:RemoteAPI):Promise<any> {
+    public static async getInitialData(api: RemoteAPI): Promise<any> {
         try {
-            let result = await api.getInitialData();
+            const result = await api.getInitialData();
             if(result.status !== 200) {
                 return [];
             }
-            let data = await result.json();
+            const data = await result.json();
             return data;
         } catch (error) {
             return [];
         }
     }
-    public static async getCurrentExclusiveBenchmarkAccess(api:RemoteAPI):Promise<any> {
+    public static async getCurrentExclusiveBenchmarkAccess(api: RemoteAPI): Promise<any> {
         try {
-            let result = await api.getCurrentExclusiveBenchmarkAccess();
+            const result = await api.getCurrentExclusiveBenchmarkAccess();
             if(result.status === 200) {
-                let data = await result.json();
+                const data = await result.json();
                 return data;
             }
             return false;
@@ -282,11 +282,11 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }
-    public static async requestExclusiveBenchmarkAccess(api:RemoteAPI):Promise<any> {
+    public static async requestExclusiveBenchmarkAccess(api: RemoteAPI): Promise<any> {
         try {
-            let result = await api.requestExclusiveBenchmarkAccess();
+            const result = await api.requestExclusiveBenchmarkAccess();
             if(result.status === 200) {
-                let data = await result.json();
+                const data = await result.json();
                 return data;
             }
             return false;
@@ -294,11 +294,11 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }
-    public static async releaseExclusiveBenchmarkAccess(api:RemoteAPI):Promise<any> {
+    public static async releaseExclusiveBenchmarkAccess(api: RemoteAPI): Promise<any> {
         try {
-            let result = await api.requestExclusiveBenchmarkAccess();
+            const result = await api.requestExclusiveBenchmarkAccess();
             if(result.status === 200) {
-                let data = await result.json();
+                const data = await result.json();
                 return data;
             }
             return false;
@@ -306,11 +306,11 @@ export class EasyRemoteApiHelpers {
             return false;
         }
     }    
-    public static async forceEndExclusiveBenchmarkAccess(api:RemoteAPI):Promise<any> {
+    public static async forceEndExclusiveBenchmarkAccess(api: RemoteAPI): Promise<any> {
         try {
-            let result = await api.forceEndExclusiveBenchmarkAccess();
+            const result = await api.forceEndExclusiveBenchmarkAccess();
             if(result.status === 200) {
-                let data = await result.json();
+                const data = await result.json();
                 return data;
             }
             return false;
@@ -322,14 +322,14 @@ export class EasyRemoteApiHelpers {
 
 export class LocalSaveUploader {
     //uploadInterval:number = 60;
-    constructor (private backend:RemoteAPI) {}
+    constructor (private backend: RemoteAPI) {}
     async uploadLocalSaves() {
         try {
-            let entries = GetLocalUploadSaves();
-            for(let entry of entries) {
-                let [key, save] = entry;
+            const entries = GetLocalUploadSaves();
+            for(const entry of entries) {
+                const [key, save] = entry;
                 if(save.type === "save-training") {
-                    let result = await this.backend.addTraining(save.data);
+                    const result = await this.backend.addTraining(save.data);
                     if(result.status === 200) {
                         console.log(`uploaded training from: ${save.date}`);
                         DeleteLocalUploadSave(key);
@@ -338,9 +338,9 @@ export class LocalSaveUploader {
                     }
                 }
                 else if(save.type === "save-benchmark") {
-                    let obj:LocalBenchmarkSaveData = save.data as LocalBenchmarkSaveData;
+                    const obj: LocalBenchmarkSaveData = save.data as LocalBenchmarkSaveData;
                     if(obj) {
-                        let result = await this.backend.addBenchmark(
+                        const result = await this.backend.addBenchmark(
                             obj.boardId,
                             obj.leftId,
                             obj.rightId,
@@ -364,8 +364,8 @@ export class LocalSaveUploader {
     }
 }
 
-export function makeSound(source:any, actx:any, loadHandler:any) {
-    var o:any = {};
+export function makeSound(source: any, actx: any, loadHandler: any) {
+    const o: any = {};
     //Set the default properties.
     o.volumeNode = actx.createGain();
     o.panNode = actx.createPanner();
@@ -427,7 +427,7 @@ export function makeSound(source:any, actx:any, loadHandler:any) {
         o.startOffset = 0;
         o.play();
     };
-    o.playFrom = function(value:any) {
+    o.playFrom = function(value: any) {
         if (o.isPlaying) {
             o.soundNode.stop(0);
         }
@@ -457,9 +457,9 @@ export function makeSound(source:any, actx:any, loadHandler:any) {
                 //panning we're only interested in the x coordinate,
                 //the first one. However, for a natural effect, the z
                 //value also has to be set proportionately.
-                let x = value;
-                let y = 0;
-                let z = 1 - Math.abs(x);
+                const x = value;
+                const y = 0;
+                const z = 1 - Math.abs(x);
                 o.panNode.setPosition(x, y, z);
                 o.panValue = value;
             },
@@ -470,7 +470,7 @@ export function makeSound(source:any, actx:any, loadHandler:any) {
     //The `load` method. It will call the `loadHandler` passed
     //that was passed as an argument when the sound has loaded.
     o.load = function() {
-        var xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
         //Use xhr to load the sound file.
         xhr.open("GET", source, true);
         xhr.responseType = "arraybuffer";
@@ -478,7 +478,7 @@ export function makeSound(source:any, actx:any, loadHandler:any) {
             //Decode the sound and store a reference to the buffer.
             actx.decodeAudioData(
                 xhr.response,
-                function(buffer:any) {
+                function(buffer: any) {
                     o.buffer = buffer;
                     o.hasLoaded = true;
                     //This next bit is optional, but important.
@@ -489,7 +489,7 @@ export function makeSound(source:any, actx:any, loadHandler:any) {
                     }
                 },
                 //Throw an error if the sound can't be decoded.
-                function(error:any) {
+                function(error: any) {
                     throw new Error("Audio could not be decoded: " + error);
                 }
             );
@@ -501,9 +501,9 @@ export function makeSound(source:any, actx:any, loadHandler:any) {
     o.load();
     //Return the sound object.
     return o;
-};
+}
 
-export function getProp(obj:any, key:string) {
+export function getProp(obj: any, key: string) {
     return key.split(".").reduce(function(o, x) {
         return (typeof o == "undefined" || o === null) ? o : o[x]; // eslint-disable-line eqeqeq
     }, obj);
@@ -513,8 +513,8 @@ declare global {
     interface Window {
         // add you custom properties and methods
         cookieManager: {
-            clear: () => void
-        }
+            clear: () => void;
+        };
       }
 }
 
@@ -524,8 +524,8 @@ export function clearAllCookies() {
     }
 }
 
-export function throttle(cb:any, limit:number) {
-    var wait = false;
+export function throttle(cb: any, limit: number) {
+    let wait = false;
     return () => {
         if (!wait) {
             cb();
@@ -537,8 +537,8 @@ export function throttle(cb:any, limit:number) {
     }
 }
 
-export async function reauth(backend:RemoteAPI) {
-    let version = await EasyRemoteApiHelpers.getVersion(backend);
+export async function reauth(backend: RemoteAPI) {
+    const version = await EasyRemoteApiHelpers.getVersion(backend);
     if(!version) {
       return false;
     }
@@ -546,8 +546,8 @@ export async function reauth(backend:RemoteAPI) {
         console.log("invalid version while reauth");
         return false;
     }
-    let cfg = GetConfigObject();
-    let authPromise = await EasyRemoteApiHelpers.authenticate(backend, cfg.secret);
+    const cfg = GetConfigObject();
+    const authPromise = await EasyRemoteApiHelpers.authenticate(backend, cfg.secret);
     if(authPromise.result.status === 200) {
         cfg.alias = authPromise.data.alias;
         cfg.email = authPromise.data.email;
@@ -562,30 +562,30 @@ export async function reauth(backend:RemoteAPI) {
     //return true;
 }
 
-export function showToast(msg:string, duration:number = 2000, pos:string = "center") {
+export function showToast(msg: string, duration = 2000, pos = "center") {
     console.log(`toast: ${msg}`);
-    let wnd = window as any;
+    const wnd = window as any;
     if(wnd.plugins && wnd.plugins.toast) {
         wnd.plugins.toast.show(msg, duration, pos)
     }
 
 }
 
-export type UpdaterCBType<T> = (value:T) => void;
+export type UpdaterCBType<T> = (value: T) => void;
 
 export class UpdateLimiter<T>
 {
-    stopRequested:boolean = false;
-    updateComplete:boolean = true;
-    value:T|null = null;
-    runningCallbacks:Map<UpdaterCBType<T>, { value:T, updateComplete:boolean }> = new Map<UpdaterCBType<T>, { value:T, updateComplete:boolean }>();
+    stopRequested = false;
+    updateComplete = true;
+    value: T|null = null;
+    runningCallbacks: Map<UpdaterCBType<T>, { value: T; updateComplete: boolean }> = new Map<UpdaterCBType<T>, { value: T; updateComplete: boolean }>();
 
-    setValue(value:T, updateCB:UpdaterCBType<T>) {
+    setValue(value: T, updateCB: UpdaterCBType<T>) {
         //this.value = value;
         if(!this.runningCallbacks.has(updateCB)) {
             this.runningCallbacks.set(updateCB, { value:value, updateComplete:true })
         }
-        let cbInfo = this.runningCallbacks.get(updateCB)!;
+        const cbInfo = this.runningCallbacks.get(updateCB)!;
         cbInfo.value = value;
         if(!cbInfo.updateComplete) {
             return;
@@ -612,24 +612,24 @@ export function nowSeconds() {
     return performance.now() / 1000;
 }
 
-export function getHoldString(holds:SelectedHolds) {
+export function getHoldString(holds: SelectedHolds) {
     if(holds.left && holds.right) {
-        let lapp = holds.left.defaultHand !== "l" ? "(R)" : "";
-        let rapp = holds.right.defaultHand !== "r" ? "(L)" : "";
+        const lapp = holds.left.defaultHand !== "l" ? "(R)" : "";
+        const rapp = holds.right.defaultHand !== "r" ? "(L)" : "";
         return `${holds.left.shortName}${lapp}/${holds.right.shortName}${rapp}`;
     }
     else if(holds.left) {
-        let lapp = holds.left.defaultHand !== "l" ? "(R)" : "";
+        const lapp = holds.left.defaultHand !== "l" ? "(R)" : "";
         return `L: ${holds.left.shortName}${lapp}`;
     }
     else if(holds.right) {
-        let rapp = holds.right.defaultHand !== "r" ? "(L)" : "";
+        const rapp = holds.right.defaultHand !== "r" ? "(L)" : "";
         return `R: ${holds.right.shortName}${rapp}`;
     }
     return "";
 }
 
-export function findNextHighscoreUser(highscore:Array<BenchmarkVisualHighscoreEntry>, time:number) {
+export function findNextHighscoreUser(highscore: Array<BenchmarkVisualHighscoreEntry>, time: number) {
     if(highscore.length === 0) {
         return { idx: -1, next: null, prev: null };
     }

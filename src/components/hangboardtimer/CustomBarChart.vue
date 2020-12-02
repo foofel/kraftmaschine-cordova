@@ -35,47 +35,47 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 //import { ChartOptions, ChartData } from 'chart.js';
 
 interface DrawDataInterface {
-    labels:Array<string>;
-    data:Array<BarDataInterface>;
-    styles:Array<BarStylesInterface>;
-    svgLines:Array<SvgGridLine>;
-    maxTime:number;
-    barWidth:0,
-    spacing:0
+    labels: Array<string>;
+    data: Array<BarDataInterface>;
+    styles: Array<BarStylesInterface>;
+    svgLines: Array<SvgGridLine>;
+    maxTime: number;
+    barWidth: 0;
+    spacing: 0;
 }
 
 interface BarDataInterface {
-    active:number;
-    inactive:number;
-    passive:number;
+    active: number;
+    inactive: number;
+    passive: number;
 }
 
 interface BarStylesInterface {
-    posx:number;
-    posy:number;
-    width:number;
-    height:string;
-    color:string;
+    posx: number;
+    posy: number;
+    width: number;
+    height: string;
+    color: string;
 }
 
 interface SvgGridLine {
-    value:number;
-    x1:number;
-    y1:number;
-    x2:number;
-    y2:number;
-    style:string;
+    value: number;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    style: string;
 }
 
 @Component({})
 export default class CustomBarChart extends Vue {
-    @Prop({}) data!:any;
-    @Prop({}) options!:any;
-    barSpaceFactor:number = 0.65;
-    startEndMargin:number = 0;
-    drawData:DrawDataInterface;
-    barContainerBB:DOMRect = new DOMRect();
-    globalRepBars:Array<number> = [];
+    @Prop({}) data!: any;
+    @Prop({}) options!: any;
+    barSpaceFactor = 0.65;
+    startEndMargin = 0;
+    drawData: DrawDataInterface;
+    barContainerBB: DOMRect = new DOMRect();
+    globalRepBars: Array<number> = [];
     constructor() {
         super();
         this.drawData = {
@@ -108,7 +108,7 @@ export default class CustomBarChart extends Vue {
     }
 
     updateBB() {
-        let elem = this.$refs.container as HTMLElement;
+        const elem = this.$refs.container as HTMLElement;
         this.barContainerBB = elem.getBoundingClientRect() as DOMRect;
     }
 
@@ -119,8 +119,8 @@ export default class CustomBarChart extends Vue {
     }
 
     updateBars() {
-        let barCount = this.data.labels!.length;
-        let data:Array<BarDataInterface> = [];
+        const barCount = this.data.labels!.length;
+        const data: Array<BarDataInterface> = [];
         for (let i = 0; i < this.data.labels!.length; i++) {
             data[i] = {
                 active: this.data.datasets[0][i] as number,
@@ -128,8 +128,8 @@ export default class CustomBarChart extends Vue {
                 passive: this.data.datasets[2][i] as number
             }
         }
-        let maxTime = this.options.max;
-        let styles:Array<BarStylesInterface> = [];
+        const maxTime = this.options.max;
+        const styles: Array<BarStylesInterface> = [];
         /*let colors = ["rgba(0, 255, 0, 0.7)", "rgba(255, 0, 0, 0.7)", "rgba(200, 200, 200, 0.7)"];
         let keyLookup = ["active", "inactive", "passive"];
         let fullBarWidth = this.barContainerBB.width / data.length;
@@ -151,12 +151,12 @@ export default class CustomBarChart extends Vue {
                 startY += height;
             }
         }*/
-        let svgLines:Array<SvgGridLine> = [];
-        let lines = Math.ceil(this.barContainerBB.height / 20);
-        let lineStep = this.barContainerBB.height / lines;
-        let timeStep = maxTime / lines;
+        const svgLines: Array<SvgGridLine> = [];
+        const lines = Math.ceil(this.barContainerBB.height / 20);
+        const lineStep = this.barContainerBB.height / lines;
+        const timeStep = maxTime / lines;
         for(let i = 0; i <= lines; i++) {
-            let y = lineStep * i;
+            const y = lineStep * i;
             //y = Math.round(y * 2) / 2;
             svgLines[i] = {
                 value: maxTime - timeStep * i,
@@ -178,18 +178,18 @@ export default class CustomBarChart extends Vue {
         }
     }
 
-    getDynamicBarPartStyle<BarDataInterface, K extends keyof BarDataInterface>(index:number, partKey:K) {
-        let height = (this.drawData.data[index] as any)[partKey] / this.drawData.maxTime;
+    getDynamicBarPartStyle<BarDataInterface, K extends keyof BarDataInterface>(index: number, partKey: K) {
+        const height = (this.drawData.data[index] as any)[partKey] / this.drawData.maxTime;
         return {
             height: `${height * 100}%`
         }
     }
 
-    getDynamicBarStyle(index:number) {
-        let fullBarWidth = this.barContainerBB.width / this.drawData.data.length;
-        let barWidth = this.barContainerBB.width / this.drawData.data.length * this.barSpaceFactor
-        let spacingCorrection = (fullBarWidth - barWidth) / this.drawData.data.length;
-        let offset = (this.barContainerBB.width / this.drawData.data.length + spacingCorrection) * index;
+    getDynamicBarStyle(index: number) {
+        const fullBarWidth = this.barContainerBB.width / this.drawData.data.length;
+        const barWidth = this.barContainerBB.width / this.drawData.data.length * this.barSpaceFactor
+        const spacingCorrection = (fullBarWidth - barWidth) / this.drawData.data.length;
+        const offset = (this.barContainerBB.width / this.drawData.data.length + spacingCorrection) * index;
         return {
             width: `${barWidth}px`,
             left: `${offset}px`

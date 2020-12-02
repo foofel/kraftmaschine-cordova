@@ -22,13 +22,13 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class Button extends Vue {
-    @Prop({default: "button"}) text!:string;
-    @Prop({default: false}) disabled!:boolean;
-    @Prop({default: "30px"}) height!:string;
-    @Prop({default: 1}) minClicks!:number;
-    @Prop({default: true}) resetClicks!:boolean;
-    clicksLeft:number;
-    timeout:any = null;
+    @Prop({default: "button"}) text!: string;
+    @Prop({default: false}) disabled!: boolean;
+    @Prop({default: "30px"}) height!: string;
+    @Prop({default: 1}) minClicks!: number;
+    @Prop({default: true}) resetClicks!: boolean;
+    clicksLeft: number;
+    timeout: any = null;
     constructor() {
         super();
         this.clicksLeft = this.minClicks;
@@ -38,7 +38,7 @@ export default class Button extends Vue {
             clearTimeout(this.timeout);
         }
     }
-    onClick(event:any) {
+    onClick(event: any) {
         if(this.disabled) {
             return;
         }

@@ -11,37 +11,42 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { ChartColors } from '../typeexports';
 import { sprintf } from "sprintf-js";
 import uPlot from 'uplot';
+import { 
+    Options as upOptions, 
+    Hooks as upHooks,
+    AlignedData as upAlignedData
+} from 'uplot';
 import 'uplot/dist/uPlot.min.css'
 
 type BaseHookType = {
-    opts: (self: uPlot, opts: uPlot.Options) => void;
-    hooks: uPlot.Hooks;
+    opts: (self: uPlot, opts: upOptions) => void;
+    hooks: upHooks.Arrays;
 };
-type PeaksPluginType = { update: (data:Array<{x:number, c:string}>) => void } & BaseHookType;
-function verticalLinePlugin(initData:Array<{x:number, c:string}>): PeaksPluginType {
+type PeaksPluginType = { update: (data: Array<{x: number; c: string}>) => void } & BaseHookType;
+function verticalLinePlugin(initData: Array<{x: number; c: string}>): PeaksPluginType {
 
     let lineData = initData;
-    let plot:uPlot|null = null;
+    let plot: uPlot|null = null;
 
-    function init(u:uPlot, opts:uPlot.Options, data:uPlot.AlignedData) {
+    function init(u: uPlot, opts: upOptions, data: upAlignedData) {
         plot = u;
     }
 
-    function setData(lines:Array<{x:number, c:string}>) {
+    function setData(lines: Array<{x: number; c: string}>) {
         lineData = lines;
         if(plot) {
             //plot.redraw();
         }
     }
 
-    function drawStats(u:uPlot): void {
-        let { ctx } = u;
-        let { left, top, width, height } = u.bbox;
+    function drawStats(u: uPlot): void {
+        const { ctx } = u;
+        const { left, top, width, height } = u.bbox;
 
         ctx.save();
         ctx.lineWidth = 1;
-        for(let peak of lineData) {
-            let xPos = Math.round(u.valToPos(peak.x, "x", true));
+        for(const peak of lineData) {
+            const xPos = Math.round(u.valToPos(peak.x, "x", true));
             ctx.strokeStyle = peak.c;
             ctx.beginPath();
             ctx.moveTo(xPos, top);
@@ -53,7 +58,7 @@ function verticalLinePlugin(initData:Array<{x:number, c:string}>): PeaksPluginTy
     }
 
     return {
-        opts: (self: uPlot, opts: uPlot.Options) => {},
+        opts: (self: uPlot, opts: upOptions) => {},
         update: setData,
         hooks: {
             init: [init],
@@ -62,14 +67,14 @@ function verticalLinePlugin(initData:Array<{x:number, c:string}>): PeaksPluginTy
     };
 }
 function hideLegendPlugin(): BaseHookType {
-    function init(u:uPlot, opts:uPlot.Options, data:uPlot.AlignedData) {
-        let legendEl:HTMLElement|null = u.root.querySelector(".legend");
+    function init(u: uPlot, opts: upOptions, data: upAlignedData) {
+        const legendEl: HTMLElement|null = u.root.querySelector(".legend");
         if(legendEl) {
             legendEl.style.display = 'none';
         }
     }
     return {
-        opts: (self: uPlot, opts: uPlot.Options) => {},
+        opts: (self: uPlot, opts: upOptions) => {},
         hooks: {
             init: [init]
         }
@@ -81,9 +86,9 @@ function hideLegendPlugin(): BaseHookType {
     }
 })
 export default class BenchmarkGraph extends Vue {
-    plot:uPlot|null = null;
-    peaksPlugin:PeaksPluginType;
-    plotElem:HTMLElement|null = null;
+    plot: uPlot|null = null;
+    peaksPlugin: PeaksPluginType;
+    plotElem: HTMLElement|null = null;
     constructor() {
         super();
         this.peaksPlugin = verticalLinePlugin([]);
@@ -102,7 +107,7 @@ export default class BenchmarkGraph extends Vue {
     mounted() {
             //let container = this.$refs.container as HTMLElement;
             this.plotElem = this.$refs.uplot as HTMLElement;
-            const opts:uPlot.Options = {
+            const opts: upOptions = {
                 //width: this.plotElem.clientWidth,
                 //height: this.plotElem.clientHeight - 25,
                 ...this.getSize(),
@@ -110,19 +115,19 @@ export default class BenchmarkGraph extends Vue {
                 //tzDate: (ts:any) => uPlot.tzDate(new Date(ts * 1e3), 'Etc/UTC'),
                 series: [{
                         label: "Time",
-                        value: (u:uPlot, v:number) => v == null ? "-" : v.toFixed(2) + "s"
+                        value: (u: uPlot, v: number) => v == null ? "-" : v.toFixed(2) + "s"
                     }, {
                         label: "Weig.",
                         stroke: ChartColors.red,
                         width: 1,
                         scale: "weight",
-                        value: (u:uPlot, v:number) => v == null ? "-" : v.toFixed(2) + "kg"
+                        value: (u: uPlot, v: number) => v == null ? "-" : v.toFixed(2) + "kg"
                     }, {
                         label: "Grad.",
                         stroke: ChartColors.blue,
                         width: 1,
                         scale: "derivate",
-                        value: (u:uPlot, v:number) => v == null ? "-" : v.toFixed(2) + "kg/s"
+                        value: (u: uPlot, v: number) => v == null ? "-" : v.toFixed(2) + "kg/s"
                     }
                 ],
                 scales: {
@@ -138,19 +143,19 @@ export default class BenchmarkGraph extends Vue {
                 },
                 axes: [
                     {
-                        values: (u:uPlot, vals:number[], space:number) => vals.map(v => +v.toFixed(2) + "s")
+                        values: (u: uPlot, vals: number[], space: number) => vals.map(v => +v.toFixed(2) + "s")
                     },{
                         scale: "weight",
                         label: "kg",
                         labelSize: 20,
-                        values: (u:uPlot, vals:number[], space:number) => vals.map(v => sprintf("%.2f", v))
+                        values: (u: uPlot, vals: number[], space: number) => vals.map(v => sprintf("%.2f", v))
                     },{
                         side: 1,
                         scale: "derivate",
                         grid: { show: false },
                         label: "kg/s",
                         labelSize: 20,
-                        values: (u:uPlot, vals:number[], space:number) => vals.map(v => sprintf("%.2f", v))
+                        values: (u: uPlot, vals: number[], space: number) => vals.map(v => sprintf("%.2f", v))
                     }
                 ],
                 plugins: [
@@ -158,7 +163,7 @@ export default class BenchmarkGraph extends Vue {
                     //hideLegendPlugin()
                 ]
             };
-            let data = [[0],[0],[0]];
+            const data: upAlignedData = [[0, 1],[0, 1],[0, 1],[0, 1]];
             this.plot = new uPlot(opts, data, this.plotElem); // eslint-disable-line new-cap
             window.addEventListener("resize", this.onResize);
     }
@@ -167,9 +172,9 @@ export default class BenchmarkGraph extends Vue {
         window.removeEventListener("resize", this.onResize);
     }
 
-    setData(time:Array<number>, weight:Array<number>, gradient:Array<number>, lines:Array<{x:number, c:string}>) {
+    setData(time: Array<number>, weight: Array<number>, gradient: Array<number>, lines: Array<{x: number; c: string}>) {
         if(this.plot) {
-            let data:uPlot.AlignedData = [
+            const data: upAlignedData = [
                 time,
                 weight,
                 gradient

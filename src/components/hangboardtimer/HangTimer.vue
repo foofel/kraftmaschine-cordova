@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-/// <reference types="../../types/cordova-plugin-media" />
+///// <reference types="../../types/cordova-plugin-media" />
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { pipe, sum, round, guard, movingAverage, passTrough, taredByObject, clampPositive, virtualMidpoint } from '../../core/messagetransformer';
 import { HangboardScale } from '../../core/hangboardscale';
@@ -117,21 +117,21 @@ const SCHEDULER_GROUPS = {
     }
 })
 export default class HangTimer extends Vue {
-    @Prop() setupData!:HangTimerSetupData;
-    activeTrackingTimer:TimerWithActiveTracking;
-    scaleBackend:HangboardScale;
-    hangTimerData:HangTimerData;
-    activationWeightFactor:number;
-    graphData:HangTimerGraphData;
-    updateScheduler:UpdateScheduler;
-    wakeLock:any;
-    normalBeepSound:any;
-    lastBeepSound:any;
-    frameDone:boolean;
-    activeTimeTemps:Array<TempSensorInterface> = [];
-    tareWeights:TareWeights;
-    timerState:TimerState = "INIT";
-    stateNameLookup:any = {
+    @Prop() setupData!: HangTimerSetupData;
+    activeTrackingTimer: TimerWithActiveTracking;
+    scaleBackend: HangboardScale;
+    hangTimerData: HangTimerData;
+    activationWeightFactor: number;
+    graphData: HangTimerGraphData;
+    updateScheduler: UpdateScheduler;
+    wakeLock: any;
+    normalBeepSound: any;
+    lastBeepSound: any;
+    frameDone: boolean;
+    activeTimeTemps: Array<TempSensorInterface> = [];
+    tareWeights: TareWeights;
+    timerState: TimerState = "INIT";
+    stateNameLookup: any = {
         "INIT": "READY!", 
         "WARMUP": "WARMUP", 
         "ACTIVE": "ACTIVE",
@@ -140,7 +140,7 @@ export default class HangTimer extends Vue {
         "COOLDOWN": "COOLDOWN",
         "DONE": "FINISHED!"
     }
-    stateColorLookup:any = {
+    stateColorLookup: any = {
         "INIT": "gray",
         "WARMUP": "#149BB5",
         "ACTIVE": "green",
@@ -149,13 +149,13 @@ export default class HangTimer extends Vue {
         "COOLDOWN": "#149BB5",
         "DONE": "#149BB5"
     }
-    progressGraphData:TimerBarChartData;
-    tempInfo:TempSensorInterface;
-    canTare:boolean;
-    calib:Calibration|null;
-    enableBeep:boolean;
-    enableVibrate:boolean;
-    cfg:ConfigFile;
+    progressGraphData: TimerBarChartData;
+    tempInfo: TempSensorInterface;
+    canTare: boolean;
+    calib: Calibration|null;
+    enableBeep: boolean;
+    enableVibrate: boolean;
+    cfg: ConfigFile;
 
     constructor() {
         super();
@@ -190,7 +190,7 @@ export default class HangTimer extends Vue {
             rightWeight: 0,
             trainData: this.hangTimerData
         };
-        let overallReps = GetOverallReps(this.hangTimerData.timer.data);
+        const overallReps = GetOverallReps(this.hangTimerData.timer.data);
         this.progressGraphData = {
             active: Array(overallReps).fill(0),
             inactive: Array(overallReps).fill(0),
@@ -246,10 +246,10 @@ export default class HangTimer extends Vue {
         this.scaleBackend.removeTempSensorCallback(this.onTempSensorMessage)
         this.scaleBackend.removeWeightCallback(this.onWeightMessage);
     }
-	onTempSensorMessage(msg:TempSensorInterface) {
+	onTempSensorMessage(msg: TempSensorInterface) {
 		this.tempInfo = msg;
     }
-    onWeightMessage(msg:WeightMessage) {
+    onWeightMessage(msg: WeightMessage) {
         this.activeTrackingTimer.onWeightMessage(msg);
         this.graphData.leftWeight = msg.left;
         this.graphData.rightWeight = msg.right;
@@ -257,8 +257,8 @@ export default class HangTimer extends Vue {
     }
     buildBeepSound() {
         if(this.normalBeepSound === null) {
-            let ctx = new AudioContext();
-            makeSound(`${CORDOVA_BASE_PATH()}/sounds/beep-wav.mp3`, ctx, (o:any) => {
+            const ctx = new AudioContext();
+            makeSound(`${CORDOVA_BASE_PATH()}/sounds/beep-wav.mp3`, ctx, (o: any) => {
                 console.log(o);
                 console.log("beep loaded");
                 this.normalBeepSound = o;
@@ -266,7 +266,7 @@ export default class HangTimer extends Vue {
             });
         }
     }
-    buildSaveData(stars:number):LocalUploadSave {
+    buildSaveData(stars: number): LocalUploadSave {
         return {
             type: "save-training",
             date: new Date(),
@@ -303,7 +303,7 @@ export default class HangTimer extends Vue {
             (window as any).plugins.insomnia.allowSleepAgain();
         }
     }
-    beep(type:BeepType) {
+    beep(type: BeepType) {
         if(type === 'VIBRATE' && this.enableVibrate) {
             if((window as any).plugins) {
                 navigator.vibrate(50);
@@ -322,13 +322,13 @@ export default class HangTimer extends Vue {
     }
     onPauseTimer() {
         this.activeTrackingTimer.stop();
-        let sso = this.$refs.startStopOverlay as StartContinueAbortOverlay;
+        const sso = this.$refs.startStopOverlay as StartContinueAbortOverlay;
         if(sso) {
                 sso.resetTimeout();
         }
         this.releaseWakeLock();
     }
-    onTimerStep(pit: TimerEntryPointInTime, weight:WeightMessage, activeTime:number) {
+    onTimerStep(pit: TimerEntryPointInTime, weight: WeightMessage, activeTime: number) {
         if(this.updateScheduler.checkTimeout(SCHEDULER_GROUPS.REP_TIME_PROGRESS)) {
             this.graphData.repProgress = pit.repElapsed;
             this.graphData.repDuration = pit.repLength;
@@ -357,7 +357,7 @@ export default class HangTimer extends Vue {
         if(this.calib === null && this.canTare && this.timerState === "PAUSE" && pit.repLength - pit.repElapsed <= 30) {
             this.canTare = false;
             this.calib = new Calibration(this.scaleBackend, 
-			(weights:TareWeights) => {
+			(weights: TareWeights) => {
 				console.log(`new tare weights, left: ${weights.left}, right: ${weights.right}`);
 				this.tareWeights.left = weights.left;
 				this.tareWeights.right = weights.right;
@@ -387,7 +387,7 @@ export default class HangTimer extends Vue {
             });
         }
     }
-    onLastStep(pit: TimerEntryPointInTime, weight:WeightMessage, activeTime:number) {
+    onLastStep(pit: TimerEntryPointInTime, weight: WeightMessage, activeTime: number) {
         // as we schedule with different speeds it can happen that the last tick get "swallowed", therefore
         // we unconditionally rebuild uppon the last tick
         this.graphData.repProgress = pit.repElapsed;
@@ -408,7 +408,7 @@ export default class HangTimer extends Vue {
         this.timerState = pit.state;
         this.buildProgressTimerGraphData();                                
     }
-    onTimerOverlayClicked(action:string, stars:number) {
+    onTimerOverlayClicked(action: string, stars: number) {
         console.log(action);
         if(action === "start") {
             this.graphData.repNormalized = 0;
@@ -464,10 +464,10 @@ export default class HangTimer extends Vue {
         this.activeTimeTemps = [];
         this.buildProgressTimerGraphData();
     }
-    saveRunData(stars:number) {      
-        let data = this.buildSaveData(stars);
+    saveRunData(stars: number) {      
+        const data = this.buildSaveData(stars);
         AddLocalUploadSave(data);
-        let uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
+        const uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
         uploader.uploadLocalSaves();
         this.$root.$emit(HANGTIMER_FINISHED, data);
     }
@@ -477,35 +477,35 @@ export default class HangTimer extends Vue {
     get overallReminingComputed() {
         if(this.timerState === "INIT") {
             //return this.currentRepRemaining(CalculateTimerLength(this.hangTimerData.timer.data));
-            let length = CalculateTimerLength(this.hangTimerData.timer.data);
+            const length = CalculateTimerLength(this.hangTimerData.timer.data);
              return moment.utc(length * 1000).format("HH:mm:ss");
         } else {
             //return this.currentRepRemaining(this.graphData.overallDuration - this.graphData.overallProgress);
             return moment.utc((this.graphData.overallDuration - this.graphData.overallProgress) * 1000).format("HH:mm:ss");
         }
     }
-    get currentStateName():string {
+    get currentStateName(): string {
         return this.stateNameLookup[this.timerState];
     }
     buildProgressTimerGraphData() {
         //console.log(SCHEDULER_GROUPS.TIMERPROGRESS_GRAPH);
-        let overallReps = GetOverallReps(this.hangTimerData.timer.data);
-        let labelValues = Array.from({length: overallReps}, (_, i) => i + 1).map((v) => ""+v);
+        const overallReps = GetOverallReps(this.hangTimerData.timer.data);
+        const labelValues = Array.from({length: overallReps}, (_, i) => i + 1).map((v) => ""+v);
         this.progressGraphData.labels = labelValues;
-        let activeTimes = this.activeTrackingTimer.getActiveTimes();
+        const activeTimes = this.activeTrackingTimer.getActiveTimes();
         this.progressGraphData.active = Array(overallReps).fill(0);
         this.progressGraphData.inactive = Array(overallReps).fill(0);
         this.progressGraphData.passive = Array(overallReps).fill(this.progressGraphData.maxValue);
-        for(let i in activeTimes) {
-            let active = activeTimes[i];
-            let inactive = this.progressGraphData.maxValue - active;
+        for(const i in activeTimes) {
+            const active = activeTimes[i];
+            const inactive = this.progressGraphData.maxValue - active;
             this.progressGraphData.active[i] = active;
             this.progressGraphData.inactive[i] = inactive;
             this.progressGraphData.passive[i] = this.progressGraphData.maxValue - (active + inactive);
         }        
         if(this.timerState === "ACTIVE") {
-            let activeIdx = this.activeTrackingTimer.currentActiveIndex;
-            let current = this.activeTrackingTimer.getCurrentActiveTime();
+            const activeIdx = this.activeTrackingTimer.currentActiveIndex;
+            const current = this.activeTrackingTimer.getCurrentActiveTime();
             this.progressGraphData.active[activeIdx] = current.active;
             this.progressGraphData.inactive[activeIdx] = current.inactive;
             this.progressGraphData.passive[activeIdx] = this.progressGraphData.maxValue - (current.active + current.inactive);

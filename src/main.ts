@@ -3,12 +3,11 @@ import App from './App.vue'
 import router from './router'
 import { HangboardScale } from './core/hangboardscale'
 import { LocalSaveUploader, RemoteAPI, reauth, clearAllCookies } from './core/util'
-//import VueAwesomeSwiper from 'vue-awesome-swiper'
 import { GetConfigObject, SaveConfigObject, SupplementDefaultKeys } from '@/core/localstore';
 
 Vue.config.productionTip = false
 
-console.log("boulderbash main file loaded!")
+console.log("kraftmaschine main file loaded!")
 
 // this "fixes" missing keys when we add new properties to the specified default values, 
 // oterweise those new keys are missing on exsiting configs
@@ -29,7 +28,7 @@ export const GlobalStore = {
 
 function startupApp() {
   console.log("starting app!")
-  let inst = new Vue({
+  const inst = new Vue({
     router,
     data: GlobalStore,
     render: h => h(App)
@@ -49,7 +48,7 @@ function onDeviceReady() {
     scaleDataBackend.onGlobalMessage("appResume");
   }, false);
 }
-let isCordovaApp = !!window.cordova;
+const isCordovaApp = window.hasOwnProperty("cordova");
 if(!isCordovaApp) {
   startupApp();
 } else {

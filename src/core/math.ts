@@ -1,63 +1,58 @@
-export type LinRegType = { slope:number, intercept:number, r2:number };
-export function linearRegression(x:ReadonlyArray<number>, y:ReadonlyArray<number>) {
-    var sumX = 0;
-    var sumY = 0;
-    var sumXY = 0;
-    var sumXX = 0;
-    var sumYY = 0;
-    for (var i = 0; i < y.length; i++) {
+export type LinRegType = { slope: number; intercept: number; r2: number };
+export function linearRegression(x: ReadonlyArray<number>, y: ReadonlyArray<number>) {
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumXX = 0;
+    let sumYY = 0;
+    for (let i = 0; i < y.length; i++) {
         sumX += x[i];
         sumY += y[i];
         sumXY += (x[i] * y[i]);
         sumXX += (x[i] * x[i]);
         sumYY += (y[i] * y[i]);
     }
-    var lr:LinRegType = { slope: 0, intercept: 0, r2:0 };
-    var n = y.length;
+    const lr: LinRegType = { slope: 0, intercept: 0, r2:0 };
+    const n = y.length;
     lr.slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
     lr.intercept = (sumY - lr.slope * sumX) / n;
     lr.r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
     return lr;
 }
 
-export function clamp(value:number, min:number, max:number):number {
+export function clamp(value: number, min: number, max: number): number {
     return Math.max(Math.min(value, max), min);
 }
 
-export function map(value:number, fromA:number, fromB:number, toA:number, toB:number) {
+export function map(value: number, fromA: number, fromB: number, toA: number, toB: number) {
     return (value - fromA) / (fromB-fromA) * (toB-toA) + toA
 }
 
-export function lerp(t:number, from:number, to:number) {
+export function lerp(t: number, from: number, to: number) {
     return (1 - t) * from + t * to;
 }
 
-export function round(value:number, base:number):number {
+export function round(value: number, base: number): number {
     return base * Math.round(value / base)
 }
 
-export function roundDown(value:number, base:number=1):number {
+export function roundDown(value: number, base=1): number {
     return base * Math.floor(value / base);
 }
 
-export function roundUp(value:number, base:number=1):number {
+export function roundUp(value: number, base=1): number {
     return Math.ceil(value * base) / base;
 }
 
-export function HSVtoRGB(h:number, s:number, v:number) {
+export function HSVtoRGB(h: number, s: number, v: number) {
     let r = 0;
     let g = 0;
     let b = 0;
-    let i;
-    let f;
-    let p;
-    let q;
-    let t;
-    i = Math.floor(h * 6);
-    f = h * 6 - i;
-    p = v * (1 - s);
-    q = v * (1 - f * s);
-    t = v * (1 - (1 - f) * s);
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
     switch (i % 6) {
         case 0: 
             r = v;
@@ -97,13 +92,13 @@ export function HSVtoRGB(h:number, s:number, v:number) {
     };
 }
 
-export function RGBtoHSV(r:number, g:number, b:number) {
-    let max = Math.max(r, g, b);
-    let min = Math.min(r, g, b);
-    let d = max - min;
+export function RGBtoHSV(r: number, g: number, b: number) {
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = max - min;
     let h = 0;
-    let s = (max === 0 ? 0 : d / max);
-    let v = max / 255;
+    const s = (max === 0 ? 0 : d / max);
+    const v = max / 255;
 
     switch (max) {
         case min: 
@@ -130,17 +125,17 @@ export function RGBtoHSV(r:number, g:number, b:number) {
     };
 }
 
-export function HexToRGB(hex:string, alpha:number) {
-    let r = parseInt(hex.slice(1, 3), 16);
-    let g = parseInt(hex.slice(3, 5), 16);
-    let b = parseInt(hex.slice(5, 7), 16);
+export function HexToRGB(hex: string, alpha: number) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
     return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 }
 
-export function sum(arr:Array<number>) {
+export function sum(arr: Array<number>) {
     return arr.reduce((p, c) => p + c, 0);
 }
 
-export function avg(arr:Array<number>) {
+export function avg(arr: Array<number>) {
     return sum(arr) / arr.length;
 }

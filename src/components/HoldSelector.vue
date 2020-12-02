@@ -67,25 +67,25 @@ import { ConfigFile, SaveConfigObject } from '../core/localstore';
 })
 export default class HoldSelector extends Vue {
     //@Prop({default: () => Hangboards.twinPeaksReference}) board!:Hangboard;
-    @Prop({default: "default"}) selectionMode!:string; // default | benchmark
-    board!:Hangboard;
-    state:number = 0;
-    hoveredHoldId:number = -1;
-    leftHold:Hold|null = null;
-    rightHold:Hold|null = null;
-    canvas!:HTMLCanvasElement;
-    fontSize:string = "";
-    selectionType:string = "both";
-    enableCustomBenchmark:boolean = false;
-    canvasElementId:string = "wa05js4ns9";
-    cfg:ConfigFile = this.$root.$data.cfg;
-    textLookup:Map<Number, { size: Number, text: string}> = new Map<Number, { size: Number, text: string}>();
-    fontSizeFixed:boolean = false;
-    waitForObjectCreation:boolean = false;
+    @Prop({default: "default"}) selectionMode!: string; // default | benchmark
+    board!: Hangboard;
+    state = 0;
+    hoveredHoldId = -1;
+    leftHold: Hold|null = null;
+    rightHold: Hold|null = null;
+    canvas!: HTMLCanvasElement;
+    fontSize = "";
+    selectionType = "both";
+    enableCustomBenchmark = false;
+    canvasElementId = "wa05js4ns9";
+    cfg: ConfigFile = this.$root.$data.cfg;
+    textLookup: Map<number, { size: number; text: string}> = new Map<number, { size: number; text: string}>();
+    fontSizeFixed = false;
+    waitForObjectCreation = false;
     
     constructor() {
         super();
-        let elem = document.getElementById(this.canvasElementId) as HTMLCanvasElement;
+        const elem = document.getElementById(this.canvasElementId) as HTMLCanvasElement;
         if(!elem) {
             this.canvas = document.createElement("canvas");
             this.canvas.id = this.canvasElementId;
@@ -93,11 +93,11 @@ export default class HoldSelector extends Vue {
         } else {
             this.canvas = elem;
         }
-        let board = this.cfg.options.boardSetups[this.cfg.options.channel];
+        const board = this.cfg.options.boardSetups[this.cfg.options.channel];
         if(!board){
             this.board = Hangboards.none;
         } else {
-            let boardObject = Hangboards.boardList().get(board);
+            const boardObject = Hangboards.boardList().get(board);
             if(boardObject){
                 this.board = boardObject;
             } else {
@@ -123,12 +123,12 @@ export default class HoldSelector extends Vue {
     }
 
     getBoards() {
-        let lst = Hangboards.boardList().values();
+        const lst = Hangboards.boardList().values();
         return lst;
     }
 
-    onBoardSelectionChanged(selection:string) {
-        let boardObject = Hangboards.boardList().get(parseInt(selection));
+    onBoardSelectionChanged(selection: string) {
+        const boardObject = Hangboards.boardList().get(parseInt(selection));
         if(boardObject){
             this.board = boardObject;
             this.leftHold = null;
@@ -147,23 +147,23 @@ export default class HoldSelector extends Vue {
         this.textLookup.clear();
     }
 
-    onEnter(hold:Hold) {
-        let disabled = this.isDisabledInBenchmark(hold);
+    onEnter(hold: Hold) {
+        const disabled = this.isDisabledInBenchmark(hold);
         if(disabled) {
             return;
         }        
         this.hoveredHoldId = hold.id;
     }
 
-    onLeave(hold:Hold) {
-        let disabled = this.isDisabledInBenchmark(hold);
+    onLeave(hold: Hold) {
+        const disabled = this.isDisabledInBenchmark(hold);
         if(disabled) {
             return;
         }        
         this.hoveredHoldId = -1;
     }
 
-    isDisabledInBenchmark(hold:Hold) {
+    isDisabledInBenchmark(hold: Hold) {
         if(this.selectionMode === 'default' || this.selectionType !== 'both') {
             return false;
         }
@@ -181,8 +181,8 @@ export default class HoldSelector extends Vue {
         this.enableCustomBenchmark = !this.enableCustomBenchmark;
     }
 
-    onSelect(hold:Hold) {
-        let disabled = this.isDisabledInBenchmark(hold);
+    onSelect(hold: Hold) {
+        const disabled = this.isDisabledInBenchmark(hold);
         if(disabled) {
             return;
         }
@@ -209,7 +209,7 @@ export default class HoldSelector extends Vue {
         }
     }
 
-    onFinishOneSelection(type:string) {
+    onFinishOneSelection(type: string) {
         if(!(this.leftHold || this.rightHold)) {
             return;
         }
@@ -236,15 +236,15 @@ export default class HoldSelector extends Vue {
     }
 
     calculateHoldDisplayText() {
-        let container = this.$refs.container as HTMLElement;
+        const container = this.$refs.container as HTMLElement;
         if(container) {
             container.style.visibility = "visible";
-            let arr = this.$refs.holds as HTMLElement[];
+            const arr = this.$refs.holds as HTMLElement[];
             if(arr) {
-                for(let idx in arr) {
-                    let intIdx = parseInt(idx);
-                    let hold = this.board.holds[intIdx];
-                    let textAndSize = this.calculateTextAndSize(arr[intIdx], hold);
+                for(const idx in arr) {
+                    const intIdx = parseInt(idx);
+                    const hold = this.board.holds[intIdx];
+                    const textAndSize = this.calculateTextAndSize(arr[intIdx], hold);
                     this.textLookup.set(hold.id, { size: textAndSize.size, text: textAndSize.text });
                 }
             }
@@ -252,17 +252,17 @@ export default class HoldSelector extends Vue {
         this.fontSizeFixed = true;
     }
 
-    css(element:HTMLElement, property:string) {
+    css(element: HTMLElement, property: string) {
         return window.getComputedStyle(element, null).getPropertyValue(property);
     }
 
-    getHolds():Array<Hold> {
+    getHolds(): Array<Hold> {
         return this.board.holds;
     }
 
-    calculateTextAndSize(holdElem: HTMLElement, hold:Hold) {
-        let holdWidth = holdElem.clientWidth;
-        let holdHeight = holdElem.clientHeight;
+    calculateTextAndSize(holdElem: HTMLElement, hold: Hold) {
+        const holdWidth = holdElem.clientWidth;
+        const holdHeight = holdElem.clientHeight;
         let text = hold.name;
         let textWidth = this.getTextWidth(hold.name, this.fontSize);
         let size = (holdWidth - (holdWidth / 100 * 5)) / textWidth * 10;
@@ -276,21 +276,21 @@ export default class HoldSelector extends Vue {
         return { size: size, text: text };
     }
 
-    getHoldText(hold:Hold) {
+    getHoldText(hold: Hold) {
         return this.textLookup.get(hold.id)!.text;
     }
 
-    getHoldTextStyle(hold:Hold) {
+    getHoldTextStyle(hold: Hold) {
         return {
             fontSize: this.textLookup.get(hold.id)!.size + "px"
         }
     }
 
-    getHoldStyle(hold:Hold) {
-        let posX = hold.pos.x / this.board.width;
-        let posY = hold.pos.y / this.board.height;
-        let sizeX = hold.size.x / this.board.width;
-        let sizeY = hold.size.y / this.board.height;        
+    getHoldStyle(hold: Hold) {
+        const posX = hold.pos.x / this.board.width;
+        const posY = hold.pos.y / this.board.height;
+        const sizeX = hold.size.x / this.board.width;
+        const sizeY = hold.size.y / this.board.height;        
         return { 
             //transform: `translate(${Math.round(hold.pos.x)}px,${Math.round(hold.pos.y)}px)`,
             left: posX * 100 + "%",
@@ -301,30 +301,30 @@ export default class HoldSelector extends Vue {
     }
 
     getContainerStyle() {
-        let scale = this.board.height / this.board.width;
+        const scale = this.board.height / this.board.width;
         return { paddingBottom: scale * 100 + "%" }
     }
 
-    getTextWidth(text:string, font:string) {
+    getTextWidth(text: string, font: string) {
         // re-use canvas object for better performance
-        let context = this.canvas.getContext("2d");
+        const context = this.canvas.getContext("2d");
         if(context) {
             context.font = font;   
-            var metrics = context.measureText(text);
+            const metrics = context.measureText(text);
             return metrics.width;
         }
         return -1;
     }
 
-    isLeftSelection(hold:Hold) {
+    isLeftSelection(hold: Hold) {
         return this.leftHold && hold.id === this.leftHold.id;
     }
 
-    isRightSelection(hold:Hold) {
+    isRightSelection(hold: Hold) {
         return this.rightHold && hold.id === this.rightHold.id;
     }
 
-    isDoubleSelection(hold:Hold) {
+    isDoubleSelection(hold: Hold) {
         return this.leftHold && this.rightHold && this.leftHold.id === hold.id && this.rightHold.id === hold.id;
     }
 }

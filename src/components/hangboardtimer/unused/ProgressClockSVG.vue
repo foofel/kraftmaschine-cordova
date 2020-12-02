@@ -29,7 +29,7 @@ import { HangTimerGraphData } from '@/components/typeexports';
     }
 })
 export default class ProgressClockSVG extends Vue {
-    @Prop({}) graphData!:HangTimerGraphData;
+    @Prop({}) graphData!: HangTimerGraphData;
     constructor() {
         super();
     }

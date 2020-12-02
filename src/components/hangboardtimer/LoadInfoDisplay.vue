@@ -29,12 +29,12 @@ import { HangTimerGraphData, DrawContextInfo } from '../typeexports';
     }
 })
 export default class LoadInfoDisplay extends Vue {
-    @Prop({}) graphData!:HangTimerGraphData;
-    @Prop({ default: true }) showImbalance!:boolean;
-    maxWeight:number;
-    colorMaxDiff:number = 0.1;
-    ul:UpdateLimiter<number> = new UpdateLimiter<number>();
-    hidpiCanvas!:HiDpiCanvas;
+    @Prop({}) graphData!: HangTimerGraphData;
+    @Prop({ default: true }) showImbalance!: boolean;
+    maxWeight: number;
+    colorMaxDiff = 0.1;
+    ul: UpdateLimiter<number> = new UpdateLimiter<number>();
+    hidpiCanvas!: HiDpiCanvas;
 
     constructor() {
         super();
@@ -48,7 +48,7 @@ export default class LoadInfoDisplay extends Vue {
     }
 
     adjustMax() {
-        let max = Math.max(
+        const max = Math.max(
             this.graphData.leftWeight, 
             this.graphData.rightWeight, 
             this.graphData.currentWeight, 
@@ -65,25 +65,25 @@ export default class LoadInfoDisplay extends Vue {
         this.ul.setValue(this.graphData.currentWeight, this.updateCombined);
     }     
 
-    updateCombined(val:number) {
-        let dc = this.hidpiCanvas.getDrawContext()
+    updateCombined(val: number) {
+        const dc = this.hidpiCanvas.getDrawContext()
         this.drawBars(dc);
     }
 
-    drawBars(dc:DrawContextInfo) {
+    drawBars(dc: DrawContextInfo) {
         if(dc.ctx) {
-            let ctx = dc.ctx;
+            const ctx = dc.ctx;
             ctx.clearRect(0, 0, dc.width, dc.height);
             ctx.fillStyle = "lightgray"
             ctx.fillRect(0, 0, dc.width, dc.height)
             ctx.fillStyle = "#63b916"
-            let combinedWidth = dc.width * clamp(this.graphData.currentWeight / this.maxWeight, 0, 1);
+            const combinedWidth = dc.width * clamp(this.graphData.currentWeight / this.maxWeight, 0, 1);
             ctx.fillRect(0, 0, Math.round(combinedWidth), dc.height);
             if(this.showImbalance) {
-                let weightDiffColor = this.weightDiffOverlayColor();
+                const weightDiffColor = this.weightDiffOverlayColor();
                 ctx.fillStyle = weightDiffColor;
-                let leftWidth = dc.width * clamp(this.graphData.leftWeight / this.maxWeight, 0, 1);
-                let rightWidth = dc.width * clamp(this.graphData.rightWeight / this.maxWeight, 0, 1);
+                const leftWidth = dc.width * clamp(this.graphData.leftWeight / this.maxWeight, 0, 1);
+                const rightWidth = dc.width * clamp(this.graphData.rightWeight / this.maxWeight, 0, 1);
                 ctx.fillRect(0, 0, Math.round(leftWidth), Math.round(dc.height / 2));
                 ctx.fillRect(0, Math.round(dc.height / 2), Math.round(rightWidth), Math.round(dc.height));
             }
@@ -94,21 +94,21 @@ export default class LoadInfoDisplay extends Vue {
         if(this.graphData.currentWeight === 0) {
             return 0;
         }
-        let left = round(this.graphData.leftWeight, 0.1);
-        let right = round(this.graphData.rightWeight, 0.1);
-        let combined = (left + right + 0.000001);
-        let diff = Math.abs(left - right);
-        let diffPer = clamp(diff / combined, 0, 1);
+        const left = round(this.graphData.leftWeight, 0.1);
+        const right = round(this.graphData.rightWeight, 0.1);
+        const combined = (left + right + 0.000001);
+        const diff = Math.abs(left - right);
+        const diffPer = clamp(diff / combined, 0, 1);
         return diffPer;
     }
 
     weightDiffOverlayColor() {
-        let diffPer = clamp(this.leftRightDiff() * (1 / this.colorMaxDiff), 0, 1);
+        const diffPer = clamp(this.leftRightDiff() * (1 / this.colorMaxDiff), 0, 1);
         return HexToRGB("#F44336", diffPer);
     }
 
     weightDiff() {
-        let diff = this.leftRightDiff() * 100;
+        const diff = this.leftRightDiff() * 100;
         //diff = lerp(, 0, 100)
         return `${diff.toFixed(2)}%`;
     }
@@ -119,12 +119,12 @@ export default class LoadInfoDisplay extends Vue {
 
     styleTrain() {
         //this.adjustMax();
-        let value = clamp(this.graphData.trainWeight / this.maxWeight, 0, 1);
+        const value = clamp(this.graphData.trainWeight / this.maxWeight, 0, 1);
         return `width: ${100 * value}%;`;
     }
     styleActivation() {
         //this.adjustMax();
-        let value = clamp(this.graphData.activationWeight / this.maxWeight, 0, 1);
+        const value = clamp(this.graphData.activationWeight / this.maxWeight, 0, 1);
         return `width: ${100 * value}%;`;
     }
 }

@@ -115,13 +115,13 @@ import { TimerSelectorEntry, PredefinedTimers } from '../typeexports';
     }
 })
 export default class TimerSelector extends Vue {
-    timers:Array<TimerSelectorEntry> = PredefinedTimers.timers;
-    showCustom:boolean = false;
-    customTimers:Array<TimerSelectorEntry>;
-    customTimerData:TimerSelectorEntry = this.getDefaultCustomTimerData() as any;
-    lastSelectedTimerEntry:TimerSelectorEntry | null = null;
-    lastTimerSelectionId:string = "";
-    cfg:ConfigFile = this.$root.$data.cfg;
+    timers: Array<TimerSelectorEntry> = PredefinedTimers.timers;
+    showCustom = false;
+    customTimers: Array<TimerSelectorEntry>;
+    customTimerData: TimerSelectorEntry = this.getDefaultCustomTimerData() as any;
+    lastSelectedTimerEntry: TimerSelectorEntry | null = null;
+    lastTimerSelectionId = "";
+    cfg: ConfigFile = this.$root.$data.cfg;
     constructor() {
         super();
         this.customTimers = this.cfg.options.savedTimers;
@@ -142,18 +142,17 @@ export default class TimerSelector extends Vue {
             }
         }
     }
-    onTimerPresetChanged(timerId:string) {
+    onTimerPresetChanged(timerId: string) {
         console.log(timerId);
         this.lastTimerSelectionId = timerId;
-        let timers = this.getTimerList();
-        let timer = timers.find((val, idx) => val.id === timerId);
+        const timers = this.getTimerList();
+        const timer = timers.find((val, idx) => val.id === timerId);
         if(timer) {
             this.lastSelectedTimerEntry = { ...timer, data: { ...timer.data } };
             this.customTimerData = { ...timer, data: { ...timer.data as any } };
-        } else {
         }
     }
-    onTimerSelected(timerEntry:TimerSelectorEntry) {
+    onTimerSelected(timerEntry: TimerSelectorEntry) {
         this.$emit("timerSelected", timerEntry);
     }
     toggleCustomTimerView() {
@@ -169,14 +168,14 @@ export default class TimerSelector extends Vue {
             alert("all values but cooldown/warmup must be > 0");
             return;
         }
-        let newTimer = { ...this.customTimerData, id: makeid(10) };
+        const newTimer = { ...this.customTimerData, id: makeid(10) };
         this.customTimers.push(newTimer as any);
         this.cfg.options.savedTimers = this.customTimers;
         SaveConfigObject(this.cfg);
         this.resetCustomTimerView();
     }
     onDeleteCurrentSelected() {
-        let timer = this.customTimers.find((val, idx) => val.id === this.lastSelectedTimerEntry!.id);
+        const timer = this.customTimers.find((val, idx) => val.id === this.lastSelectedTimerEntry!.id);
         if(timer) {
             if(confirm(`delete timer '${timer.name}'?`)) {
                 this.customTimers = this.customTimers.filter((val) => val.id !== timer!.id);
@@ -190,9 +189,9 @@ export default class TimerSelector extends Vue {
         }
     }
     updateSelectedCustomTimer() {
-        let timerIdx = this.customTimers.findIndex((val) => val.id === this.lastTimerSelectionId);
+        const timerIdx = this.customTimers.findIndex((val) => val.id === this.lastTimerSelectionId);
         if(timerIdx !== -1) {
-            let timer = this.customTimers[timerIdx];
+            const timer = this.customTimers[timerIdx];
             if(confirm(`update timer '${timer.name}'?`)) {
                 this.customTimers[timerIdx] = {...this.customTimerData};
                 this.cfg.options.savedTimers = this.customTimers;

@@ -1,6 +1,6 @@
 interface Timeout {
-    lastUpdate:number;
-    intervall:number;
+    lastUpdate: number;
+    intervall: number;
     next: () => number;
 }
 interface TimeoutDict {
@@ -8,14 +8,14 @@ interface TimeoutDict {
 }
 
 export class UpdateScheduler {
-    now:number;
-    timeoutLookup:TimeoutDict = {}
+    now: number;
+    timeoutLookup: TimeoutDict = {}
     //allowedTimeouts:number = 1;
     //timeoutsExecuted:number = 0;
     constructor() {
         this.now = 0;
     }
-    registerTimeout(key:string, intervall:number) {
+    registerTimeout(key: string, intervall: number) {
         this.timeoutLookup[key] = { 
             lastUpdate: 0, 
             intervall: intervall, 
@@ -27,12 +27,12 @@ export class UpdateScheduler {
     /*restartFrame() {
         this.timeoutsExecuted = 0;
     }*/
-    checkTimeout(key:string) {
+    checkTimeout(key: string) {
         /*if(this.timeoutsExecuted >= this.allowedTimeouts) {
             return false;
         }*/
-        let updateObject = this.timeoutLookup[key];
-        let now = performance.now();
+        const updateObject = this.timeoutLookup[key];
+        const now = performance.now();
         if(now >= updateObject.next()) {
             updateObject.lastUpdate = now;
             //this.timeoutsExecuted++;

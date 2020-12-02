@@ -58,10 +58,10 @@ import { getHoldString } from '@/core/util';
     }
 })
 export default class BenchmarkSetup extends Vue {
-    state:number = 0
-    benchmarkCalibrationInProgress:boolean = false;
-    continueTime:number = 3;
-    continueTimerId:any = 0;
+    state = 0
+    benchmarkCalibrationInProgress = false;
+    continueTime = 3;
+    continueTimerId: any = 0;
     setupData = {
         tareWeights: {},
         selectedHolds: {},
@@ -73,17 +73,17 @@ export default class BenchmarkSetup extends Vue {
     mounted() {
         this.state = 1;
     }
-    onTareDone(data:TareWeights) {
+    onTareDone(data: TareWeights) {
         this.setupData.tareWeights = data;
         //console.log("tare done", data);
         this.state = 2;
     }
-    onHoldSelected(holds:SelectedHolds) {
+    onHoldSelected(holds: SelectedHolds) {
         this.setupData.selectedHolds = holds;
         //console.log("holds selected", holds);
         this.state = 3;
     }
-    onCalibrationUserDone(weight:WeightData) {
+    onCalibrationUserDone(weight: WeightData) {
         this.setupData.userWeight = weight.combined;
         //console.log(weight);
         this.state = 4;

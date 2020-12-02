@@ -32,17 +32,17 @@ import { ConfigFile } from '@/core/localstore';
 })
 export default class GoalClock extends Vue {
 
-    hidpiCanvas!:HiDpiCanvas;
-    @Prop({default: 0}) currentTime:number = 0;
-    @Prop({default: () => ({})}) highscoreData!:BenchmarkVisualModel;
-    highscore2:Array<BenchmarkVisualHighscoreEntry>|undefined = undefined;
-    clockRemainingTime:string = "";
-    clockNextPlace:string = "";
-    clockNextName:string = "";
-    clockNextNormalized:number = 0;
-    clockSelfNormalized:number = 0;
-    clockOverallNormalized:number = 0;
-    selfBest:number = 0;
+    hidpiCanvas!: HiDpiCanvas;
+    @Prop({default: 0}) currentTime = 0;
+    @Prop({default: () => ({})}) highscoreData!: BenchmarkVisualModel;
+    highscore2: Array<BenchmarkVisualHighscoreEntry>|undefined = undefined;
+    clockRemainingTime = "";
+    clockNextPlace = "";
+    clockNextName = "";
+    clockNextNormalized = 0;
+    clockSelfNormalized = 0;
+    clockOverallNormalized = 0;
+    selfBest = 0;
 
     constructor(){
         super();
@@ -50,24 +50,24 @@ export default class GoalClock extends Vue {
 
     mounted() {
         this.hidpiCanvas = this.$refs.hidpiCanvas as HiDpiCanvas;
-        let dc = this.hidpiCanvas.getDrawContext()
+        const dc = this.hidpiCanvas.getDrawContext()
         this.drawClockInfo(dc);
         this.highscore2 = cloneDeep(this.highscoreData.highscore)
         this.updateDataAndRedraw();
-        let cfg = this.$root.$data.cfg as ConfigFile;
+        const cfg = this.$root.$data.cfg as ConfigFile;
         for(let i = this.highscore2!.length; i <= 0; i--) {
-            let entry = this.highscore2[i];
+            const entry = this.highscore2[i];
             if(entry.id === cfg.id) {
                 this.selfBest = entry.time;
             }
         }
     }
 
-    drawClockInfo(dc:DrawContextInfo) {
+    drawClockInfo(dc: DrawContextInfo) {
         if(dc.ctx) {
-            let ctx = dc.ctx;
+            const ctx = dc.ctx;
             ctx.clearRect(0, 0, dc.width, dc.height);
-            let center = {x: dc.width / 2, y: dc.height / 2 }
+            const center = {x: dc.width / 2, y: dc.height / 2 }
             ctx.font = "36px Roboto"
             ctx.fillStyle = "black";
             ctx.textAlign="center"; 
@@ -80,34 +80,34 @@ export default class GoalClock extends Vue {
     }
 
     @Watch("currentTime")
-    onBarTimeChanged(_old:number, _new:number) {
+    onBarTimeChanged(_old: number, _new: number) {
         this.updateDataAndRedraw();
     }
 
     updateDataAndRedraw() {
-        let pn = findNextHighscoreUser(this.highscore2!, this.currentTime);
+        const pn = findNextHighscoreUser(this.highscore2!, this.currentTime);
         if(!pn.next && !pn.prev) {
             this.clockRemainingTime = "-";
         } else if(pn.next) {
-            let remain = pn.next.time - this.currentTime;
+            const remain = pn.next.time - this.currentTime;
             this.clockRemainingTime = remain.toFixed(2);
         }
         else if(pn.prev) {
-            let overshot = this.currentTime - pn.prev.time;
+            const overshot = this.currentTime - pn.prev.time;
             this.clockRemainingTime = `⇪ ${overshot.toFixed(2)}`;
         }
         this.clockNextPlace = pn.next !== null ? `${pn.next.rank}` : "-";
         this.clockNextName = pn.next !== null ? pn.next.name : "-";
         this.clockSelfNormalized = this.selfBest === 0 ? 1 : clamp(this.selfBest / this.currentTime, 0, 1);
         this.clockOverallNormalized = this.highscore2!.length === 0 ? 1 : clamp(this.currentTime / this.highscore2![this.highscore2!.length - 1].time, 0, 1);
-        let length = pn.next && pn.prev ? pn.next.time - pn.prev.time : pn.next ? pn.next.time : 1;
-        let diff = pn.next ? pn.next.time - this.currentTime : 1;
+        const length = pn.next && pn.prev ? pn.next.time - pn.prev.time : pn.next ? pn.next.time : 1;
+        const diff = pn.next ? pn.next.time - this.currentTime : 1;
         this.clockNextNormalized = 1 - (diff / length);
-        let dc = this.hidpiCanvas.getDrawContext()
+        const dc = this.hidpiCanvas.getDrawContext()
         this.drawClockInfo(dc);
     }
 
-    onRedraw(dc:DrawContextInfo) {
+    onRedraw(dc: DrawContextInfo) {
         this.drawClockInfo(dc);
     }
 }

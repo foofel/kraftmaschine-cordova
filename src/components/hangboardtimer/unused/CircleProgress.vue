@@ -66,18 +66,18 @@ import { makeid } from '@/core/util';
 
 @Component({})
 export default class CircleProgress extends Vue {
-    @Prop({default: 0.8}) progress!:number;
-    @Prop({default: "green"}) foreground!:number;
-    @Prop({default: "lightgray"}) background!:number;
-    @Prop({default: "2%"}) lineWidth!:string;
-    @Prop({default: "300px"}) width!:number;
-    @Prop({default: "300px"}) height!:number;
-    completedPath:string = "";
-    remainingPath:string = "";
-    progressMaskId:string = makeid(8);
-    bgMaskId:string = makeid(8);
-    clipId:string= makeid(8);
-    bb:DOMRect = new DOMRect(); //{ width: 0, height: 0, x: 0, y: 0 };
+    @Prop({default: 0.8}) progress!: number;
+    @Prop({default: "green"}) foreground!: number;
+    @Prop({default: "lightgray"}) background!: number;
+    @Prop({default: "2%"}) lineWidth!: string;
+    @Prop({default: "300px"}) width!: number;
+    @Prop({default: "300px"}) height!: number;
+    completedPath = "";
+    remainingPath = "";
+    progressMaskId: string = makeid(8);
+    bgMaskId: string = makeid(8);
+    clipId: string= makeid(8);
+    bb: DOMRect = new DOMRect(); //{ width: 0, height: 0, x: 0, y: 0 };
     constructor() {
         super();
     }
@@ -98,23 +98,23 @@ export default class CircleProgress extends Vue {
     }
 
     updateBB() {
-        let svg = this.$refs.svg as SVGElement
+        const svg = this.$refs.svg as SVGElement
         this.bb = svg.getBoundingClientRect() as DOMRect;
     }
 
-    polarToCartesian(centerX:number, centerY:number, rx:number, ry:number, angleInDegrees:number) {
-        var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+    polarToCartesian(centerX: number, centerY: number, rx: number, ry: number, angleInDegrees: number) {
+        const angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
         return {
             x: centerX + (rx * Math.cos(angleInRadians)),
             y: centerY + (ry * Math.sin(angleInRadians))
         };
     }
 
-    describeArc(x:number, y:number, rx:number, ry:number, startAngle:number, endAngle:number){
-        var start = this.polarToCartesian(x, y, rx, ry, endAngle);
-        var end = this.polarToCartesian(x, y, rx, ry, startAngle);
-        var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-        var d = [
+    describeArc(x: number, y: number, rx: number, ry: number, startAngle: number, endAngle: number){
+        const start = this.polarToCartesian(x, y, rx, ry, endAngle);
+        const end = this.polarToCartesian(x, y, rx, ry, startAngle);
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+        let d = [
             "M", start.x, start.y, 
             "A", rx, ry, 0, largeArcFlag, 0, end.x, end.y
         ].join(" ");
@@ -124,28 +124,28 @@ export default class CircleProgress extends Vue {
         return d;       
     }
 
-    updatePath(progress:number) {
+    updatePath(progress: number) {
         progress = Math.max(Math.min(progress, 1), 0);
-        let limit = 359.99;
-        let arc = progress * limit;
+        const limit = 359.99;
+        const arc = progress * limit;
         /*let svg = this.$refs.svg as SVGElement
         let bbox = svg.getBoundingClientRect();
         let width = bbox.right - bbox.left;
         let height = bbox.bottom - bbox.top;*/
-        let x = this.bb.width / 2;
-        let y = this.bb.height / 2;
-        let rx = this.bb.width / 2;
-        let ry = this.bb.height / 2;
+        const x = this.bb.width / 2;
+        const y = this.bb.height / 2;
+        const rx = this.bb.width / 2;
+        const ry = this.bb.height / 2;
         this.completedPath = this.describeArc(x, y, rx, ry, 0, arc);
         this.remainingPath = this.describeArc(x, y, rx, ry, arc, limit);
     }
 
-    buildLineWidth(width:string, maskScale:number=0) {
-        let match = width.match("(\\d+)(.*)");
+    buildLineWidth(width: string, maskScale=0) {
+        const match = width.match("(\\d+)(.*)");
         if(match && match.length === 1) {
             return parseInt(match[0]) * 2;
         } else if(match && match.length === 2) {
-            let value = parseInt(match[0]);
+            const value = parseInt(match[0]);
             return `${value * 2 + value * maskScale}${match[1]}`;
         }
         return width;
@@ -160,7 +160,7 @@ export default class CircleProgress extends Vue {
     }
 
     @Watch("progress")
-    progressChanged(value:number, oldValue:number) {
+    progressChanged(value: number, oldValue: number) {
         this.updatePath(value);
     }
 }

@@ -1,20 +1,20 @@
 import { linearRegression, LinRegType } from './math'
 
 export class DataHistory<T> {
-    data:Array<T> = [];
-    sizeLimit:number;
-    constructor(sizeLimit:number = -1) {
+    data: Array<T> = [];
+    sizeLimit: number;
+    constructor(sizeLimit = -1) {
         this.sizeLimit = sizeLimit;
     }
 
-    push(value:T): void {
+    push(value: T): void {
         this.data.push(value);
         if(this.sizeLimit !== -1 && this.data.length > this.sizeLimit) {
             this.data.shift();
         }
     }
 
-    getData(itemCount:number = 0): ReadonlyArray<T> {
+    getData(itemCount = 0): ReadonlyArray<T> {
         if(this.data.length === 0) {
             return [];
         }
@@ -62,16 +62,16 @@ export class TransformedHistory<T, U> {
     }
 }*/
 
-export function LinearRegressionFromData(x:ReadonlyArray<number>, y:ReadonlyArray<number>):LinRegType {
+export function LinearRegressionFromData(x: ReadonlyArray<number>, y: ReadonlyArray<number>): LinRegType {
     //let x = Array.from(Array(data.length), (_, index) => index);
     return linearRegression(x, y);
 }
 
-type LRInfo<T> =  T & { ts:number; }
-export function LinearRegressionFromHistoryData<T, K extends keyof T>(data:ReadonlyArray<LRInfo<T>>, key:K):LinRegType {
+type LRInfo<T> =  T & { ts: number }
+export function LinearRegressionFromHistoryData<T, K extends keyof T>(data: ReadonlyArray<LRInfo<T>>, key: K): LinRegType {
     //let x = Array.from(Array(data.length), (_, index) => index);
-    let xData = data.map(a => a.ts);
-    let yData = data.map(a => (a as any)[key]);
+    const xData = data.map(a => a.ts);
+    const yData = data.map(a => (a as any)[key]);
     return linearRegression(xData, yData);
 }
 
@@ -87,21 +87,21 @@ function getFields<T>(fields: { [P in NonMethodKeys<T>]: true }) {
     return Object.keys(fields)
 }
 
-export type MinMaxResult = { min:number, max:number };
-export function getMinMax<T, K extends keyof T>(data:DataHistory<T>, key:K): MinMaxResult {
-    let minVal:number = Math.min.apply(Math, data.getData().map(a => (a as any)[key]));
-    let maxVal:number = Math.max.apply(Math, data.getData().map(a => (a as any)[key]));
+export type MinMaxResult = { min: number; max: number };
+export function getMinMax<T, K extends keyof T>(data: DataHistory<T>, key: K): MinMaxResult {
+    const minVal: number = Math.min(...data.getData().map(a => (a as any)[key]));
+    const maxVal: number = Math.max(...data.getData().map(a => (a as any)[key]));
     return { 
         min: minVal,
         max: maxVal 
     }
 }
 
-export function getAvg<T, K extends keyof T>(data:ReadonlyArray<LRInfo<T>>, key:K): number {
+export function getAvg<T, K extends keyof T>(data: ReadonlyArray<LRInfo<T>>, key: K): number {
     if(data.length === 0) {
         return 0;
     }
-    let sum = data.reduce((accu, value) => accu + (value as any)[key], 0);
+    const sum = data.reduce((accu, value) => accu + (value as any)[key], 0);
     return sum / data.length;
 }
 

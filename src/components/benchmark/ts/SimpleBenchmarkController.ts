@@ -48,29 +48,29 @@ export const makeDefaultDataset = () : BenchmarkData => {
 };
 */
 
-export type BenchmarkInfoCB = (time:number, index:number) => void;
-export type BenchmarkEventCB = (event:ProcessingEvent) => void;
-export type BenchmarkUpdateCB = (elapsed:number) => void;
-export type ErroCB = (info:string, code:number) => void;
+export type BenchmarkInfoCB = (time: number, index: number) => void;
+export type BenchmarkEventCB = (event: ProcessingEvent) => void;
+export type BenchmarkUpdateCB = (elapsed: number) => void;
+export type ErroCB = (info: string, code: number) => void;
 
 export interface BenchmarkDebugLine {
-    x:number;
-    c:string;
-};
+    x: number;
+    c: string;
+}
 
 export class SimpleBenchmarkController {
-    bc:BenchmarkController;
-    stopUpdateLoop:boolean = false;
-    loopRunning:boolean = false;
-    startEvent:ProcessingEvent|null = null;
-    endEvent:ProcessingEvent|null = null;
-    startSend:boolean = false;
+    bc: BenchmarkController;
+    stopUpdateLoop = false;
+    loopRunning = false;
+    startEvent: ProcessingEvent|null = null;
+    endEvent: ProcessingEvent|null = null;
+    startSend = false;
     endSend = false;
-    currentTime:number = 0;
-    delay:number = 0.5;
-    startTimeOvershot:number = 0;
-    sw:StopWatch = new StopWatch();
-    debugLines:Array<BenchmarkDebugLine> = [];
+    currentTime = 0;
+    delay = 0.5;
+    startTimeOvershot = 0;
+    sw: StopWatch = new StopWatch();
+    debugLines: Array<BenchmarkDebugLine> = [];
     debugColorMapping = {
         [SignalProcessorEvents.STARTED]: "black",
         [SignalProcessorEvents.RISE]: "orange",
@@ -83,7 +83,7 @@ export class SimpleBenchmarkController {
         [SignalProcessorEvents.ERROR_START_TIMEOUT]: "red"
     }
 
-    constructor(private onStart:BenchmarkInfoCB, private onUpdate:BenchmarkUpdateCB, private onEnd:BenchmarkInfoCB, private onError:ErroCB, private _onEvent:BenchmarkEventCB, tareWeights:TareWeights) {
+    constructor(private onStart: BenchmarkInfoCB, private onUpdate: BenchmarkUpdateCB, private onEnd: BenchmarkInfoCB, private onError: ErroCB, private _onEvent: BenchmarkEventCB, tareWeights: TareWeights) {
         this.bc = new BenchmarkController(this.onEvent, tareWeights);
         this.startUpdateLoop();
     }
@@ -102,7 +102,7 @@ export class SimpleBenchmarkController {
         this.startUpdateLoop();
     }
 
-    injectWeightMessage(msg:WeightMessage) {
+    injectWeightMessage(msg: WeightMessage) {
         this.currentTime = msg.ts;
         this.bc.injectWeightMessage(msg);
         /*if(!this.startEvent) {
@@ -129,7 +129,7 @@ export class SimpleBenchmarkController {
         }
         this.stopUpdateLoop = false;
         this.loopRunning = true;
-        let loop = () => {
+        const loop = () => {
             if(this.stopUpdateLoop) {
                 this.loopRunning = false;
                 return;
@@ -147,11 +147,11 @@ export class SimpleBenchmarkController {
             }*/
             if(this.startSend && !this.endSend) {
                 if(!this.endEvent) {
-                    let elapsed = this.sw.elapsed();
+                    const elapsed = this.sw.elapsed();
                     this.onUpdate(elapsed);
                 } else if(this.endEvent) {
                     let elapsed = this.sw.elapsed();
-                    let duration = this.endEvent.time - this.startEvent!.time;
+                    const duration = this.endEvent.time - this.startEvent!.time;
                     elapsed = Math.min(this.sw.elapsed(), duration);
                     this.onUpdate(elapsed);
                     console.log(`nachlauf @ ${duration - elapsed}`)
@@ -167,9 +167,9 @@ export class SimpleBenchmarkController {
         requestAnimationFrame(loop);
     }
 
-    onEvent = (type:SignalProcessorEvents, index:number, time:number) => {
+    onEvent = (type: SignalProcessorEvents, index: number, time: number) => {
         this._onEvent({type:type, index:index, time:time});
-        let color = (this.debugColorMapping as any)[type];
+        const color = (this.debugColorMapping as any)[type];
         this.debugLines.push({x: time, c: color});
         if(type === SignalProcessorEvents.TOP) {
             this.startEvent = {type:type, index:index, time:time};

@@ -106,32 +106,32 @@ import Button from '@/components/Button.vue'
     }
 })
 export default class StartupView extends Vue {
-    backend:RemoteAPI = this.$root.$data.backend;
-    cfg:ConfigFile = this.$root.$data.cfg;
+    backend: RemoteAPI = this.$root.$data.backend;
+    cfg: ConfigFile = this.$root.$data.cfg;
     //backendVersion:string = "";
     // visible (error) states and setup
-    showCreateAccount:boolean = false;
-    showBackendVersionMismatch:boolean = false;
-    showChangeSecret:boolean = false;
-    showBackendError:boolean = false;
-    setupComplete:boolean = false;
+    showCreateAccount = false;
+    showBackendVersionMismatch = false;
+    showChangeSecret = false;
+    showBackendError = false;
+    setupComplete = false;
     // account creation stuff
-    timeout:any = null;
-    usernameExists:boolean = false;
-    selectedUsername:string = "";
-    showExpertMode:boolean = false;
-    enableUuidValidation:number = 3;
+    timeout: any = null;
+    usernameExists = false;
+    selectedUsername = "";
+    showExpertMode = false;
+    enableUuidValidation = 3;
     versionState = {
         appVer: AppVersion.versionString(),
         requiredBackendVersion: RequiredBackendVersion.versionString(),
         backendVersion: ""
     }
-    validateRegex:RegExp = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+    validateRegex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
     model = {
         secret: ""
     }
     // splash stuff
-    displayName:string = ""
+    displayName = ""
     constructor() {
         super();
     }
@@ -153,11 +153,11 @@ export default class StartupView extends Vue {
         this.enableUuidValidation--;
     }
 
-    async validateUsername(name:string) {
+    async validateUsername(name: string) {
         this.selectedUsername = name
         this.usernameExists = true;
         if(name) {
-            let response = await EasyRemoteApiHelpers.userExists(this.backend, this.selectedUsername);
+            const response = await EasyRemoteApiHelpers.userExists(this.backend, this.selectedUsername);
             if(response.result.status === 200) {
                 if(this.timeout) {
                     clearTimeout(this.timeout);
@@ -172,14 +172,14 @@ export default class StartupView extends Vue {
         }
     }
 
-    async createAccountClicked(evt:any) {
-        let result = await EasyRemoteApiHelpers.createAccount(this.backend, this.selectedUsername);
+    async createAccountClicked(evt: any) {
+        const result = await EasyRemoteApiHelpers.createAccount(this.backend, this.selectedUsername);
         if(result) {
             this.cfg.secret = result.secret;
             this.cfg.alias = result.alias;
             SaveConfigObject(this.cfg);
             console.log(`account '${this.cfg.alias}' created (key:${this.cfg.secret}, PRIVATE do not share!)`);
-            let authPromise = await EasyRemoteApiHelpers.authenticate(this.backend, this.cfg.secret);
+            const authPromise = await EasyRemoteApiHelpers.authenticate(this.backend, this.cfg.secret);
             if(authPromise.result.status !== 200) {
                 this.showBackendError = true;
                 //this.reloadApp();
@@ -191,7 +191,7 @@ export default class StartupView extends Vue {
         }
     }
 
-    async saveSecretClicked(evt:any) {
+    async saveSecretClicked(evt: any) {
         this.cfg.secret = this.model.secret;
         SaveConfigObject(this.cfg);
         this.reloadApp();
@@ -201,7 +201,7 @@ export default class StartupView extends Vue {
         this.displayName = this.cfg.alias;
         this.model.secret = this.cfg.secret;
         this.startIntro();
-        let version = await EasyRemoteApiHelpers.getVersion(this.backend);
+        const version = await EasyRemoteApiHelpers.getVersion(this.backend);
         if(!version) {
             this.showBackendError = true;
             this.setupComplete = true;
@@ -227,7 +227,7 @@ export default class StartupView extends Vue {
             this.setupComplete = true;
             return;
         }
-        let authPromise = await EasyRemoteApiHelpers.authenticate(this.backend, this.cfg.secret);
+        const authPromise = await EasyRemoteApiHelpers.authenticate(this.backend, this.cfg.secret);
         //let initData = await EasyRemoteApiHelpers.getInitialData(this.backend);
         if(authPromise.result.status === 200/* && initData !== []*/) {
             this.cfg.id = authPromise.data.id;
@@ -251,13 +251,13 @@ export default class StartupView extends Vue {
         this.setupComplete = true;
     }
 
-	sleep(ms:number) {
+	sleep(ms: number) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
 	async startIntro() {
-        let splash = this.$refs.splash as HTMLElement;
-        let content = this.$refs.startupContent  as HTMLElement;
+        const splash = this.$refs.splash as HTMLElement;
+        const content = this.$refs.startupContent  as HTMLElement;
 
         // inital sleep is needed otherweise we wont get the css transition
         if(this.cfg.options.skipSplash) {
@@ -268,7 +268,7 @@ export default class StartupView extends Vue {
             await this.sleep(2000);
         }
         
-        let interval = setInterval(async () => {
+        const interval = setInterval(async () => {
             if(!this.setupComplete) {
                 return;
             }
@@ -290,8 +290,8 @@ export default class StartupView extends Vue {
     }
     
     get hasName() {
-        let alias = this.cfg.alias;
-        let hn = alias != ''; // eslint-disable-line eqeqeq
+        const alias = this.cfg.alias;
+        const hn = alias != ''; // eslint-disable-line eqeqeq
         console.log(hn);
         return hn;
     }
@@ -314,7 +314,7 @@ export default class StartupView extends Vue {
         //console.log("REDIREEEEECT");
     }
 
-    validUuid(uuid:string) {
+    validUuid(uuid: string) {
         //if(this.showExpertMode) {
             if(this.enableUuidValidation > 0) {
                 return this.validateRegex.test(uuid)

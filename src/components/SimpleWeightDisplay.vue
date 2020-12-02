@@ -32,15 +32,15 @@ import { round } from '../core/math';
 	}
 })
 export default class SimpleWeightDisplay extends VueNavigation {
-	@Prop({default: 8}) rate!:number;
+	@Prop({default: 8}) rate!: number;
 	weight: WeightDataInterface;
-	scaleBackend:HangboardScale;
-	hidden:boolean;
-	calib:Calibration|null;
-	tareWeights:TareWeights = { left: 0, right: 0 };
-	tempInfo:TempSensorInterface;
-	intervallId:any = null;
-	displayWeights:WeightDataInterface = { left: 0, right: 0, combined: 0 };
+	scaleBackend: HangboardScale;
+	hidden: boolean;
+	calib: Calibration|null;
+	tareWeights: TareWeights = { left: 0, right: 0 };
+	tempInfo: TempSensorInterface;
+	intervallId: any = null;
+	displayWeights: WeightDataInterface = { left: 0, right: 0, combined: 0 };
 
 	constructor() {
 		super();
@@ -52,7 +52,6 @@ export default class SimpleWeightDisplay extends VueNavigation {
 	}
 
 	mounted () {
-		let self = this;
 		this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20), clampPositive));
 		this.scaleBackend.registerTempSensorCallback(this.onTempSensorMessage);
 		this.onTare();
@@ -73,11 +72,11 @@ export default class SimpleWeightDisplay extends VueNavigation {
 		}
 	}
 
-	onWeightMessage(msg:WeightMessage) {
+	onWeightMessage(msg: WeightMessage) {
 		this.weight = msg;
 	}
 
-	onTempSensorMessage(msg:TempSensorInterface) {
+	onTempSensorMessage(msg: TempSensorInterface) {
 		this.tempInfo = msg;
 	}
 
@@ -99,7 +98,7 @@ export default class SimpleWeightDisplay extends VueNavigation {
 		}
 		console.log("start calibration");
 		this.calib = new Calibration(this.scaleBackend, 
-			(weights:TareWeights) => {
+			(weights: TareWeights) => {
 				console.log(`new tare weights, left: ${weights.left}, right: ${weights.right}`);
 				this.tareWeights.left = weights.left;
 				this.tareWeights.right = weights.right;

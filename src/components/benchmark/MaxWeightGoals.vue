@@ -42,7 +42,7 @@ import ProgressBar from '@/components/ProgressBar.vue'
     }
 })
 export default class MaxWeightGoals extends Vue {
-    @Prop({default: 0}) elapsedTime!:number;
+    @Prop({default: 0}) elapsedTime!: number;
     constructor(){
         super();
     }

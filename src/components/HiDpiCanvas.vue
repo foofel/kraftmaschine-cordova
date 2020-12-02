@@ -8,34 +8,34 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { DrawContextInfo } from './typeexports';
 
-type DrawFunctionType = (ctx:DrawContextInfo) => void;
+type DrawFunctionType = (ctx: DrawContextInfo) => void;
 
 @Component({
     components: {
     }
 })
 export default class HiDpiCanvas extends Vue {
-    dprFixer!:Function;
-    cachedWidth:number = 0;
-    cachedHeight:number = 0;
-    @Prop({default: null}) drawFunction!:DrawFunctionType|null;
+    dprFixer!: Function;
+    cachedWidth = 0;
+    cachedHeight = 0;
+    @Prop({default: null}) drawFunction!: DrawFunctionType|null;
 
     constructor() {
         super();
     }
     mounted() {
         const makeDpxFixer = () => {
-            let size = { x:0, y:0 };
+            const size = { x:0, y:0 };
             let lastRatio = 1;
             return () => {
-                let elems = this.getCanvasElements();
+                const elems = this.getCanvasElements();
                 if(elems.ctx) {
-                    var ratio = this.getDevicePixelRatio();
+                    const ratio = this.getDevicePixelRatio();
                     if(elems.canvas.width === size.x && elems.canvas.height === size.y && ratio === lastRatio) {
                         return;
                     }             
-                    let oldWidth = elems.canvas.width;
-                    let oldHeight = elems.canvas.height;
+                    const oldWidth = elems.canvas.width;
+                    const oldHeight = elems.canvas.height;
                     elems.canvas.width = oldWidth * ratio;
                     elems.canvas.height = oldHeight * ratio;
                     elems.canvas.style.width = oldWidth + "px";
@@ -59,7 +59,7 @@ export default class HiDpiCanvas extends Vue {
     onResize() {
         this.adjustCanvasToBaseElemSize();
         if(this.drawFunction) {
-            let dc = this.getDrawContext();
+            const dc = this.getDrawContext();
             if(dc.ctx) {
                 dc.ctx.save();
                 this.drawFunction(dc);
@@ -69,35 +69,35 @@ export default class HiDpiCanvas extends Vue {
     }    
 
     getDevicePixelRatio() {
-        let elems = this.getCanvasElements()
+        const elems = this.getCanvasElements()
         if(elems.ctx) {
-            let ctx = elems.ctx as any;
-            let dpr = window.devicePixelRatio || 1;
-            let bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio ||
+            const ctx = elems.ctx as any;
+            const dpr = window.devicePixelRatio || 1;
+            const bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio ||
             ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
             return dpr / bsr;
         } else {
             console.log("unable to get device pixel ratio")
             return 1;
         }
-    };
+    }
 
     adjustCanvasToBaseElemSize() {
-        let elems = this.getCanvasElements()
+        const elems = this.getCanvasElements()
         if(elems.canvas && elems.base) {
             elems.canvas.width = elems.base.clientWidth;
             elems.canvas.height = elems.base.clientHeight;
             this.dprFixer();   
-            let width = elems.canvas.style.width || ""+elems.canvas.width;
-            let height = elems.canvas.style.height || ""+elems.canvas.height;
+            const width = elems.canvas.style.width || ""+elems.canvas.width;
+            const height = elems.canvas.style.height || ""+elems.canvas.height;
             this.cachedWidth = parseFloat(width)
             this.cachedHeight = parseFloat(height);
         }
     }    
 
     getCanvasElements() {
-        let base = this.$refs.base as HTMLElement;
-        let canvas = this.$refs.canvas as HTMLCanvasElement;
+        const base = this.$refs.base as HTMLElement;
+        const canvas = this.$refs.canvas as HTMLCanvasElement;
         let ctx = null;
         if(canvas) {
             ctx = canvas.getContext('2d');
@@ -110,7 +110,7 @@ export default class HiDpiCanvas extends Vue {
     }
 
     getDrawContext() {
-        let elems = this.getCanvasElements()
+        const elems = this.getCanvasElements()
         return {
             base: elems.base,
             canvas: elems.canvas,

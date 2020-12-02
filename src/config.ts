@@ -1,12 +1,12 @@
 import { HANGTIMER_FINISHED } from './messages';
 
 let CORDOVA_BASE_PATH_VAL = ""
-let isCordovaApp = !!window.cordova;
+const isCordovaApp = window.hasOwnProperty("cordova");
 if(isCordovaApp) {
     CORDOVA_BASE_PATH_VAL = "file:///android_asset/www";
 }
 
-export function CORDOVA_BASE_PATH():String {
+export function CORDOVA_BASE_PATH(): string {
     return CORDOVA_BASE_PATH_VAL;
 }
 

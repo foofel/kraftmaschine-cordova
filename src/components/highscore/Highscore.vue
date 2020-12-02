@@ -108,19 +108,19 @@ import { VueNavigation } from '../vuenavigation';
 
 interface DisplayHighscoreEntry {
     data: HighscoreEntry;
-    showDetails:boolean;
+    showDetails: boolean;
 }
 
 //TODO: make scrolling virtual https://github.com/Akryum/vue-virtual-scroller
 
 @Component
 export default class Highscore extends VueNavigation {
-    highscoreEntries:Array<DisplayHighscoreEntry> = [];
-    backend:RemoteAPI;
+    highscoreEntries: Array<DisplayHighscoreEntry> = [];
+    backend: RemoteAPI;
     constructor() {
         super();
         this.backend = this.$root.$data.backend;
-        this.$root.$on(HANGTIMER_FINISHED, (run:LocalTrainingSaveData) => {
+        this.$root.$on(HANGTIMER_FINISHED, (run: LocalTrainingSaveData) => {
             this.buildRows();
         });
     }
@@ -129,7 +129,7 @@ export default class Highscore extends VueNavigation {
     }
     beforeDestroy() {}
 
-    toggleRow(entry:DisplayHighscoreEntry) {
+    toggleRow(entry: DisplayHighscoreEntry) {
         entry.showDetails = !entry.showDetails;
     }
 
@@ -141,9 +141,9 @@ export default class Highscore extends VueNavigation {
         this.highscoreEntries = []
         let highscores = await EasyRemoteApiHelpers.getReferenceHighscore(this.backend, "time");
         highscores = highscores.reverse();
-        let hse = []
-        for(let hs of highscores) {
-            let hsEntry:HighscoreEntry = {
+        const hse = []
+        for(const hs of highscores) {
+            const hsEntry: HighscoreEntry = {
                 id: hs.id,
                 rank: hs.rank,
                 percentile: hs.percentile_rank,
@@ -171,7 +171,7 @@ export default class Highscore extends VueNavigation {
         this.highscoreEntries = hse;
     }
 
-    getDate(entry:HighscoreEntry) {
+    getDate(entry: HighscoreEntry) {
         return moment(entry.insertDate).format("DD.MM.YYYY")
     }
 

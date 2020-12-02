@@ -13,8 +13,8 @@ interface CanvasFixer {
 }
 
 interface ClockData {
-    c:string;
-    p:number;
+    c: string;
+    p: number;
 }
 
 @Component({
@@ -22,13 +22,13 @@ interface ClockData {
     }
 })
 export default class ProgressClockCanvas extends Vue {
-    dprFixer!:Function;
+    dprFixer!: Function;
     //offscreenCanvas:OffscreenCanvas;
-    @Prop({default: 0.5}) rep!:number;
-    @Prop({default: 0.5}) set!:number;
-    @Prop({default: 0.5}) overall!:number;
-    @Prop({default: "#149BB5"}) repColor!:string;
-    clockData:Array<ClockData> = [
+    @Prop({default: 0.5}) rep!: number;
+    @Prop({default: 0.5}) set!: number;
+    @Prop({default: 0.5}) overall!: number;
+    @Prop({default: "#149BB5"}) repColor!: string;
+    clockData: Array<ClockData> = [
         { c: "black", p: 0 },
         { c: "black", p: 0 },
         { c: "black", p: 0 }
@@ -48,7 +48,7 @@ export default class ProgressClockCanvas extends Vue {
         window.addEventListener("resize", this.onResize)
     }
 
-    drawNiceClock(ctx:CanvasRenderingContext2D, width:number, height:number) {
+    drawNiceClock(ctx: CanvasRenderingContext2D, width: number, height: number) {
         /*let offCtx = this.offscreenCanvas.getContext("2d");
         if(offCtx) {
             let clockDataGray = [ { c: "lightgray", p: 1 }, { c: "lightgray", p: 1 }, { c: "lightgray", p: 1 } ];
@@ -61,23 +61,23 @@ export default class ProgressClockCanvas extends Vue {
         ctx.drawImage(this.offscreenCanvas, 0, 0, this.offscreenCanvas.width, this.offscreenCanvas.height, 0, 0, width, height);*/
         this.dprFixer();
         ctx.clearRect(0, 0, width, height);
-        let clockDataGray = [ { c: "lightgray", p: 1 }, { c: "lightgray", p: 1 }, { c: "lightgray", p: 1 } ];
+        const clockDataGray = [ { c: "lightgray", p: 1 }, { c: "lightgray", p: 1 }, { c: "lightgray", p: 1 } ];
         this.drawClock(ctx, width, height, clockDataGray);
-        let clockDataInit = [ { c: this.repColor, p: this.rep }, { c: "black", p: this.set }, { c: "black", p: this.overall } ];
+        const clockDataInit = [ { c: this.repColor, p: this.rep }, { c: "black", p: this.set }, { c: "black", p: this.overall } ];
         this.drawClock(ctx, width, height, clockDataInit);
     }
 
-    drawClock(ctx:CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, width:number, height:number, clockData:Array<ClockData>) {
-        let center = { x: width/2, y:height/2 };
+    drawClock(ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, width: number, height: number, clockData: Array<ClockData>) {
+        const center = { x: width/2, y:height/2 };
         this.drawCircle(ctx, clockData[0].c, 4, 0.92, width, height, clockData[0].p);
         this.drawCircle(ctx, clockData[1].c, 1, 0.96, width, height, clockData[1].p);
         this.drawCircle(ctx, clockData[2].c, 1, 1, width, height, clockData[2].p);
     }
 
-    drawCircle(ctx:CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, color:string, lineWidth:number, size:number, width:number, height:number, progress:number) {
-        let center = { x: width/2, y:height/2 };
-        let lineWidthPx = width / 100 * lineWidth;
-        let sizePx = (width / 2) * size;
+    drawCircle(ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, color: string, lineWidth: number, size: number, width: number, height: number, progress: number) {
+        const center = { x: width/2, y:height/2 };
+        const lineWidthPx = width / 100 * lineWidth;
+        const sizePx = (width / 2) * size;
         ctx.beginPath();
         ctx.strokeStyle = color;
         ctx.lineWidth = lineWidthPx;
@@ -85,8 +85,8 @@ export default class ProgressClockCanvas extends Vue {
         ctx.stroke(); 
     }
 
-    arc(ctx:CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, x:number, y:number, radius:number, sa:number, ea:number) {
-        let step = 0.01;
+    arc(ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, x: number, y: number, radius: number, sa: number, ea: number) {
+        const step = 0.01;
         let a = sa + step;
         ctx.moveTo(x + radius * Math.cos(sa), y + radius * Math.sin(sa));
         for(; a < ea; a+=step) {
@@ -96,11 +96,11 @@ export default class ProgressClockCanvas extends Vue {
 
     @Watch("rep")
     updateCanvas() {
-        let elems = this.htmlElems()
+        const elems = this.htmlElems()
         if(elems.canvas && elems.ctx) {
-            let ctx = elems.ctx;
-            let width = elems.canvas.style.width || ""+elems.canvas.width;
-            let height = elems.canvas.style.height || ""+elems.canvas.height;
+            const ctx = elems.ctx;
+            const width = elems.canvas.style.width || ""+elems.canvas.width;
+            const height = elems.canvas.style.height || ""+elems.canvas.height;
             this.drawNiceClock(ctx, parseFloat(width), parseFloat(height));
         }
     }
@@ -111,16 +111,16 @@ export default class ProgressClockCanvas extends Vue {
     }    
 
     getDprFixer() {
-        let size = { x:0, y:0 };
+        const size = { x:0, y:0 };
         return () => {
-            let elems = this.htmlElems();
+            const elems = this.htmlElems();
             if(elems.canvas && elems.ctx) {
-                var ratio = this.getDevicePixelRatio();
+                const ratio = this.getDevicePixelRatio();
                 if(elems.canvas.width === size.x && elems.canvas.height === size.y) {
                     return;
                 }             
-                let oldWidth = elems.canvas.width;
-                let oldHeight = elems.canvas.height;
+                const oldWidth = elems.canvas.width;
+                const oldHeight = elems.canvas.height;
                 elems.canvas.width = oldWidth * ratio;
                 elems.canvas.height = oldHeight * ratio;
                 elems.canvas.style.width = oldWidth + "px";
@@ -133,21 +133,21 @@ export default class ProgressClockCanvas extends Vue {
     }
 
     getDevicePixelRatio() {
-        let elems = this.htmlElems()
+        const elems = this.htmlElems()
         if(elems.ctx) {
-            let ctx = elems.ctx! as any;
-            let dpr = window.devicePixelRatio || 1;
-            let bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio ||
+            const ctx = elems.ctx! as any;
+            const dpr = window.devicePixelRatio || 1;
+            const bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio ||
             ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
             return dpr / bsr;
         } else {
             console.log("unable to get device pixel ratio")
             return 1;
         }
-    };
+    }
 
     fixCanvasSize() {
-        let elems = this.htmlElems()
+        const elems = this.htmlElems()
         if(elems.canvas && elems.base) {
             elems.canvas.width = elems.base.clientWidth;
             elems.canvas.height = elems.base.clientHeight;          
@@ -158,8 +158,8 @@ export default class ProgressClockCanvas extends Vue {
     }    
 
     htmlElems() {
-        let base = this.$refs.base as HTMLElement;
-        let canvas = this.$refs.canvas as HTMLCanvasElement;
+        const base = this.$refs.base as HTMLElement;
+        const canvas = this.$refs.canvas as HTMLCanvasElement;
         let ctx = null;
         if(canvas) {
             ctx = canvas.getContext('2d');

@@ -13,32 +13,32 @@ const TrippleComponent = Vue.component('tripple-progress', {
     },
     methods: {
       updateCanvas: function () {
-        let canvas = (this.$refs.canvas as HTMLCanvasElement);
-        let ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+        const canvas = (this.$refs.canvas as HTMLCanvasElement);
+        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
         this.redraw(ctx, canvas);
       },
       fixCanvasScaling: function() {
-        let canvas = (this.$refs.canvas as HTMLCanvasElement);
-        let ctx = canvas.getContext('2d') as any;
-        var PIXEL_RATIO = (function () {
-          var dpr = window.devicePixelRatio || 1;
-          var bsr = ctx.webkitBackingStorePixelRatio ||
+        const canvas = (this.$refs.canvas as HTMLCanvasElement);
+        const ctx = canvas.getContext('2d') as any;
+        const PIXEL_RATIO = (function () {
+          const dpr = window.devicePixelRatio || 1;
+          const bsr = ctx.webkitBackingStorePixelRatio ||
           ctx.mozBackingStorePixelRatio ||
           ctx.msBackingStorePixelRatio ||
           ctx.oBackingStorePixelRatio ||
           ctx.backingStorePixelRatio || 1;
           return dpr / bsr;
         })();
-        var ratio = PIXEL_RATIO;
-        let oldWidth = canvas.width;
-        let oldHeight = canvas.height;
+        const ratio = PIXEL_RATIO;
+        const oldWidth = canvas.width;
+        const oldHeight = canvas.height;
         canvas.width = oldWidth * ratio;
         canvas.height = oldHeight * ratio;
         canvas.style.width = oldWidth + "px";
         canvas.style.height = oldHeight + "px";
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       },
-      redraw: function(ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
+      redraw: function(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         //ctx.
       }

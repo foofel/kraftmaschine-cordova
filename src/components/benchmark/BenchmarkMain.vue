@@ -52,13 +52,13 @@ import { EasyRemoteApiHelpers, RemoteAPI, showToast } from '../../core/util';
     }*/
 })
 export default class BenchmarkMain extends VueNavigation {
-    state:number = 0;
-    backend:RemoteAPI;
+    state = 0;
+    backend: RemoteAPI;
     //setupData:BenchmarkSetupData|null = null;
-    setupData:any = JSON.parse('{"tareWeights":{"left":0,"right":0,"combined":0},"selectedHolds":{"left":{"id":9,"complementary":12,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"l","depth":20,"fingers":4,"pos":{"x":12.5,"y":90},"size":{"x":100,"y":25}},"right":{"id":12,"complementary":9,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"r","depth":20,"fingers":4,"pos":{"x":387.5,"y":90},"size":{"x":100,"y":25}},"board":{"id":1,"name":"Twinpeaks Reference","width":750,"height":180,"holds":[{"id":1,"complementary":4,"name":"Jug","shortName":"Jug","type":"jug","defaultHand":"l","depth":50,"fingers":5,"pos":{"x":0,"y":160},"size":{"x":125,"y":20}},{"id":2,"complementary":5,"name":"40° Sloper","shortName":"S40","type":"sloper","defaultHand":"l","depth":50,"fingers":5,"pos":{"x":125,"y":138},"size":{"x":125,"y":42}},{"id":3,"complementary":6,"name":"45° Sloper","shortName":"S45","type":"sloper","defaultHand":"l","depth":50,"fingers":5,"pos":{"x":250,"y":130},"size":{"x":125,"y":50}},{"id":4,"complementary":1,"name":"Jug","shortName":"Jug","type":"jug","defaultHand":"r","depth":50,"fingers":5,"pos":{"x":375,"y":160},"size":{"x":125,"y":20}},{"id":5,"complementary":2,"name":"40° Sloper","shortName":"S40","type":"sloper","defaultHand":"r","depth":50,"fingers":5,"pos":{"x":500,"y":138},"size":{"x":125,"y":42}},{"id":6,"complementary":3,"name":"45° Sloper","shortName":"S45","type":"sloper","defaultHand":"r","depth":50,"fingers":5,"pos":{"x":625,"y":130},"size":{"x":125,"y":50}},{"id":7,"complementary":8,"name":"Pocket","shortName":"Pkt","type":"pocket","defaultHand":"l","depth":20,"fingers":3,"pos":{"x":27.5,"y":130},"size":{"x":70,"y":25}},{"id":8,"complementary":7,"name":"Pocket","shortName":"Pkt","type":"pocket","defaultHand":"r","depth":20,"fingers":3,"pos":{"x":402.5,"y":130},"size":{"x":70,"y":25}},{"id":9,"complementary":12,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"l","depth":20,"fingers":4,"pos":{"x":12.5,"y":90},"size":{"x":100,"y":25}},{"id":10,"complementary":13,"name":"Edge 25","shortName":"E25","type":"edge","defaultHand":"l","depth":25,"fingers":4,"pos":{"x":137.5,"y":90},"size":{"x":100,"y":25}},{"id":11,"complementary":14,"name":"Edge 30","shortName":"E30","type":"edge","defaultHand":"l","depth":30,"fingers":4,"pos":{"x":262.5,"y":90},"size":{"x":100,"y":25}},{"id":12,"complementary":9,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"r","depth":20,"fingers":4,"pos":{"x":387.5,"y":90},"size":{"x":100,"y":25}},{"id":13,"complementary":10,"name":"Edge 25","shortName":"E25","type":"edge","defaultHand":"r","depth":25,"fingers":4,"pos":{"x":512.5,"y":90},"size":{"x":100,"y":25}},{"id":14,"complementary":11,"name":"Edge 30","shortName":"E30","type":"edge","defaultHand":"r","depth":30,"fingers":4,"pos":{"x":637.5,"y":90},"size":{"x":100,"y":25}},{"id":15,"complementary":18,"name":"Edge 10","shortName":"E10","type":"edge","defaultHand":"l","depth":10,"fingers":4,"pos":{"x":12.5,"y":50},"size":{"x":100,"y":25}},{"id":16,"complementary":19,"name":"Edge 12","shortName":"E12","type":"edge","defaultHand":"l","depth":12,"fingers":4,"pos":{"x":137.5,"y":50},"size":{"x":100,"y":25}},{"id":17,"complementary":20,"name":"Edge 15","shortName":"E15","type":"edge","defaultHand":"l","depth":15,"fingers":4,"pos":{"x":262.5,"y":50},"size":{"x":100,"y":25}},{"id":18,"complementary":15,"name":"Edge 10","shortName":"E10","type":"edge","defaultHand":"r","depth":10,"fingers":4,"pos":{"x":387.5,"y":50},"size":{"x":100,"y":25}},{"id":19,"complementary":16,"name":"Edge 12","shortName":"E12","type":"edge","defaultHand":"r","depth":12,"fingers":4,"pos":{"x":512.5,"y":50},"size":{"x":100,"y":25}},{"id":20,"complementary":17,"name":"Edge 15","shortName":"E15","type":"edge","defaultHand":"r","depth":15,"fingers":4,"pos":{"x":637.5,"y":50},"size":{"x":100,"y":25}},{"id":21,"complementary":24,"name":"Crimp 4","shortName":"C4","type":"crimp","defaultHand":"l","depth":4,"fingers":4,"pos":{"x":12.5,"y":10},"size":{"x":100,"y":25}},{"id":22,"complementary":25,"name":"Crimp 6","shortName":"C6","type":"crimp","defaultHand":"l","depth":6,"fingers":4,"pos":{"x":137.5,"y":10},"size":{"x":100,"y":25}},{"id":23,"complementary":26,"name":"Crimp 8","shortName":"C8","type":"crimp","defaultHand":"l","depth":8,"fingers":4,"pos":{"x":262.5,"y":10},"size":{"x":100,"y":25}},{"id":24,"complementary":21,"name":"Crimp 4","shortName":"C4","type":"crimp","defaultHand":"r","depth":4,"fingers":4,"pos":{"x":387.5,"y":10},"size":{"x":100,"y":25}},{"id":25,"complementary":22,"name":"Crimp 6","shortName":"C6","type":"crimp","defaultHand":"r","depth":6,"fingers":4,"pos":{"x":512.5,"y":10},"size":{"x":100,"y":25}},{"id":26,"complementary":23,"name":"Crimp 8","shortName":"C8","type":"crimp","defaultHand":"r","depth":8,"fingers":4,"pos":{"x":637.5,"y":10},"size":{"x":100,"y":25}}],"officialBenchmarkHolds":{"left":9,"right":12}}},"userWeight":37.80400000000006}');
-    highscoreData:Array<HighscoreEntry> = [];
-    exclusiveAccessAllowed:boolean = false;
-    intervall:any = null;
+    setupData: any = JSON.parse('{"tareWeights":{"left":0,"right":0,"combined":0},"selectedHolds":{"left":{"id":9,"complementary":12,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"l","depth":20,"fingers":4,"pos":{"x":12.5,"y":90},"size":{"x":100,"y":25}},"right":{"id":12,"complementary":9,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"r","depth":20,"fingers":4,"pos":{"x":387.5,"y":90},"size":{"x":100,"y":25}},"board":{"id":1,"name":"Twinpeaks Reference","width":750,"height":180,"holds":[{"id":1,"complementary":4,"name":"Jug","shortName":"Jug","type":"jug","defaultHand":"l","depth":50,"fingers":5,"pos":{"x":0,"y":160},"size":{"x":125,"y":20}},{"id":2,"complementary":5,"name":"40° Sloper","shortName":"S40","type":"sloper","defaultHand":"l","depth":50,"fingers":5,"pos":{"x":125,"y":138},"size":{"x":125,"y":42}},{"id":3,"complementary":6,"name":"45° Sloper","shortName":"S45","type":"sloper","defaultHand":"l","depth":50,"fingers":5,"pos":{"x":250,"y":130},"size":{"x":125,"y":50}},{"id":4,"complementary":1,"name":"Jug","shortName":"Jug","type":"jug","defaultHand":"r","depth":50,"fingers":5,"pos":{"x":375,"y":160},"size":{"x":125,"y":20}},{"id":5,"complementary":2,"name":"40° Sloper","shortName":"S40","type":"sloper","defaultHand":"r","depth":50,"fingers":5,"pos":{"x":500,"y":138},"size":{"x":125,"y":42}},{"id":6,"complementary":3,"name":"45° Sloper","shortName":"S45","type":"sloper","defaultHand":"r","depth":50,"fingers":5,"pos":{"x":625,"y":130},"size":{"x":125,"y":50}},{"id":7,"complementary":8,"name":"Pocket","shortName":"Pkt","type":"pocket","defaultHand":"l","depth":20,"fingers":3,"pos":{"x":27.5,"y":130},"size":{"x":70,"y":25}},{"id":8,"complementary":7,"name":"Pocket","shortName":"Pkt","type":"pocket","defaultHand":"r","depth":20,"fingers":3,"pos":{"x":402.5,"y":130},"size":{"x":70,"y":25}},{"id":9,"complementary":12,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"l","depth":20,"fingers":4,"pos":{"x":12.5,"y":90},"size":{"x":100,"y":25}},{"id":10,"complementary":13,"name":"Edge 25","shortName":"E25","type":"edge","defaultHand":"l","depth":25,"fingers":4,"pos":{"x":137.5,"y":90},"size":{"x":100,"y":25}},{"id":11,"complementary":14,"name":"Edge 30","shortName":"E30","type":"edge","defaultHand":"l","depth":30,"fingers":4,"pos":{"x":262.5,"y":90},"size":{"x":100,"y":25}},{"id":12,"complementary":9,"name":"Edge 20","shortName":"E20","type":"edge","defaultHand":"r","depth":20,"fingers":4,"pos":{"x":387.5,"y":90},"size":{"x":100,"y":25}},{"id":13,"complementary":10,"name":"Edge 25","shortName":"E25","type":"edge","defaultHand":"r","depth":25,"fingers":4,"pos":{"x":512.5,"y":90},"size":{"x":100,"y":25}},{"id":14,"complementary":11,"name":"Edge 30","shortName":"E30","type":"edge","defaultHand":"r","depth":30,"fingers":4,"pos":{"x":637.5,"y":90},"size":{"x":100,"y":25}},{"id":15,"complementary":18,"name":"Edge 10","shortName":"E10","type":"edge","defaultHand":"l","depth":10,"fingers":4,"pos":{"x":12.5,"y":50},"size":{"x":100,"y":25}},{"id":16,"complementary":19,"name":"Edge 12","shortName":"E12","type":"edge","defaultHand":"l","depth":12,"fingers":4,"pos":{"x":137.5,"y":50},"size":{"x":100,"y":25}},{"id":17,"complementary":20,"name":"Edge 15","shortName":"E15","type":"edge","defaultHand":"l","depth":15,"fingers":4,"pos":{"x":262.5,"y":50},"size":{"x":100,"y":25}},{"id":18,"complementary":15,"name":"Edge 10","shortName":"E10","type":"edge","defaultHand":"r","depth":10,"fingers":4,"pos":{"x":387.5,"y":50},"size":{"x":100,"y":25}},{"id":19,"complementary":16,"name":"Edge 12","shortName":"E12","type":"edge","defaultHand":"r","depth":12,"fingers":4,"pos":{"x":512.5,"y":50},"size":{"x":100,"y":25}},{"id":20,"complementary":17,"name":"Edge 15","shortName":"E15","type":"edge","defaultHand":"r","depth":15,"fingers":4,"pos":{"x":637.5,"y":50},"size":{"x":100,"y":25}},{"id":21,"complementary":24,"name":"Crimp 4","shortName":"C4","type":"crimp","defaultHand":"l","depth":4,"fingers":4,"pos":{"x":12.5,"y":10},"size":{"x":100,"y":25}},{"id":22,"complementary":25,"name":"Crimp 6","shortName":"C6","type":"crimp","defaultHand":"l","depth":6,"fingers":4,"pos":{"x":137.5,"y":10},"size":{"x":100,"y":25}},{"id":23,"complementary":26,"name":"Crimp 8","shortName":"C8","type":"crimp","defaultHand":"l","depth":8,"fingers":4,"pos":{"x":262.5,"y":10},"size":{"x":100,"y":25}},{"id":24,"complementary":21,"name":"Crimp 4","shortName":"C4","type":"crimp","defaultHand":"r","depth":4,"fingers":4,"pos":{"x":387.5,"y":10},"size":{"x":100,"y":25}},{"id":25,"complementary":22,"name":"Crimp 6","shortName":"C6","type":"crimp","defaultHand":"r","depth":6,"fingers":4,"pos":{"x":512.5,"y":10},"size":{"x":100,"y":25}},{"id":26,"complementary":23,"name":"Crimp 8","shortName":"C8","type":"crimp","defaultHand":"r","depth":8,"fingers":4,"pos":{"x":637.5,"y":10},"size":{"x":100,"y":25}}],"officialBenchmarkHolds":{"left":9,"right":12}}},"userWeight":37.80400000000006}');
+    highscoreData: Array<HighscoreEntry> = [];
+    exclusiveAccessAllowed = false;
+    intervall: any = null;
 
     constructor() {
         super();
@@ -78,7 +78,7 @@ export default class BenchmarkMain extends VueNavigation {
     }
 
     async checkCanStartBenchmark() {
-        let current = await EasyRemoteApiHelpers.getCurrentExclusiveBenchmarkAccess(this.backend);
+        const current = await EasyRemoteApiHelpers.getCurrentExclusiveBenchmarkAccess(this.backend);
         console.log(current);
         if(current !== false && current.userId === -1) {
             this.exclusiveAccessAllowed = true;
@@ -96,9 +96,9 @@ export default class BenchmarkMain extends VueNavigation {
     }
 
     async getHighscoreData() {
-        let highscores = await EasyRemoteApiHelpers.getReferenceHighscore(this.backend, "time");
-        for(let hs of highscores) {
-            let hsEntry:HighscoreEntry = {
+        const highscores = await EasyRemoteApiHelpers.getReferenceHighscore(this.backend, "time");
+        for(const hs of highscores) {
+            const hsEntry: HighscoreEntry = {
                 id: hs.id,
                 rank: parseInt(hs.rank),
                 percentile: hs.percentile_rank,
@@ -124,7 +124,7 @@ export default class BenchmarkMain extends VueNavigation {
     }
 
     async onStart() {
-        let request = await EasyRemoteApiHelpers.requestExclusiveBenchmarkAccess(this.backend);
+        const request = await EasyRemoteApiHelpers.requestExclusiveBenchmarkAccess(this.backend);
         //TODO: now we need to keep the exclusive access alive
         if(request && request.error === 0) {
             this.state = 1;
@@ -133,10 +133,10 @@ export default class BenchmarkMain extends VueNavigation {
         }
     }
     async onForceEnd() {
-        let kick = window.confirm("This will kick someone out of their current Benchmark. Do this only if you are physically at the board and see it is not in use. The user will know who kicked him, do you want to continue?");
+        const kick = window.confirm("This will kick someone out of their current Benchmark. Do this only if you are physically at the board and see it is not in use. The user will know who kicked him, do you want to continue?");
         if(kick) {
             console.log("kick");
-            let request = await EasyRemoteApiHelpers.forceEndExclusiveBenchmarkAccess(this.backend);
+            const request = await EasyRemoteApiHelpers.forceEndExclusiveBenchmarkAccess(this.backend);
             if(request.error === 0) {
                 showToast("forcefully ended benchmark");
             } else {
@@ -148,7 +148,7 @@ export default class BenchmarkMain extends VueNavigation {
         }
     }
 
-    onSetupDone(setupData:any) {
+    onSetupDone(setupData: any) {
         this.setupData = setupData;
         this.state = 2;
     }
@@ -157,7 +157,7 @@ export default class BenchmarkMain extends VueNavigation {
         if(this.state !== 2){
             return "ok";
         }
-        let bm = this.$refs.benchmark as Benchmark;
+        const bm = this.$refs.benchmark as Benchmark;
         if(bm) {
             if(bm.canAskForLeave()) {
                 return "ask";

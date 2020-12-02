@@ -18,7 +18,7 @@ import { VueNavigation } from '../vuenavigation';
     }
 })
 export default class UsersView extends VueNavigation {
-    channel:string = "";
+    channel = "";
     constructor(){
         super();
     }

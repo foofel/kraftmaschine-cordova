@@ -19,9 +19,9 @@ import CustomBarChart from './CustomBarChart.vue'
     }
 })
 export default class TimerBarChart extends Vue {
-    @Prop() progressGraphData!:TimerBarChartData;
-    chartData:any = {};
-    chartOptions:any = {};
+    @Prop() progressGraphData!: TimerBarChartData;
+    chartData: any = {};
+    chartOptions: any = {};
     constructor() {
         super();
         this.chartData.labels = this.progressGraphData.labels;

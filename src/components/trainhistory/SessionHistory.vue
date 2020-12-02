@@ -76,7 +76,7 @@ import { VueNavigation } from '../vuenavigation';
 
 interface DisplaySaveDataEntry {
     data: LocalTrainingSaveData;
-    showDetails:boolean;
+    showDetails: boolean;
 }
 
 @Component({
@@ -86,14 +86,14 @@ interface DisplaySaveDataEntry {
     }
 })
 export default class SessionHistory extends VueNavigation {
-    saveEntries:Array<DisplaySaveDataEntry> = [];
-    timerId:any = 0;
+    saveEntries: Array<DisplaySaveDataEntry> = [];
+    timerId: any = 0;
     //storage:LocalStorage<LocalTrainingSaveData> = new LocalStorage<LocalTrainingSaveData>();
-    backend:RemoteAPI;
+    backend: RemoteAPI;
     constructor() {
         super();
         this.backend = this.$root.$data.backend;
-        this.$root.$on(HANGTIMER_FINISHED, (run:LocalTrainingSaveData) => {
+        this.$root.$on(HANGTIMER_FINISHED, (run: LocalTrainingSaveData) => {
             this.buildRows();
         });
     }
@@ -105,13 +105,13 @@ export default class SessionHistory extends VueNavigation {
             clearInterval(this.timerId);
         }
     }
-    formatLength(time:number) {
+    formatLength(time: number) {
         return moment.utc(time * 1000).format('HH:mm:ss');
     }
-    formatTime(time:string) {
+    formatTime(time: string) {
         return moment(time).format('DD.MM.YYYY');
     }
-    toggleRow(entry:DisplaySaveDataEntry) {
+    toggleRow(entry: DisplaySaveDataEntry) {
         entry.showDetails = !entry.showDetails;
     }
 
@@ -120,27 +120,27 @@ export default class SessionHistory extends VueNavigation {
             console.log("no backend yet");
             return;
         }
-        let newEntries = [];
+        const newEntries = [];
         this.saveEntries = [];
-        let remoteTrainings = await EasyRemoteApiHelpers.getTrainings(this.backend);
+        const remoteTrainings = await EasyRemoteApiHelpers.getTrainings(this.backend);
         console.log("trainings:", remoteTrainings);
-        for(let rt of remoteTrainings) {
+        for(const rt of remoteTrainings) {
             newEntries.push({
                 data: rt.data,
                 showDetails: false,
                 sync: true
             });
         }
-        let localTrainings = GetLocalUploadSaves("save-training");
-        for(let lt of localTrainings) {
-            let [key, save] = lt;
+        const localTrainings = GetLocalUploadSaves("save-training");
+        for(const lt of localTrainings) {
+            const [key, save] = lt;
             newEntries.push({
                 data: save.data,
                 showDetails: false,
                 sync: false
             });
         }
-        this.saveEntries = newEntries.sort((a:DisplaySaveDataEntry, b:DisplaySaveDataEntry) => +new Date(b.data.date) - +new Date(a.data.date));
+        this.saveEntries = newEntries.sort((a: DisplaySaveDataEntry, b: DisplaySaveDataEntry) => +new Date(b.data.date) - +new Date(a.data.date));
         console.log("history reloaded");
     }
 
@@ -149,12 +149,12 @@ export default class SessionHistory extends VueNavigation {
         this.buildRows();
     }
 
-    getChartOptions(entry:DisplaySaveDataEntry){
+    getChartOptions(entry: DisplaySaveDataEntry){
         return {
             max: entry.data.timerParams.data.active
         }
     }
-    getChartData(entry:DisplaySaveDataEntry) {
+    getChartData(entry: DisplaySaveDataEntry) {
         return{
             labels: Array.from({length: entry.data.activeTimeData.length}, (_, i) => i + 1).map((v) => ""+v),
             datasets: [

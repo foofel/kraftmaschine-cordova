@@ -6,7 +6,7 @@
 // Copyright (c) Microsoft Open Technologies Inc
 // Licensed under the MIT license
 
-declare var Media: {
+declare let Media: {
     new (
         src: string,
         mediaSuccess: () => void,
@@ -17,7 +17,7 @@ declare var Media: {
         MEDIA_STARTING: number;
         MEDIA_RUNNING: number;
         MEDIA_PAUSED: number;
-        MEDIA_STOPPED: number
+        MEDIA_STOPPED: number;
 };
 
 /**

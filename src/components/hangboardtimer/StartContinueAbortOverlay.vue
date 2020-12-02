@@ -49,17 +49,17 @@ import { TimerState } from './ts/timerrunner';
 
 @Component({})
 export default class StartContinueAbortOverlay extends Vue {
-    @Prop({default: "INIT"}) timerState!:TimerState;
-    @Prop({default: true}) timerRunning!:boolean;
-    internalState:string;
+    @Prop({default: "INIT"}) timerState!: TimerState;
+    @Prop({default: true}) timerRunning!: boolean;
+    internalState: string;
     //firstSelection:string = "";
-    timerId:any = null;
-    stopWatch:StopWatch = new StopWatch(false);
-    continueTimeout:number = 3;
-    badClickCount:number = 2;
-    remainingContinueTime:number;
-    remainingBadClickCount:number = 0;
-    selectedStars:number = 0;
+    timerId: any = null;
+    stopWatch: StopWatch = new StopWatch(false);
+    continueTimeout = 3;
+    badClickCount = 2;
+    remainingContinueTime: number;
+    remainingBadClickCount = 0;
+    selectedStars = 0;
 
     constructor() {
         super();
@@ -81,7 +81,7 @@ export default class StartContinueAbortOverlay extends Vue {
         }
     }    
 
-    onOverlayClick(selection:string, star:number) {
+    onOverlayClick(selection: string, star: number) {
         if(this.selectedStars > 0) {
             return;
         }
@@ -133,12 +133,12 @@ export default class StartContinueAbortOverlay extends Vue {
     }
 
     @Watch("timerState")
-    onTimerStateCHanged(value:string) {
+    onTimerStateCHanged(value: string) {
         this.onParamsChange();
     }
 
     @Watch("timerRunning")
-    onTimerRunningCHanged(value:boolean) {
+    onTimerRunningCHanged(value: boolean) {
         this.onParamsChange();
     }
 
@@ -164,7 +164,7 @@ export default class StartContinueAbortOverlay extends Vue {
                 return;
             }
             this.remainingContinueTime = this.continueTimeout - this.stopWatch.elapsed();
-            let elapsed = this.stopWatch.elapsed();
+            const elapsed = this.stopWatch.elapsed();
             if(elapsed >= this.continueTimeout) {
                 this.resetTimeout();
                 this.timerId = null;

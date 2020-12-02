@@ -16,16 +16,16 @@ import { sprintf } from "sprintf-js";
 @Component
 export default class ProgressBar extends Vue {
     //@Prop({default: 0.2}) initValue!:number;
-    @Prop({default: 0}) value!:number;
-    @Prop({default: 1}) max!:number;
-    @Prop({default: "%d%%"}) initFormat!:string;
-    @Prop({default: "%d%%"}) progressFormat!:string;
-    @Prop({default: () => { return [ { to: 1, colora: "#4eb5e5", colorb: "#389ed5" } ] }}) bgColors!:Array<{to: number, colora: string, colorb: string}>;
-    @Prop({default: ""}) border!:string;
-    timerId:any = null;
+    @Prop({default: 0}) value!: number;
+    @Prop({default: 1}) max!: number;
+    @Prop({default: "%d%%"}) initFormat!: string;
+    @Prop({default: "%d%%"}) progressFormat!: string;
+    @Prop({default: () => { return [ { to: 1, colora: "#4eb5e5", colorb: "#389ed5" } ] }}) bgColors!: Array<{to: number; colora: string; colorb: string}>;
+    @Prop({default: ""}) border!: string;
+    timerId: any = null;
     //value:number = 0;
     //max:number = 0;
-    hasSlot:boolean = false;
+    hasSlot = false;
     constructor() {
         super();
         //this.value = this.initValue || 0;
@@ -39,11 +39,11 @@ export default class ProgressBar extends Vue {
     /*setValue(value:number):void {
         this.value = value;
     }*/
-    findColor(where:number) {
+    findColor(where: number) {
         let foundTo = Number.MAX_VALUE;
         let idx = 0;
-        for(let key in this.bgColors) {
-            let to = this.bgColors[key].to;
+        for(const key in this.bgColors) {
+            const to = this.bgColors[key].to;
             if(to >= where && to < foundTo) {
                 foundTo = to;
                 idx = parseInt(key);
@@ -52,8 +52,8 @@ export default class ProgressBar extends Vue {
         return this.bgColors[idx];
     }
     barStyle() {
-        let progress = Math.min(this.value / this.max, 1);
-        let color = this.findColor(progress);
+        const progress = Math.min(this.value / this.max, 1);
+        const color = this.findColor(progress);
         return {
             width: progress * 100 + "%",
             background: `linear-gradient(to bottom, ${color.colora} 0%, ${color.colorb} 100%)`
@@ -61,7 +61,7 @@ export default class ProgressBar extends Vue {
     }
 
     progressText() {
-        let progressPercentage = Math.min(this.value / this.max * 100, 100);
+        const progressPercentage = Math.min(this.value / this.max * 100, 100);
         if(progressPercentage === 0) {
             if(this.timerId !== null) {
                 return

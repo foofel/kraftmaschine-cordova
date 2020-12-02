@@ -20,19 +20,19 @@ import { StopWatch } from '../../core/stopwatch';
     }
 })
 export default class WeightCalibration extends Vue {
-    @Prop({default: false}) autorun!:boolean;
-    @Prop({default: -1000}) minWeight!:number;
-    @Prop({default: 1000}) maxWeight!:number;
-    @Prop({default: "hang onto board"}) initFormat!:number;
-    @Prop({default: "%d%%"}) progressFormat!:number;
-    @Prop({default: () => { return { left: 0, right: 0 } }}) tareWeights!:TareWeights;
-    scaleBackend:HangboardScale;
-    calib:Calibration|null = null;
+    @Prop({default: false}) autorun!: boolean;
+    @Prop({default: -1000}) minWeight!: number;
+    @Prop({default: 1000}) maxWeight!: number;
+    @Prop({default: "hang onto board"}) initFormat!: number;
+    @Prop({default: "%d%%"}) progressFormat!: number;
+    @Prop({default: () => { return { left: 0, right: 0 } }}) tareWeights!: TareWeights;
+    scaleBackend: HangboardScale;
+    calib: Calibration|null = null;
     //progressBar:ProgressBar|null = null;
-    progressValue:number = 0;
-    stopBarUpdate:boolean = false;
-    completedTime:number = 0;
-    stopWatch:StopWatch = new StopWatch(false);
+    progressValue = 0;
+    stopBarUpdate = false;
+    completedTime = 0;
+    stopWatch: StopWatch = new StopWatch(false);
 
     constructor() {
         super();
@@ -43,7 +43,7 @@ export default class WeightCalibration extends Vue {
         //this.progressBar = this.$refs.progress as ProgressBar;
         if(this.calib === null) {
             this.calib = new Calibration(this.scaleBackend, 
-                (weights:TareWeights) => {
+                (weights: TareWeights) => {
                     console.log("done");
                     this.$emit("calibrationDone", new WeightData(weights.left, weights.right, weights.left + weights.right))
                     this.calib = null;
@@ -52,12 +52,12 @@ export default class WeightCalibration extends Vue {
                 this.minWeight, 
                 this.maxWeight, 
                 this.tareWeights,
-                (duration:number) => {
+                (duration: number) => {
                     this.completedTime = duration;
                     console.log("start", duration);
                     this.startUpdate();
                 },
-                (progress:number) => {},
+                (progress: number) => {},
                 () => {
                     console.log("reset");
                     this.stopUpdate();

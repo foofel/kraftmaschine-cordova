@@ -1,99 +1,144 @@
 import { TempSensorInterface } from '@/core/sensorreader';
 
 export class Rectangle {
-    constructor(readonly x:string, readonly y:string, readonly width:string, readonly height:string) {}
+    constructor(readonly x: string, readonly y: string, readonly width: string, readonly height: string) {}
 }
 
-export type Hold = { id:number, complementary:number, name:string, type:string, shortName:string, defaultHand:string, depth:number, fingers:number, pos:{ x:number, y:number }, size: {x:number, y:number} };
-export type TareWeights = { left: number, right:number };
-export type SelectedHolds = { left: Hold|null, right: Hold|null, board:Hangboard };
+export type Hold = { id: number; complementary: number; name: string; type: string; shortName: string; defaultHand: string; depth: number; fingers: number; pos: { x: number; y: number }; size: {x: number; y: number} };
+export type TareWeights = { left: number; right: number };
+export type SelectedHolds = { left: Hold|null; right: Hold|null; board: Hangboard };
+
+export class TimerEntry {
+    constructor(
+        public readonly warmup: number,      // get ready countdown
+        public readonly active: number,      // time to execute the activity
+        public readonly passive: number,     // rest time between active times
+        public readonly repeats: number,     // how often to repeat active + passive
+        public readonly pause: number,       // pause between sets
+        public readonly sets: number,        // how many sets "(active + passive) * repeats" until the whole workout is done
+        public readonly cooldown: number     // to relax after the workout
+    ) {}
+}
+
+export const PredefinedTimers = {
+    timers: [
+        {
+            id: "r6O9TznYgp",
+            name: "7/5 basic",
+            desc: "7s hang with 5s rest for one minute. then 3m pause.",
+            data: new TimerEntry(10, 7, 5, 5, 180, 6, 0)
+        }, {
+            id: "NCPhaAalem",
+            name: "7/3 basic",
+            desc: "7s hang with 3s rest for one minute. then 3m pause.",
+            data: new TimerEntry(10, 7, 3, 6, 180, 6, 0)
+        }, {
+            id: "9TRDPVqu1a",
+            name: "10s max hangs",
+            desc: "10s hang with max weight on both hands, then 3m pause",
+            data: new TimerEntry(10, 10, 0, 1, 180, 10, 10)
+        }, {
+            id: "3oaOgQSlG0",
+            name: "10s max hangs (alt)",
+            desc: "10s hang with max weight on one hand, 5s break to switch hands then 3m pause",
+            data: new TimerEntry(10, 10, 5, 2, 180, 10, 10)
+        }, {
+            id: "qAbvsL4lvJ",
+            name: "Test/Debug 39",
+            desc: "10s hang with max weight on one hand, 5s break to switch hands then 3m break",
+            data: new TimerEntry(1, 3, 5, 3, 5, 3, 5)
+        }
+    ],
+    get default() { return this.timers[0]; },
+    get test() { return this.timers[this.timers.length - 1]; }
+};
 
 export class HangTimerSetupData {
     constructor(
-        public timer:TimerSelectorEntry = PredefinedTimers.default,
-        public tareWeights:TareWeights,
-        public selectedHolds:SelectedHolds,
-        public userWeight:number,
-        public trainWeight:number
-    ) {};
+        public timer: TimerSelectorEntry = PredefinedTimers.default,
+        public tareWeights: TareWeights,
+        public selectedHolds: SelectedHolds,
+        public userWeight: number,
+        public trainWeight: number
+    ) {}
 }
 
 export class HangTimerData extends HangTimerSetupData {
     constructor(
-        public timer:TimerSelectorEntry = PredefinedTimers.default,
-        public tareWeights:TareWeights,
-        public selectedHolds:SelectedHolds,
-        public userWeight:number,
-        public trainWeight:number,
-        public activationWeight:number
+        public timer: TimerSelectorEntry = PredefinedTimers.default,
+        public tareWeights: TareWeights,
+        public selectedHolds: SelectedHolds,
+        public userWeight: number,
+        public trainWeight: number,
+        public activationWeight: number
     ) {
         super(timer, tareWeights, selectedHolds, userWeight, trainWeight);
-    };
+    }
 }
 
 export interface HangTimerGraphDataInterface {
-    innerTimerColor:string;
-    set:number;
-    rep:number;
-    repProgress:number;
-    repDuration:number;
-    repNormalized:number;
-    setProgress:number;
-    setDuration:number;
-    setNormalized:number;
-    overallProgress:number;
-    overallDuration:number;
-    overallNormalized:number;
-    activeTimeProgress:number;
-    activeTimeDuration:number;
-    activeTimeNormalized:number;
-    currentWeight:number;
-    userWeight:number;
-    activationWeight:number;
-    trainWeight:number;
-    leftWeight:number;
-    rightWeight:number;
-    trainData:HangTimerData;
+    innerTimerColor: string;
+    set: number;
+    rep: number;
+    repProgress: number;
+    repDuration: number;
+    repNormalized: number;
+    setProgress: number;
+    setDuration: number;
+    setNormalized: number;
+    overallProgress: number;
+    overallDuration: number;
+    overallNormalized: number;
+    activeTimeProgress: number;
+    activeTimeDuration: number;
+    activeTimeNormalized: number;
+    currentWeight: number;
+    userWeight: number;
+    activationWeight: number;
+    trainWeight: number;
+    leftWeight: number;
+    rightWeight: number;
+    trainData: HangTimerData;
 }
 
 export class HangTimerGraphData {
     constructor(
-        public innerTimerColor:string,
-        public set:number,
-        public rep:number,
-        public repProgress:number,
-        public repDuration:number,
-        public repNormalized:number,
-        public setProgress:number,
-        public setDuration:number,
-        public setNormalized:number,
-        public overallProgress:number,
-        public overallDuration:number,
-        public overallNormalized:number,
-        public activeTimeProgress:number,
-        public activeTimeDuration:number,
-        public activeTimeNormalized:number,
-        public currentWeight:number,
-        public userWeight:number,
-        public activationWeight:number,
-        public trainWeight:number,
-        public leftWeight:number,
-        public rightWeight:number,
-        readonly trainData:HangTimerData
-    ) {};
-};
+        public innerTimerColor: string,
+        public set: number,
+        public rep: number,
+        public repProgress: number,
+        public repDuration: number,
+        public repNormalized: number,
+        public setProgress: number,
+        public setDuration: number,
+        public setNormalized: number,
+        public overallProgress: number,
+        public overallDuration: number,
+        public overallNormalized: number,
+        public activeTimeProgress: number,
+        public activeTimeDuration: number,
+        public activeTimeNormalized: number,
+        public currentWeight: number,
+        public userWeight: number,
+        public activationWeight: number,
+        public trainWeight: number,
+        public leftWeight: number,
+        public rightWeight: number,
+        readonly trainData: HangTimerData
+    ) {}
+}
 
 export interface LocalTrainingSaveData {
-    date:Date;
-    timerParams:TimerSelectorEntry;
-    timerDuration:number;
-    timerElapsed:number;
-    activeTime:number;
-    maxActiveTime:number;
-    humidity:number;
+    date: Date;
+    timerParams: TimerSelectorEntry;
+    timerDuration: number;
+    timerElapsed: number;
+    activeTime: number;
+    maxActiveTime: number;
+    humidity: number;
     activeTimeData: Array<number>;
     rawData: Array<Array<number>>;
-    runNumber:number;
+    runNumber: number;
     hangboard: number;
     holdLeft: number|null;
     holdRight: number|null;
@@ -101,14 +146,14 @@ export interface LocalTrainingSaveData {
 
 export interface Hangboard {
     id: number;
-    holds:Array<Hold>;
-    name:string;
-    width:number;
-    height:number;
+    holds: Array<Hold>;
+    name: string;
+    width: number;
+    height: number;
     officialBenchmarkHolds: { 
-        left:number;
-        right:number;
-    }
+        left: number;
+        right: number;
+    };
 }
 
 export const ChartColors = {
@@ -122,41 +167,40 @@ export const ChartColors = {
 };
 
 export interface TimerBarChartData {
-    active:Array<number>;
-    inactive:Array<number>;
-    passive:Array<number>;
-    labels:Array<string>
-    maxValue:number;
+    active: Array<number>;
+    inactive: Array<number>;
+    passive: Array<number>;
+    labels: Array<string>;
+    maxValue: number;
 }
 
 export interface BenchmarkGraphData {
-    labels:Array<string>;
-    changeToggle:boolean;
+    labels: Array<string>;
+    changeToggle: boolean;
     dataSets: {
-        [id:string]: {
-            data:Array<number>;
-            type:string;
-        }
-    }
-    annotations: Array<{x:number, y:number}>;
+        [id: string]: {
+            data: Array<number>;
+            type: string;
+        };
+    };
+    annotations: Array<{x: number; y: number}>;
 }
 
 export class Hangboards {
-    static boardList = () : Map<number, Hangboard> => {
-        let map = new Map<number, Hangboard>();
+    static boardList = (): Map<number, Hangboard> => {
+        const map = new Map<number, Hangboard>();
         map.set(Hangboards.none.id, Hangboards.none);
         map.set(Hangboards.twinPeaksReference.id, Hangboards.twinPeaksReference);
         map.set(Hangboards.beastmaker1000.id, Hangboards.beastmaker1000);
         map.set(Hangboards.beastmaker2000.id, Hangboards.beastmaker2000);
         return map;
     };
-    static readonly none:Hangboard = { id: 0, name: "none", width: 0, height: 0, holds: [], officialBenchmarkHolds: { left: 0, right: 0 } };
-    static readonly twinPeaksReference:Hangboard = {
+    static readonly none: Hangboard = { id: 0, name: "none", width: 0, height: 0, holds: [], officialBenchmarkHolds: { left: 0, right: 0 } };
+    static readonly twinPeaksReference: Hangboard = {
         id: 1,
         name: "Twinpeaks Reference",
         width: 750,
         height: 180,
-        /* eslint-disable standard/object-curly-even-spacing */
         holds: [
             { id:  1, complementary:  4, name: "Jug",        shortName: "Jug", type: "jug",    defaultHand: "l", depth: 50, fingers: 5, pos: { x:  0.0, y: 160.0  }, size: { x: 125.0, y: 20.0 } },
             { id:  2, complementary:  5, name: "40° Sloper", shortName: "S40", type: "sloper", defaultHand: "l", depth: 50, fingers: 5, pos: { x: 125.0, y: 138.0 }, size: { x: 125.0, y: 42.0 } },
@@ -193,9 +237,8 @@ export class Hangboards {
             left: 9,
             right: 12
         }
-        /* eslint-enable standard/object-curly-even-spacing */
     };
-    static readonly beastmaker1000:Hangboard = {
+    static readonly beastmaker1000: Hangboard = {
         id: 2,
         name: "Beastmaker 1000",
         width: 580,
@@ -229,7 +272,7 @@ export class Hangboards {
         ],
         officialBenchmarkHolds: { left: 17, right: 22 }
     };
-    static readonly beastmaker2000:Hangboard = {
+    static readonly beastmaker2000: Hangboard = {
         id: 3,
         name: "Beastmaker 2000",
         width: 0,
@@ -241,17 +284,17 @@ export class Hangboards {
 
 export interface LocalBenchmarkSaveData {
     boardId: number;
-    leftId: number|null,
-    rightId: number|null,
-    userWeight: number,
-    hangWeight: number,
-    activeTime: number,
+    leftId: number|null;
+    rightId: number|null;
+    userWeight: number;
+    hangWeight: number;
+    activeTime: number;
     data: {
         date: Date;
-        time: Array<number>,
-        weight: Array<number>,
-        temperatureInfo: TempSensorInterface
-    }
+        time: Array<number>;
+        weight: Array<number>;
+        temperatureInfo: TempSensorInterface;
+    };
 }
 
 export interface BenchmarkSetupData {
@@ -262,80 +305,35 @@ export interface BenchmarkSetupData {
 
 export interface HighscoreEntry {
     // highscore
-    id:number;
-    rank:number;
-    percentile:number;
-    userWeight:number;
-    hangWeight:number;
-    activeTime:number;
-    insertDate:Date;
+    id: number;
+    rank: number;
+    percentile: number;
+    userWeight: number;
+    hangWeight: number;
+    activeTime: number;
+    insertDate: Date;
     //user
-    userId:number;
-    userAlias:string;
-    userName:string;
+    userId: number;
+    userAlias: string;
+    userName: string;
     // board
-    boardId:number;
-    boardName:string;
+    boardId: number;
+    boardName: string;
     // holds stuff
-    leftId:number;
-    leftDepth:number;
-    leftName:string;
-    rightId:number;
-    rightDepth:number;
-    rightName:string;
+    leftId: number;
+    leftDepth: number;
+    leftName: string;
+    rightId: number;
+    rightDepth: number;
+    rightName: string;
 }
-
-export class TimerEntry {
-    constructor(
-        public readonly warmup:number,      // get ready countdown
-        public readonly active:number,      // time to execute the activity
-        public readonly passive:number,     // rest time between active times
-        public readonly repeats:number,     // how often to repeat active + passive
-        public readonly pause:number,       // pause between sets
-        public readonly sets:number,        // how many sets "(active + passive) * repeats" until the whole workout is done
-        public readonly cooldown:number     // to relax after the workout
-    ) {}
-};
 
 export interface TimerSelectorEntry {
     id: string;
-    name:string;
-    desc:string;
-    data:TimerEntry;
-};
-
-export const PredefinedTimers = {
-    timers: [
-        {
-            id: "r6O9TznYgp",
-            name: "7/5 basic",
-            desc: "7s hang with 5s rest for one minute. then 3m pause.",
-            data: new TimerEntry(10, 7, 5, 5, 180, 6, 0)
-        }, {
-            id: "NCPhaAalem",
-            name: "7/3 basic",
-            desc: "7s hang with 3s rest for one minute. then 3m pause.",
-            data: new TimerEntry(10, 7, 3, 6, 180, 6, 0)
-        }, {
-            id: "9TRDPVqu1a",
-            name: "10s max hangs",
-            desc: "10s hang with max weight on both hands, then 3m pause",
-            data: new TimerEntry(10, 10, 0, 1, 180, 10, 10)
-        }, {
-            id: "3oaOgQSlG0",
-            name: "10s max hangs (alt)",
-            desc: "10s hang with max weight on one hand, 5s break to switch hands then 3m pause",
-            data: new TimerEntry(10, 10, 5, 2, 180, 10, 10)
-        }, {
-            id: "qAbvsL4lvJ",
-            name: "Test/Debug 39",
-            desc: "10s hang with max weight on one hand, 5s break to switch hands then 3m break",
-            data: new TimerEntry(1, 3, 5, 3, 5, 3, 5)
-        }
-    ],
-    get default() { return this.timers[0]; },
-    get test() { return this.timers[this.timers.length - 1]; }
-};
+    name: string;
+    desc: string;
+    data: TimerEntry;
+}
 
 export type NavigationLeaveResponse = "ok" | "ask" | "block";
 export interface NavigationComponent {
@@ -352,49 +350,48 @@ export interface DrawContextInfo {
 }
 
 export interface DataModelComponentValueInterface {
-    value:string|number|boolean;
-    type:string;
-    edit:string;
-    displayName:string;
+    value: string|number|boolean;
+    type: string;
+    edit: string;
+    displayName: string;
     desc: string;
 }
 export interface DataModelComponentModelInterface {
-    [id:string]: DataModelComponentValueInterface;
+    [id: string]: DataModelComponentValueInterface;
 }
 export interface DataModelComponentDataInterface {
-    title:string;
+    title: string;
     model: DataModelComponentModelInterface;
 }
 
 export interface StaticData {
-    boards:Array<Hangboard>|null;
+    boards: Array<Hangboard>|null;
 }
 
 export interface BenchmarkVisualHighscoreEntry {
-    id:number;
-    time:number;
-    rank:number;
-    percentile:number;
-    name:string;
+    id: number;
+    time: number;
+    rank: number;
+    percentile: number;
+    name: string;
     //priority:number;
 }
 
 export interface BenchmarkVisualModelMarker {
     time: number;
-    text:string;
+    text: string;
     bgColor: string;
     borderColor: string;
     priority: number;
-    drawName:boolean;
-    draw:boolean;
+    drawName: boolean;
+    draw: boolean;
 }
 
-export interface BenchmarkVisualClockMarker extends BenchmarkVisualHighscoreEntry {
-}
+export type BenchmarkVisualClockMarker = BenchmarkVisualHighscoreEntry
 
 export interface BenchmarkVisualModel {
-    highscore:Array<BenchmarkVisualHighscoreEntry>
-    timeMarkers:Array<BenchmarkVisualModelMarker>
-    percentileMarkers:Array<BenchmarkVisualModelMarker>
-    clockMarkers:Array<BenchmarkVisualClockMarker>
+    highscore: Array<BenchmarkVisualHighscoreEntry>;
+    timeMarkers: Array<BenchmarkVisualModelMarker>;
+    percentileMarkers: Array<BenchmarkVisualModelMarker>;
+    clockMarkers: Array<BenchmarkVisualClockMarker>;
 }

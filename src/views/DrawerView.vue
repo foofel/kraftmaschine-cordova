@@ -74,10 +74,10 @@ import { GlobalStore } from '../main';
     }  
 })
 export default class DrawerView extends Vue {
-    visible:boolean = false;
-    itemKey:string = "";
-    keyLookup:Map<string, string> = new Map<string, string>();
-    channelError:boolean = false;
+    visible = false;
+    itemKey = "";
+    keyLookup: Map<string, string> = new Map<string, string>();
+    channelError = false;
     constructor() {
         super();
     }
@@ -90,7 +90,7 @@ export default class DrawerView extends Vue {
         GlobalStore.scaleBackend.removeChannelInfoCallback(this.onChannelInfo);
     }
 
-    onChannelInfo(channel:string, isActive:boolean) {
+    onChannelInfo(channel: string, isActive: boolean) {
         this.channelError = !isActive;
     }
 
@@ -102,20 +102,20 @@ export default class DrawerView extends Vue {
         this.visible = false;
     }
 
-    overlayClicked(event:any) {
+    overlayClicked(event: any) {
         console.log(event)
         event.preventDefault();
         this.visible = false;
     }
 
-    itemClicked(item:string) {
+    itemClicked(item: string) {
         const canChange = () => {
-            let currentView = this.$refs.routeView as VueNavigation;
+            const currentView = this.$refs.routeView as VueNavigation;
             if(currentView) {
-                let leaveAction = currentView.canLeaveComponent();
+                const leaveAction = currentView.canLeaveComponent();
                 if(leaveAction === "ask") {
                     currentView.onBeforeShowDialog();
-                    let leave = window.confirm("Leave current page?");
+                    const leave = window.confirm("Leave current page?");
                     if(leave) {
                         return true;
                     }
@@ -129,8 +129,8 @@ export default class DrawerView extends Vue {
             }
             return false;
         }
-        let cr = this.$router.currentRoute;
-        let idx = cr.path.lastIndexOf("/");
+        const cr = this.$router.currentRoute;
+        const idx = cr.path.lastIndexOf("/");
         if(!this.keyLookup.has(item)) {
             this.keyLookup.set(item, ""+Math.random());
         }
@@ -148,7 +148,7 @@ export default class DrawerView extends Vue {
         }
     }
 
-    log(str:string) {
+    log(str: string) {
         console.log(str);
     }
 

@@ -4,35 +4,35 @@ import { GlobalConfig } from '@/config';
 import { compress, decompress } from 'lz-string';
 
 export interface Storage<T> {
-    save(id:string, entry:T):void;
-    load(id:string):T | null;
-    delete(id:string):void;
-    keyExists(id:string):boolean;
+    save(id: string, entry: T): void;
+    load(id: string): T | null;
+    delete(id: string): void;
+    keyExists(id: string): boolean;
 }
 
 export class LocalStorage<T> implements Storage<T> {
     constructor() {}
-    save(id:string, entry:T):void {
+    save(id: string, entry: T): void {
         localStorage.setItem(id, JSON.stringify(entry));
     }
-    load(id:string):T | null {
-        let entry = localStorage.getItem(id);
+    load(id: string): T | null {
+        const entry = localStorage.getItem(id);
         if(entry) {
-            let object = JSON.parse(entry);
+            const object = JSON.parse(entry);
             return object as T;
         }
         return null;
     }
-    delete(id:string):void {
+    delete(id: string): void {
         localStorage.removeItem(id);
     }
-    keyExists(id:string):boolean {
-        let obj = localStorage.getItem(id);
+    keyExists(id: string): boolean {
+        const obj = localStorage.getItem(id);
         return obj !== null;
     }
 }
 
-export function GetStore<T>():Storage<T> {
+export function GetStore<T>(): Storage<T> {
     return new LocalStorage<T>();
 }
 
@@ -41,44 +41,44 @@ export interface ConfigBoardSetup {
 }
 
 export interface ConfigData {
-    runCount:number;
-    firstLogin:boolean;
-    skipSplash:boolean;
+    runCount: number;
+    firstLogin: boolean;
+    skipSplash: boolean;
     savedTimers: Array<TimerSelectorEntry>;
     enableBeep: boolean;
     beepTimeOffset: number;
     forceMaxVolumeBeep: boolean;
     enableVibrate: boolean;
-    channel:string;
+    channel: string;
     boardSetups: ConfigBoardSetup;
-    gbDrawTimeMarkers:boolean;
-    gbDrawPercentileMarkers:boolean;
+    gbDrawTimeMarkers: boolean;
+    gbDrawPercentileMarkers: boolean;
     [key: string]: any;
 }
 
 export interface ConfigFile {
-    id:number;
-    secret:string;
-    alias:string;
-    email:string;
-    name:string;
-    options:ConfigData;
+    id: number;
+    secret: string;
+    alias: string;
+    email: string;
+    name: string;
+    options: ConfigData;
 }
 
 export const LOCAL_SAVE_PREFIX = "save-";
 export type LocalUploadSaveKey = "save-training" | "save-benchmark";
 
-function MakeSaveName(type:LocalUploadSaveKey):string {
-    function dec2hex (dec:number) {
+function MakeSaveName(type: LocalUploadSaveKey): string {
+    function dec2hex (dec: number) {
         return ('0' + dec.toString(16)).substr(-2)
     }    
-    var arr = new Uint8Array((20) / 2)
+    const arr = new Uint8Array((20) / 2)
     window.crypto.getRandomValues(arr)
-    let id = Array.from(arr, dec2hex).join('')
+    const id = Array.from(arr, dec2hex).join('')
     return `${type}-${id}`;
 }
 
-function BuildInitialConfig():ConfigFile {
+function BuildInitialConfig(): ConfigFile {
     return {
         id: -1,
         alias: "",
@@ -102,12 +102,12 @@ function BuildInitialConfig():ConfigFile {
     }
 }
 
-function isObject(item:any) {
+function isObject(item: any) {
     return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-function mergeDeep(target:any, source:any) {
-    let output = Object.assign({}, target);
+function mergeDeep(target: any, source: any) {
+    const output = Object.assign({}, target);
     if (isObject(target) && isObject(source)) {
         Object.keys(source).forEach(key => {
             if (isObject(source[key])) {
@@ -124,12 +124,12 @@ function mergeDeep(target:any, source:any) {
     return output;
 }
 
-export function SupplementDefaultKeys(real:ConfigFile) {
+export function SupplementDefaultKeys(real: ConfigFile) {
     return mergeDeep(BuildInitialConfig(), real);
 }
 
-export function GetConfigObject():ConfigFile {
-    let store = new LocalStorage<ConfigFile>();
+export function GetConfigObject(): ConfigFile {
+    const store = new LocalStorage<ConfigFile>();
     let cfg = store.load(GlobalConfig.configKey);
     if(!cfg) {
         cfg = BuildInitialConfig();
@@ -138,29 +138,29 @@ export function GetConfigObject():ConfigFile {
     return cfg;
 }
 
-export function SaveConfigObject(config:ConfigFile) {
-    let store = new LocalStorage<ConfigFile>();
+export function SaveConfigObject(config: ConfigFile) {
+    const store = new LocalStorage<ConfigFile>();
     store.save(GlobalConfig.configKey, config);
 }
 
 export interface LocalUploadSave {
-    type:LocalUploadSaveKey;
-    params:Array<string>;
+    type: LocalUploadSaveKey;
+    params: Array<string>;
     date: Date;
-    compressData:boolean;
+    compressData: boolean;
     data: any;
 }
 
-export function GetLocalUploadSaves(type:LocalUploadSaveKey|null = null):Map<string, LocalUploadSave> {
-    let saves:Map<string, LocalUploadSave> = new Map<string, LocalUploadSave>();
-    let lookup:string = type || LOCAL_SAVE_PREFIX;
-    for(let entry of Object.entries(localStorage)) {
-        let [key, data] = entry;
+export function GetLocalUploadSaves(type: LocalUploadSaveKey|null = null): Map<string, LocalUploadSave> {
+    const saves: Map<string, LocalUploadSave> = new Map<string, LocalUploadSave>();
+    const lookup: string = type || LOCAL_SAVE_PREFIX;
+    for(const entry of Object.entries(localStorage)) {
+        const [key, data] = entry;
         if(key.startsWith(lookup)) {
-            let typedSave:LocalUploadSave = JSON.parse(data) as LocalUploadSave;
+            const typedSave: LocalUploadSave = JSON.parse(data) as LocalUploadSave;
             if(typedSave) {
                 if(typedSave.compressData) {
-                    let decomp = decompress(typedSave.data);
+                    const decomp = decompress(typedSave.data);
                     if(decomp) {
                         typedSave.data = JSON.parse(decomp);
                     } else {
@@ -175,17 +175,17 @@ export function GetLocalUploadSaves(type:LocalUploadSaveKey|null = null):Map<str
     }
     return saves;
 }
-export function AddLocalUploadSave(data:LocalUploadSave) {
-    let storage:LocalStorage<LocalUploadSave> = new LocalStorage<LocalUploadSave>();
-    let saveKey = MakeSaveName(data.type);
-    let saveData = { ...data };
+export function AddLocalUploadSave(data: LocalUploadSave) {
+    const storage: LocalStorage<LocalUploadSave> = new LocalStorage<LocalUploadSave>();
+    const saveKey = MakeSaveName(data.type);
+    const saveData = { ...data };
     if(data.compressData) {
         saveData.data = compress(JSON.stringify(data.data));
     }
     storage.save(saveKey, saveData);
 }
 
-export function DeleteLocalUploadSave(storageId:string) {
-    let storage:LocalStorage<LocalUploadSave> = new LocalStorage<LocalUploadSave>();
+export function DeleteLocalUploadSave(storageId: string) {
+    const storage: LocalStorage<LocalUploadSave> = new LocalStorage<LocalUploadSave>();
     storage.delete(storageId);
 }

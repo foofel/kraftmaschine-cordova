@@ -17,8 +17,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
     }
 })
 export default class HeadlineView extends Vue {
-    @Prop({default: "#FDD835"}) color!:string;
-    @Prop({default: "TÖÖÖÖXT"}) headlineText!:string;
+    @Prop({default: "#FDD835"}) color!: string;
+    @Prop({default: "TÖÖÖÖXT"}) headlineText!: string;
     constructor(){
         super();
     }

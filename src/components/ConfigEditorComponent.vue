@@ -21,9 +21,9 @@ import { showToast } from '../core/util';
     }
 })
 export default class ConfigEditorComponent extends VueNavigation {
-    model:DataModelComponentDataInterface =  { title: "Options", model: {}};
-    scale:HangboardScale;
-    cfg:ConfigFile = this.$root.$data.cfg;
+    model: DataModelComponentDataInterface =  { title: "Options", model: {}};
+    scale: HangboardScale;
+    cfg: ConfigFile = this.$root.$data.cfg;
 
     constructor() {
         super();
@@ -36,7 +36,7 @@ export default class ConfigEditorComponent extends VueNavigation {
     mounted() {
     }
 
-    buildModel():any {
+    buildModel(): any {
         return {
             channel: {
                 displayName: "Select Board",
@@ -44,7 +44,7 @@ export default class ConfigEditorComponent extends VueNavigation {
                 value: this.cfg.options.channel,
                 type: "string",
                 edit: "text",
-                validate: function(val:string) {
+                validate: function(val: string) {
                     if(val === "") {
                         return false;
                     } 
@@ -58,7 +58,7 @@ export default class ConfigEditorComponent extends VueNavigation {
                 value: this.cfg.options.enableBeep,
                 type: "boolean",
                 edit: "checked",
-                validate: function(val:boolean) {
+                validate: function(val: boolean) {
                     return true;
                 }
             }, 
@@ -75,13 +75,13 @@ export default class ConfigEditorComponent extends VueNavigation {
                 value: this.cfg.options.beepTimeOffset,                      
                 type: "number",
                 edit: "text",
-                validate: function(val:number|string) {
+                validate: function(val: number|string) {
                     let check = 0;
                     if(typeof val === "number") {
                         check = val;
                     }
                     else if(typeof val === "string") {
-                        let match = val.trim().match(String.raw`^[-+]?[0-9]*\.?[0-9]+$`);
+                        const match = val.trim().match(String.raw`^[-+]?[0-9]*\.?[0-9]+$`);
                         if(!match) {
                             return false;
                         }
@@ -100,11 +100,11 @@ export default class ConfigEditorComponent extends VueNavigation {
         this.$emit("onAbort");
     }
 
-    onSave(model:DataModelComponentModelInterface) {
+    onSave(model: DataModelComponentModelInterface) {
         this.$emit("onSave", model);
-        for(let idx in model) {
-            let newObj = model[idx];
-            let oldObj = this.model.model[idx];
+        for(const idx in model) {
+            const newObj = model[idx];
+            const oldObj = this.model.model[idx];
             if(newObj.value !== oldObj.value) {
                 this.onPropertyChanged(idx, newObj, oldObj);
             }
@@ -112,17 +112,17 @@ export default class ConfigEditorComponent extends VueNavigation {
         SaveConfigObject(this.cfg);
     }
 
-    onPropertyChanged(propName:string, newObj:DataModelComponentValueInterface, oldObj:DataModelComponentValueInterface) {
+    onPropertyChanged(propName: string, newObj: DataModelComponentValueInterface, oldObj: DataModelComponentValueInterface) {
         console.log(`prop change: ${propName}, from: ${oldObj.value}, to:${newObj.value}`);
         if(propName === "channel") {
-            let channel = newObj.value as string || "test";
+            const channel = newObj.value as string || "test";
             if(channel !== "") {
                 this.scale.selectChannel(channel);
                 showToast(`Board changed to ${channel}`);
             }
         }
         oldObj.value = newObj.value;
-        let options = this.cfg.options;
+        const options = this.cfg.options;
         if(options.hasOwnProperty(propName)) {
             if(newObj.type === "number") {
                 options[propName] = parseFloat(newObj.value as string);

@@ -10,14 +10,14 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class CustomBar extends Vue {
-    @Prop({default: 0.25}) value!:number;
-    @Prop({default: "lightgray"}) passiveColor!:string;
-    @Prop({default: "linear-gradient(0deg, rgba(0,180,0,1) 10%, rgba(0,220,0,1))"}) activeColor!:string;
-    direction:string = "width";
+    @Prop({default: 0.25}) value!: number;
+    @Prop({default: "lightgray"}) passiveColor!: string;
+    @Prop({default: "linear-gradient(0deg, rgba(0,180,0,1) 10%, rgba(0,220,0,1))"}) activeColor!: string;
+    direction = "width";
     mounted() {
-        let cnt = this.$refs.container as HTMLElement;
+        const cnt = this.$refs.container as HTMLElement;
         if(cnt) {
-            let rkt = cnt.getBoundingClientRect();
+            const rkt = cnt.getBoundingClientRect();
             if(rkt.height > rkt.width) {
                 this.direction = "height";
             }
@@ -25,7 +25,7 @@ export default class CustomBar extends Vue {
     }
 
     get activeStyle() {
-        let value = Math.max(Math.min(this.value, 1), 0);
+        const value = Math.max(Math.min(this.value, 1), 0);
         return `${this.direction}: ${100 * value}%;`;
     }
 }

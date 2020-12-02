@@ -80,8 +80,8 @@ import HeadlineView from '@/components/HeadlineView.vue'
 import { getHoldString } from '@/core/util';
 
 class NavigationState {
-    stateIndex:number = 0;
-    constructor(readonly states:string[]) {}
+    stateIndex = 0;
+    constructor(readonly states: string[]) {}
     advance() {
         this.stateIndex++;
     }
@@ -115,11 +115,11 @@ class NavigationState {
     }*/
 })
 export default class TimerMain extends VueNavigation {
-    scaleBackend:HangboardScale;
-    navState:NavigationState = new NavigationState(['setup', 'timer']);
-    preperationProgress:number = 0;
-    continueTime:number = 3;
-    continueTimerId:any = null;
+    scaleBackend: HangboardScale;
+    navState: NavigationState = new NavigationState(['setup', 'timer']);
+    preperationProgress = 0;
+    continueTime = 3;
+    continueTimerId: any = null;
     initialState = {
         continueTime: this.continueTime,
         preperationProgress: this.preperationProgress
@@ -149,25 +149,25 @@ export default class TimerMain extends VueNavigation {
         this.continueTime = this.initialState.continueTime;
     }
 
-    onTimerSelected(timer:TimerSelectorEntry) {
+    onTimerSelected(timer: TimerSelectorEntry) {
         console.log("timer selected", timer);
         this.setupData.timer = timer;
         this.preperationProgress++;
     }
 
-    onHoldSelected(holds:SelectedHolds) {
+    onHoldSelected(holds: SelectedHolds) {
         console.log("selected board", holds);
         this.setupData.selectedHolds = holds;
         this.preperationProgress++;
     }
 
-    onTareDone(msg:WeightData) {
+    onTareDone(msg: WeightData) {
         console.log("tare done", msg);
         this.setupData.tareWeights = msg;
         this.preperationProgress++;
     }
 
-    onCalibrationUserDone(msg:WeightData) {
+    onCalibrationUserDone(msg: WeightData) {
         console.log("calibration (u) done", msg);
         this.setupData.userWeight = msg.combined;
         this.setupData.trainWeight = msg.combined
@@ -178,7 +178,7 @@ export default class TimerMain extends VueNavigation {
         this.preperationProgress++;
     }
 
-    onCalibrationTrainDone(msg:WeightData) {
+    onCalibrationTrainDone(msg: WeightData) {
         console.log("calibration (t) done", msg);
         this.setupData.trainWeight = msg.combined;
         this.preperationProgress++;
@@ -210,7 +210,7 @@ export default class TimerMain extends VueNavigation {
     }
 
     pauseTimer() {
-        let ht = this.$refs.hangtimer as HangTimer;
+        const ht = this.$refs.hangtimer as HangTimer;
         if(ht) {
             ht.onPauseTimer();
         } 
@@ -220,7 +220,7 @@ export default class TimerMain extends VueNavigation {
         if(this.navState.current() === "setup") {
             return "ok";
         }
-        let ht = this.$refs.hangtimer as HangTimer;
+        const ht = this.$refs.hangtimer as HangTimer;
         if(ht) {
             if(ht.timerState === "INIT") {
                 return "ok";

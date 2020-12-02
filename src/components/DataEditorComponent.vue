@@ -46,8 +46,8 @@ Vue.use(ToggleButton);
     }
 })
 export default class DataEditorComponent extends Vue {
-    @Prop({default: () => { return { title: "default", model: {}}}}) model!:DataModelComponentDataInterface;
-    modelCopy:DataModelComponentDataInterface|null = null;
+    @Prop({default: () => { return { title: "default", model: {}}}}) model!: DataModelComponentDataInterface;
+    modelCopy: DataModelComponentDataInterface|null = null;
 
     created() {
         this.modelCopy = cloneDeep(this.model);
