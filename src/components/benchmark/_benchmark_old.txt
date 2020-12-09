@@ -99,7 +99,7 @@ import WeightDisplay from '@/components/benchmark/WeightDisplay.vue'
 import BenchmarkGraph from '@/components/benchmark/BenchmarkGraph.vue'
 import Button from '@/components/Button.vue'
 import moment from 'moment';
-import { HangboardScale } from '@/core/hangboardscale';
+import { HangboardConnector } from '@/core/hangboardconnector';
 import { WeightMessage, ScaleOptions } from '@/core/sensorreader';
 import { sum, round, pipe, guard, movingAverage, tared } from '@/core/messagetransformer';
 import { BenchmarkController, ProgressInfo, BenchmarkData, PeakData } from '@/components/benchmark/ts/BenchmarkController'
@@ -123,7 +123,7 @@ import GoalBar from './GoalBar.vue'
 })
 export default class Benchmark extends Vue {
     @Prop({default: () => {}}) setupData!:BenchmarkSetupData;
-    scaleBackend:HangboardScale;
+    scaleBackend:HangboardConnector;
     bc!:BenchmarkController;
     benchmarkGraph:BenchmarkGraph|null = null;
     weightGoals!:MaxWeightGoals;

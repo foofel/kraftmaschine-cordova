@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { HangboardScale } from '../core/hangboardscale';
+import { HangboardConnector } from '../core/hangboardconnector';
 import { pipe, sum, guard, movingAverage, tared, taredByObject, clampPositive } from '../core/messagetransformer';
 import { WeightMessage, ScaleOptions, WeightDataInterface, WeightData, TempSensorInterface } from '@/core/sensorreader';
 import { TareWeights, DataModelComponentDataInterface, DataModelComponentModelInterface } from './typeexports';
@@ -34,7 +34,7 @@ import { round } from '../core/math';
 export default class SimpleWeightDisplay extends VueNavigation {
 	@Prop({default: 8}) rate!: number;
 	weight: WeightDataInterface;
-	scaleBackend: HangboardScale;
+	scaleBackend: HangboardConnector;
 	hidden: boolean;
 	calib: Calibration|null;
 	tareWeights: TareWeights = { left: 0, right: 0 };
@@ -47,7 +47,7 @@ export default class SimpleWeightDisplay extends VueNavigation {
 		this.hidden = true;
 		this.weight = new WeightData(0, 0, 0);
 		this.calib = null;
-		this.scaleBackend = this.$root.$data.scaleBackend as HangboardScale;
+		this.scaleBackend = this.$root.$data.scaleBackend as HangboardConnector;
 		this.tempInfo = this.scaleBackend.getLastTempSensorData();
 	}
 

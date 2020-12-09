@@ -7,7 +7,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { pipe, sum, round, guard, movingAverage, passTrough } from '../../core/messagetransformer';
-import { HangboardScale } from '../../core/hangboardscale';
+import { HangboardConnector } from '../../core/hangboardconnector';
 import { WeightMessage, ScaleOptions } from '@/core/sensorreader';
 import { DataHistory } from '../../core/history';
 import { ChartColors, TimerBarChartData } from '@/components/typeexports';

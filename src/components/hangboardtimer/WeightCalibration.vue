@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { pipe, sum, round, guard, movingAverage, tared } from '@/core/messagetransformer';
-import { HangboardScale } from '../../core/hangboardscale';
+import { HangboardConnector } from '../../core/hangboardconnector';
 import { ScaleOptions, WeightData, WeightMessage } from '@/core/sensorreader';
 import ProgressBar from '@/components/ProgressBar.vue'
 import { DataHistory, getAvg, LinearRegressionFromHistoryData } from '@/core/history';
@@ -26,7 +26,7 @@ export default class WeightCalibration extends Vue {
     @Prop({default: "hang onto board"}) initFormat!: number;
     @Prop({default: "%d%%"}) progressFormat!: number;
     @Prop({default: () => { return { left: 0, right: 0 } }}) tareWeights!: TareWeights;
-    scaleBackend: HangboardScale;
+    scaleBackend: HangboardConnector;
     calib: Calibration|null = null;
     //progressBar:ProgressBar|null = null;
     progressValue = 0;

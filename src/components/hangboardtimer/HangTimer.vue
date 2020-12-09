@@ -80,7 +80,7 @@
 ///// <reference types="../../types/cordova-plugin-media" />
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { pipe, sum, round, guard, movingAverage, passTrough, taredByObject, clampPositive, virtualMidpoint } from '../../core/messagetransformer';
-import { HangboardScale } from '../../core/hangboardscale';
+import { HangboardConnector } from '../../core/hangboardconnector';
 import { WeightMessage, ScaleOptions, TempSensorInterface } from '@/core/sensorreader';
 import { CORDOVA_BASE_PATH, GlobalConfig } from '../../config'
 import { HangTimerData, HangTimerSetupData, HangTimerGraphData, TimerBarChartData, LocalTrainingSaveData, Hangboards, TareWeights, SelectedHolds, Hold } from '@/components/typeexports'
@@ -119,7 +119,7 @@ const SCHEDULER_GROUPS = {
 export default class HangTimer extends Vue {
     @Prop() setupData!: HangTimerSetupData;
     activeTrackingTimer: TimerWithActiveTracking;
-    scaleBackend: HangboardScale;
+    scaleBackend: HangboardConnector;
     hangTimerData: HangTimerData;
     activationWeightFactor: number;
     graphData: HangTimerGraphData;

@@ -94,7 +94,7 @@ function BuildInitialConfig(): ConfigFile {
             enableBeep: true,
             forceMaxVolumeBeep: false,
             enableVibrate: true,
-            channel: "test",
+            channel: "",
             boardSetups: {},
             gbDrawTimeMarkers: true,
             gbDrawPercentileMarkers: true          

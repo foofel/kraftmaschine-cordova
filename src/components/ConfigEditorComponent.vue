@@ -11,7 +11,7 @@ import { VueNavigation } from './vuenavigation';
 import { DataModelComponentDataInterface, DataModelComponentModelInterface, DataModelComponentValueInterface } from './typeexports';
 import DataEditorComponent from './DataEditorComponent.vue'
 import { SaveConfigObject, ConfigData, ConfigFile } from '../core/localstore';
-import { HangboardScale } from '../core/hangboardscale';
+import { HangboardConnector } from '../core/hangboardconnector';
 import { showToast } from '../core/util';
 
 @Component({
@@ -22,7 +22,7 @@ import { showToast } from '../core/util';
 })
 export default class ConfigEditorComponent extends VueNavigation {
     model: DataModelComponentDataInterface =  { title: "Options", model: {}};
-    scale: HangboardScale;
+    scale: HangboardConnector;
     cfg: ConfigFile = this.$root.$data.cfg;
 
     constructor() {

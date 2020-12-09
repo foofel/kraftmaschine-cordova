@@ -1,5 +1,5 @@
 import { BenchmarkController, SignalProcessorEvents, ProcessingEvent } from './BenchmarkController';
-import { HangboardScale } from '@/core/hangboardscale';
+import { HangboardConnector } from '@/core/hangboardconnector';
 import { TareWeights } from '@/components/typeexports';
 import { WeightMessage } from '@/core/sensorreader';
 import { StopWatch } from '@/core/stopwatch';

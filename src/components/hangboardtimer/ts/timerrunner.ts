@@ -1,5 +1,5 @@
 import { StopWatch } from '@/core/stopwatch';
-import { HangboardScale } from '@/core/hangboardscale';
+import { HangboardConnector } from '@/core/hangboardconnector';
 import { WeightMessage } from '@/core/sensorreader';
 import { HangTimerData, TimerEntry } from '../../typeexports';
 import { clamp, round, roundDown } from '@/core/math';
@@ -178,7 +178,7 @@ export class TimerWithActiveTracking {
     updateIntervall: any;
     constructor(
         private hangTimerData: HangTimerData,
-        private scaleBackend: HangboardScale, 
+        private scaleBackend: HangboardConnector, 
         private timerProgressCallback: ActiveTrackingTimerCallback,
         private timerDoneCallback: ActiveTrackingTimerCallback,
         private beepCallback: BeepCallback) 

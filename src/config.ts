@@ -32,11 +32,18 @@ export const RequiredBackendVersion = {
     versionNumber: () => { return RequiredBackendVersion.major * 10000 + RequiredBackendVersion.minor * 100 + RequiredBackendVersion.patch; }
 };
 
+export const BLEServiceInfo = {
+    servidceId: "03257878-beb5-4087-ab68-ae6a82e4c4d9",
+    weightCharacteristicId: "095aac41-c04d-436f-93c1-8ef1cea45016",
+    hwVersionCharacteristicId: "abe57162-bb8a-4689-a9df-1af2268bf398",
+    deviceIdCharacteristicId: "b19e6ca8-4d24-4e1b-9f66-5b3990eeac4f"
+}
+
 export const BackendServers = {
     webscaleServerRemote: "wss://bb.urbsch.at:7324/",
-    webscaleServerLocal: "wss://192.168.0.136:7324/",
+    webscaleServerLocal: "wss://192.168.1.20:7324/",
     webscaleServer: () => { return BackendServers.webscaleServerRemote },
-    backendLocal: "https://localhost:25834/",
+    backendLocal: "https://192.168.1.20:25834/",
     backendRemote: "https://bb.urbsch.at:25834/",
-    backend: () => { return BackendServers.backendRemote; }
+    backend: () => { return BackendServers.backendLocal; }
 };

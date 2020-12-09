@@ -12,16 +12,16 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { VueNavigation } from '../vuenavigation';
 import BenchmarkGraph from '@/components/benchmark/BenchmarkGraph.vue'
 import { WeightMessage } from '@/core/sensorreader';
-import { HangboardScale } from '@/core/hangboardscale';
+import { HangboardConnector } from '@/core/hangboardconnector';
 import { pipe, tared, passTrough } from '@/core/messagetransformer';
-//import WC from '@/components/hangboardtimer/WeightCalibration.vue'
+import { round } from '../../core/messagetransformer';
 
 class Data {
     textData = [];
     timeBuffer = [];
     weightBuffer = [];
     gradientBuffer = [];
-    bufferLengthSeconds = 3600;
+    bufferLengthSeconds = 10;
 }
 
 export default {
@@ -57,14 +57,14 @@ export default {
         const doRedraw = () => {
             if(self.benchmarkGraph) {
                 const data = self.$options.dataObject;
-                self.benchmarkGraph.setData(data.timeBuffer, data.weightBuffer, data.gradientBuffer, []);
+                self.benchmarkGraph.setData(data.timeBuffer, data.weightBuffer, [], []);
             }
             if(self.stopUpdate) {
                 return;
             }
-            setTimeout(() => {
+            //setTimeout(() => {
                 requestAnimationFrame(doRedraw);
-            }, 1000)
+            //}, 1000)
         }
         requestAnimationFrame(doRedraw)
     },
@@ -97,6 +97,11 @@ export default {
             data.weightBuffer.splice(0, count);
             data.gradientBuffer.splice(0, count);
         }
+    },
+    methods: {
+        canLeaveComponent: function() {
+            return "ok"; // NavigatorLeaveResponse
+        }
     }
 }
 
@@ -110,7 +115,7 @@ export default class DebugViewComponent extends VueNavigation {
     interval: any = null;
     benchmarkGraph!: BenchmarkGraph;
     stopUpdate = false;
-    scaleBackend: HangboardScale;
+    scaleBackend: HangboardConnector;
     dataObject:Data|undefined = undefined;
 
     constructor() {

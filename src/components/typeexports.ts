@@ -282,6 +282,31 @@ export class Hangboards {
     };    
 }
 
+export interface Hx711CalibrationData {
+    left:number;
+    right:number;
+}
+
+export interface Hx711CalibrationListInterface {
+    [id: string]: { left: number, right: number } | { left: 1, right: 1 };
+}
+
+export class Hx711CalibrationList {
+    static getCalibrationValues(deviceId:string) {
+        const idx = this.deviceIds.findIndex((obj) => {
+            return obj.id === deviceId;
+        })
+        if(idx !== -1) {
+            return this.deviceIds[idx];
+        }
+        return { id: "00000", left: 1, right: 1 }
+    }
+    private static readonly deviceIds = [
+        { id: "00000", left: 1/25000, right: 1/25000 },
+        { id: "12345", left: 1/25000, right: 1/25000 }
+    ]
+}
+
 export interface LocalBenchmarkSaveData {
     boardId: number;
     leftId: number|null;

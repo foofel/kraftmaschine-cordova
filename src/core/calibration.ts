@@ -1,4 +1,4 @@
-import { HangboardScale } from './hangboardscale';
+import { HangboardConnector } from './hangboardconnector';
 import { tared, pipe } from './messagetransformer';
 import { TareWeights } from '@/components/typeexports';
 import { WeightMessage, ScaleOptions, WeightData } from './sensorreader';
@@ -20,7 +20,7 @@ export class Calibration {
     startFound = false;
     initialSamples = 20;
     progressStartTime = 0;
-    constructor(private scale: HangboardScale, 
+    constructor(private scale: HangboardConnector, 
         private onDone: CalibrationDoneCB,
         private smoothness: number = 1, 
         private minWeight: number = -10, 

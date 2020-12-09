@@ -64,7 +64,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Route } from 'vue-router';
 import { pipe, sum, round, guard, movingAverage } from '../../core/messagetransformer';
-import { HangboardScale } from '../../core/hangboardscale';
+import { HangboardConnector } from '../../core/hangboardconnector';
 import { VueNavigation } from '@/components/vuenavigation';
 import { WeightMessage, ScaleOptions, WeightData } from '@/core/sensorreader';
 //import TimerTare from './TimerTare.vue'
@@ -115,7 +115,7 @@ class NavigationState {
     }*/
 })
 export default class TimerMain extends VueNavigation {
-    scaleBackend: HangboardScale;
+    scaleBackend: HangboardConnector;
     navState: NavigationState = new NavigationState(['setup', 'timer']);
     preperationProgress = 0;
     continueTime = 3;

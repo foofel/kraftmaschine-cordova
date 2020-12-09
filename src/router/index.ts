@@ -20,6 +20,7 @@ import OptionsView from '@/components/options/OptionsView.vue'
 import TrainPlanView from '@/components/plan/TrainPlanView.vue'
 import DataEditorComponent from '@/components/DataEditorComponent.vue'
 import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
+import BluetoothConnectionSelector from '@/components/connectionselector/BluetoothConnectionSelector.vue'
 import { GlobalStore } from '@/main'
 
 Vue.use(VueRouter)
@@ -107,6 +108,9 @@ const routes = [
       },{
         path: 'debug',
         component: DebugViewComponent
+      }, {
+        path: 'connectionSelector',
+        component: BluetoothConnectionSelector
       }
     ]
   }

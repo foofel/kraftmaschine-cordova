@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { sum, round, pipe, guard, movingAverage, passTrough } from '@/core/messagetransformer';
-import { HangboardScale } from '../../core/hangboardscale';
+import { HangboardConnector } from '../../core/hangboardconnector';
 import { WeightMessage } from '../../core/sensorreader';
 import { sprintf } from "sprintf-js";
 
@@ -14,7 +14,7 @@ import { sprintf } from "sprintf-js";
     }
 })
 export default class WeightDisplay extends Vue {
-    scaleBackend: HangboardScale;
+    scaleBackend: HangboardConnector;
     currentWeight = 0;
     @Prop({default: "%s"}) format!: string;
     @Prop({default: () => pipe(passTrough)}) pipeline!: any;

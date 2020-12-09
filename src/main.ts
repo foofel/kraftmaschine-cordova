@@ -1,56 +1,58 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import { HangboardScale } from './core/hangboardscale'
+import { HangboardConnector } from './core/hangboardconnector'
 import { LocalSaveUploader, RemoteAPI, reauth, clearAllCookies } from './core/util'
-import { GetConfigObject, SaveConfigObject, SupplementDefaultKeys } from '@/core/localstore';
+import { ConfigFile, GetConfigObject, SaveConfigObject, SupplementDefaultKeys } from '@/core/localstore';
 
 Vue.config.productionTip = false
 
 console.log("kraftmaschine main file loaded!")
 
-// this "fixes" missing keys when we add new properties to the specified default values, 
-// oterweise those new keys are missing on exsiting configs
-let cfg = GetConfigObject();
-cfg = SupplementDefaultKeys(cfg);
-SaveConfigObject(cfg);
-
-const backendApi = new RemoteAPI();
-const scaleDataBackend = new HangboardScale(cfg.options.channel);
-const saveUploader = new LocalSaveUploader(backendApi);
-export const GlobalStore = {
-  scaleBackend: scaleDataBackend,
-  backend: backendApi,
-  localSaveUploader: saveUploader,
-  cfg:cfg,
+export interface GlobalStoreInterface {
+  scaleBackend: HangboardConnector,
+  backend: RemoteAPI,
+  localSaveUploader: LocalSaveUploader,
+  cfg: ConfigFile,
   staticData: null
 }
+export const GlobalStore = ({}) as GlobalStoreInterface
 
 function startupApp() {
-  console.log("starting app!")
+  console.log("startApp()");
+  // this "fixes" missing keys when we add new properties to the specified default values, 
+  // oterweise those new keys are missing on exsiting configs
+  let cfg = GetConfigObject();
+  cfg = SupplementDefaultKeys(cfg);
+  SaveConfigObject(cfg);    
+  GlobalStore.cfg = cfg;
+  const backendApi = new RemoteAPI();
+  const scaleDataBackend = new HangboardConnector(cfg.options.channel);
+  const saveUploader = new LocalSaveUploader(backendApi);
+  GlobalStore.scaleBackend = scaleDataBackend;
+  GlobalStore.backend = backendApi;
+  GlobalStore.localSaveUploader = saveUploader;
+  console.log("starting vue");
   const inst = new Vue({
     router,
     data: GlobalStore,
     render: h => h(App)
   }).$mount('#app');
-}
-
-function onDeviceReady() {
-  startupApp();
   document.addEventListener("pause", () => {
-    scaleDataBackend.onGlobalMessage("appPause");
+    GlobalStore.scaleBackend.onGlobalMessage("appPause");
   }, false);
   document.addEventListener("resume", () => {
-    if(cfg.secret !== "" && !reauth(backendApi)) {
+    if(cfg.secret !== "" && !reauth(GlobalStore.backend)) {
       clearAllCookies();
       window.location.reload(true);
     }
-    scaleDataBackend.onGlobalMessage("appResume");
-  }, false);
+    GlobalStore.scaleBackend.onGlobalMessage("appResume");
+  }, false);  
 }
+
 const isCordovaApp = window.hasOwnProperty("cordova");
 if(!isCordovaApp) {
   startupApp();
 } else {
-  document.addEventListener("deviceready", onDeviceReady, false);
+  document.addEventListener("deviceready", startupApp, false);
 }

@@ -1,7 +1,7 @@
 <template>
     <div class="main">
-        <div v-if="this.channelError" class="notification-container">
-            <div class="drawer-blink"></div>
+        <div v-if="this.channelError" @click="connectionMenuClicked()" class="notification-container">
+            you need to reconnect!
         </div>
         <div class="view">
             <!--keep-alive-->
@@ -11,10 +11,10 @@
         </div>
         <div class="drawer" :class="{'drawer-active': visible}" @click="hideDrawer()">
             <div class="items">
-                <div class="channel-error">
+                <!--div class="channel-error">
                     <div v-if="this.channelError" class="error-bg"></div>
                     <div v-if="this.channelError" class="error-msg center-in-rows">no data from scale</div>
-                </div>                
+                </div-->                
                 <div class="scroll-container">
                     <div class="item clickable" @click="itemClicked('scale')">
                         <i class="fas fa-balance-scale icon"></i><span>Scale</span>
@@ -51,7 +51,10 @@
                     </div>
                     <div class="item clickable" @click="itemClicked('debug')">
                         <i class="fas fa-cogs icon"></i><span>Debug</span>
-                    </div>                    
+                    </div>
+                    <div class="item clickable" @click="itemClicked('connectionSelector')">
+                        <i class="fas fa-cogs icon"></i><span>Device</span>
+                    </div>                      
                 </div>
             </div>
         </div>
@@ -69,9 +72,9 @@ import { Route } from 'vue-router';
 import { VueNavigation } from '../components/vuenavigation';
 import { showToast } from '../core/util';
 import { GlobalStore } from '../main';
+
 @Component({
-	components: {
-    }  
+	components: {}  
 })
 export default class DrawerView extends Vue {
     visible = false;
@@ -106,6 +109,10 @@ export default class DrawerView extends Vue {
         console.log(event)
         event.preventDefault();
         this.visible = false;
+    }
+
+    connectionMenuClicked(event: any) {
+
     }
 
     itemClicked(item: string) {
@@ -179,13 +186,11 @@ export default class DrawerView extends Vue {
     }
     .notification-container {
         position: absolute;
-        top: 0;
+        bottom: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
         z-index: 97;
-        pointer-events: none;
-        .drawer-blink {
+        //pointer-events: none;
+        /*.drawer-blink {
             position: absolute;
             left: 0;
             top: 0;
@@ -194,7 +199,7 @@ export default class DrawerView extends Vue {
             background-color: #ed2828;
             animation: fadeInOut 2s infinite;
             animation-timing-function: ease-in-out;
-        }
+        }*/
     }
     .burger-icon {
         position: absolute;

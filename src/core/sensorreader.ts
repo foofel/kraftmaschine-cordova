@@ -1,5 +1,8 @@
+import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexports';
+import { BLEServiceInfo, GlobalConfig } from '@/config';
+import { GlobalStore } from '@/main';
 import { runInContext } from 'lodash';
-import { BluetoothLE, CordovaBluetoothLE, WebBluetoothLE } from './bluetoothle';
+import { BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
 import { StopWatch } from './stopwatch';
 
 export const ScaleOptions = {
@@ -50,6 +53,9 @@ export interface SensorReaderInterface {
     removeTempSensorCallback(cb: TempSensorCallback): void;
     registerChannelInfoCallback(cb: ChannelInfoCallback): void ;
     removeChannelInfoCallback(cb: ChannelInfoCallback): void;
+    disconnect(): Promise<boolean>;
+    startChannelSearch(cb:(result: ScanCallbackInterface) => void): void;
+    stopChannelSearch(): void;
 }
 
 export class BluetoothSensorReader implements SensorReaderInterface 
@@ -61,19 +67,40 @@ export class BluetoothSensorReader implements SensorReaderInterface
     receivedPackages = 0;
     ppsLimitWatch: StopWatch = new StopWatch();
     activeResetWatch: StopWatch = new StopWatch(false);
+    lastid: number = 0;
+    calibrationData:Hx711CalibrationData;
+    elapsed:number = 0;
+    bleScanTimeout:any = null;
 
     constructor() {
         if(window.hasOwnProperty("cordova")) {
-            this.bleBackend = new CordovaBluetoothLE("NimBLE", "24:6F:28:7B:A5:BE");
+            this.bleBackend = new CordovaBluetoothLE();
         } else {
             this.bleBackend = new WebBluetoothLE();
         }
-        this.run();
+        this.calibrationData = Hx711CalibrationList.getCalibrationValues("");
+        const run = async () => {
+            if(GlobalStore.cfg.options.channel !== "") {
+                await this.connect(GlobalStore.cfg.options.channel);
+            }
+        };
+        run();
     }
 
-    private async run() {
-        await this.bleBackend.connect("24:6F:28:7B:A5:BE");
-        await this.bleBackend.subscribe("0x2a98", (data:string) => {
+    disconnect(): Promise<boolean> {
+        return this.bleBackend.disconnect("");
+    }
+
+    async connect(address:string) {
+        try {
+            const connectr = await this.bleBackend.connect(address);
+            if(!connectr) {
+                console.log("unable to connect");
+                return connectr;
+            }
+            const devId = this.bleBackend.getDeviceId();
+            this.calibrationData = Hx711CalibrationList.getCalibrationValues(devId);
+            await this.bleBackend.subscribe(BLEServiceInfo.weightCharacteristicId, (data:ArrayBuffer) => {
             if(this.ppsLimitWatch.elapsed() > 1) {
                 this.receivedPackages = 0;
             }
@@ -81,35 +108,49 @@ export class BluetoothSensorReader implements SensorReaderInterface
                 console.log("too many messages/s, ignoring");
                 return;
             }
-            if(data.length == 0) {
-                console.log("empty message, ignoring");
+            
+            if(data.byteLength < 12) {
+                console.log("invalid message length");
                 return;
             }
-            const messageType = data[0];
-            const payload = data.substr(1);
+            //console.log(data);
+            const dataView = new DataView(data);
+            const messageType = String.fromCharCode(dataView.getUint8(0));
             if(messageType === 'w') {
-                const params = payload.split(" ");
-                if(params.length < 4) {
-                    return;
+                const pkg = dataView.getUint8(1);
+                const timed = dataView.getUint16(2, true) / 1000000;
+                const left = dataView.getInt32(4, true) * this.calibrationData.left;
+                const right = dataView.getInt32(8, true) * this.calibrationData.right;
+                this.elapsed += timed;
+                const msg: WeightMessageInterface = new WeightMessage(
+                    left,
+                    right,
+                    left + right,
+                    this.elapsed,
+                    false
+                );
+                if(pkg < this.lastid) {
+                    this.lastid -= 255;
                 }
-                const msg: WeightMessageInterface = new WeightMessage(+params[2], +params[3], (+params[2]) + (+params[3]), (+params[1]) / 1000000, false);
+                if(Math.abs(pkg - this.lastid) > 1) {
+                    console.log(`missed package(s): ${pkg - this.lastid}`);
+                }
+                this.lastid = pkg;
                 for(const cb of this.weightListener) {
                     cb(msg);
                 }
                 this.receivedPackages++;
                 this.activeResetWatch.restart();
             } else if (messageType === 't') {
-                const params = payload.split(" ");
-                if(params.length < 3) {
-                    return;
-                }
+                const temp = dataView.getInt16(1, true) / 100;
+                const hum = dataView.getInt16(3, true) / 100;
+                const press = dataView.getInt16(5, true) / 10;
                 for(const cb of this.tempListener) {
                     const obj: TempSensorInterface = {
-                        //time: +tempData[0],
                         time: new Date(),
-                        temp: +params[0],
-                        humidity: +params[1],
-                        pressure: +params[2]
+                        temp: temp,
+                        humidity: hum,
+                        pressure: press
                     };
                     cb(obj);
                 }
@@ -120,10 +161,23 @@ export class BluetoothSensorReader implements SensorReaderInterface
             }
             
         });
+        } catch(e) {
+            console.log("error establishing connection:" , e);
+        }
     }
 
     public selectChannel(channel: string): void {
+        for(const cb of this.channelInfoListener) {
+            cb("ble", false);
+        }
+    }
 
+    public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {
+        this.bleScanTimeout = this.bleBackend.startScan(cb, 5);
+    }
+
+    public stopChannelSearch() {
+        this.bleBackend.stopScan(this.bleScanTimeout);
     }
 
     public isChannelActive(): boolean {
@@ -168,6 +222,10 @@ export class WebsocketSensorReader implements SensorReaderInterface {
     constructor(private connectionString: string, private channel: string) {
         this.startReader();
     }
+
+    async disconnect(): Promise<boolean> {
+        return true;
+    }    
 
     private startReader() {
         this.socket = new WebSocket(this.connectionString);
@@ -262,7 +320,7 @@ export class WebsocketSensorReader implements SensorReaderInterface {
             console.log(event);
             for(const cb of this.channelInfoListener) {
                 cb(this.channel, false);
-            }            
+            }
             setTimeout(() => {
                 this.startReader();
             }, 1000);
@@ -281,6 +339,9 @@ export class WebsocketSensorReader implements SensorReaderInterface {
             this.waitForChannelAnswer = true;
         }
     }
+
+    public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {}
+    public stopChannelSearch() {}
 
     public isChannelActive(): boolean {
         return this.channelActive;

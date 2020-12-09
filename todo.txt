@@ -1,0 +1,59 @@
+[training sessions]
+- make nice graphs for hold size/train weight/percentage weight
+
+[battle]
+- like seasons, resetting each month/week or seasons-
+- various categories hangtime/holdsize/both (think of a key on how to weight this)
+- direct battle, e.g. increating weight or hangtimer alternating between two people
+
+[benchmark]
+
+
+[highscore]
+
+
+[general]
+
+
+[nessesary]
+# easy
++++++ next +++++
+    beim benchmark muss der keepalive im intervall erneruert werden während der benchmark läuft, das sollte mit dem start/error vom controller irgendwie gehen, danach die letzten punkte hierdrunter
+- highlight your own best time on goal bar
+- show self best on goal clock [maybe done]
+- fix "custom benchmark" directly visivle at hole selection
+
+[easy]
+- leave/join channel uppon pause/resume
+- ++ optional ++ friend thingy?
+[medium]
+- highlight friends on goal bar / goal timer (red?)
+- dont show expert mode on backend error
+- persistent saves (not local storage, that only for debugging)
+- add qr code gen page/scan
+- nicer colors for left/right selection. more dignified
+- allow some routes to keep the previus content
+- scale: hide weight until initial tare is done
+- add qr code generation/scanning for firnd/board selection/adding
+- add general "options" thingy for the config stuff so the user can modify it
+- add graph to highscore detail results
+- set beep delay(beep sound on off etc.) directly on the timer via gear icon in the lower left
+- the whole scale callback thingy neets to be more... flexible e.g. after the tare the scale should allow for 
+- timer should "wait" a specific time (e.g. 2s) if the user is no in the activation time zone on change to the active state
+    becase we want not to measure how "exact" he can start but if he can hang the whole duration
+- need some kind of auth for clients for the websocket backend otherwise its easy to ddos and maybe some kind of keepalive (already ping/pong??)
+[hard]
+- add "schnellkraft" test via pullup
+- add some stuff to the debug view
+- "perks"/achivbements e.g. hang a minute, have a valid hang on 10mm etc. (visible opn user profile page)
+- add perks
+    - 1 training
+    - 10 trainings
+    - 100 trainings
+    - 10 trainings in a week
+    - ...
+- select board from map?
+
+
+
+    

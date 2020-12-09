@@ -1,4 +1,4 @@
-import { HangboardScale } from "@/core/hangboardscale";
+import { HangboardConnector } from "@/core/hangboardconnector";
 import { pipe, tared, passTrough } from '@/core/messagetransformer';
 import { WeightMessage, ScaleOptions } from '@/core/sensorreader';
 import { LinearRegressionFromData } from '@/core/history';
