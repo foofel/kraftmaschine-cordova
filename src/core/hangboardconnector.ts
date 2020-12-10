@@ -1,5 +1,5 @@
 import { MessageTransformerIntrerface, pipe, sum } from "./messagetransformer";
-import { SensorReaderInterface, WebsocketSensorReader, WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, ChannelInfoCallback, BluetoothSensorReader } from "./sensorreader";
+import { SensorReaderInterface,  WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, DeviceInfoCallback, BluetoothSensorReader } from "./sensorreader";
 import { BackendServers } from '../config';
 import { ScanCallbackInterface } from './bluetoothle';
 
@@ -13,7 +13,7 @@ export class HangboardConnector {
     weightListener: Array<WeightCallbackEntry> = [];
     tempListener: Array<TempSensorCallback> = [];
     globalEventListener: Array<GlobalEventCB> = [];
-    channelInfoListener: Array<ChannelInfoCallback> = [];
+    channelInfoListener: Array<DeviceInfoCallback> = [];
     lastTempMessage: TempSensorInterface;
 
     constructor(private initialChannel: string) {
@@ -36,17 +36,17 @@ export class HangboardConnector {
         console.log("[ble] disconnected, result:", res);
     }
 
-    public selectChannel(channel: string) {
-        this.dataReader.selectChannel(channel);
+    public selectDevice(channel: string) {
+        this.dataReader.connect(channel);
         this.resetData();
     }
 
     public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {
-        return this.dataReader.startChannelSearch(cb);
+        return this.dataReader.startDeviceSearch(cb);
     }
 
     public stopChannelSearch() {
-        this.dataReader.stopChannelSearch();
+        this.dataReader.stopDeviceSearch();
     }    
 
     private resetData() {
@@ -111,10 +111,10 @@ export class HangboardConnector {
         this.tempListener = this.tempListener.filter((e) => e !== cb);
     }
 
-    public registerChannelInfoCallback(cb: ChannelInfoCallback): void {
+    public registerChannelInfoCallback(cb: DeviceInfoCallback): void {
         this.channelInfoListener.push(cb);
     }
-    public removeChannelInfoCallback(cb: ChannelInfoCallback): void {
+    public removeChannelInfoCallback(cb: DeviceInfoCallback): void {
         this.channelInfoListener = this.channelInfoListener.filter((e) => e !== cb);
     }    
 

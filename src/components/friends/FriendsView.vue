@@ -18,7 +18,7 @@ import { VueNavigation } from '../vuenavigation';
     }
 })
 export default class FriendsView extends VueNavigation {
-    channel = "";
+
     constructor(){
         super();
     }

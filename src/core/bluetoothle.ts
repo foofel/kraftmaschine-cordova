@@ -61,7 +61,7 @@ class BluetoothLEHelpers {
         );
         setTimeout(() => {
             resolve({ status: true });
-        }, 20);
+        }, 100);
     });
     static closep = (address: string) => new Promise<BluetoothlePlugin.DeviceInfo>((resolve, reject) => {
         const params = {
@@ -447,15 +447,51 @@ export class CordovaBluetoothLE implements BluetoothLE {
 
     connectedAddress:string = "";
     connectedDeviceId:string = "";
+    startupSuccess:boolean = false;
 
-    constructor() {}
+    constructor() {
+        const start = async () => {
+            console.log("[ble] STARTING BLUETOOTH");
+            console.log("[ble] getting initislized state");
+            const isInitializedr = await BluetoothLEHelpers.isInitializedp();
+            console.log(`[ble] (isInitializedp)`, isInitializedr);
+            if(!isInitializedr.isInitialized) {
+                console.log("[ble] not initialized, trying init");
+                const initr = await BluetoothLEHelpers.initializep((result: { status: 'enabled' | 'disabled' }) => {
+                    console.log(`[ble] #################################### enabled state changed: ${result.status}`);
+                });
+                console.log(`[ble] (initializep)`, initr);
+                if(initr.status !== "enabled") {
+                    return false;
+                }
+            }
+            console.log("[ble] getting enabled state");
+            const isEnabledr = await BluetoothLEHelpers.isEnabledp();
+            console.log(`[ble] (isEnabledp)`, isEnabledr);            
+            if(!isEnabledr.isEnabled) {
+                console.log("[ble] not enabled, trying enable");
+                const enabler = await BluetoothLEHelpers.enablep();
+                console.log(`[ble] (enablep)`, enabler);
+                if(!enabler.status) {
+                    return false;
+                }
+            }
+            this.startupSuccess = true;
+        }
+        start();
+    }
 
     async connect(address:string): Promise<boolean>
     {
+        if(!this.startupSuccess) {
+            console.log("[ble] blue startup war not cuccessfull unable to use bluetooth");
+            return false;
+        }
+        const prevConnected = this.connectedAddress
         this.connectedAddress = "";
         this.connectedDeviceId = "";
         try {
-            console.log("[ble] STARTING");
+            console.log("[ble] trying to connect");
             console.log("[ble] getting initislized state");
             const isInitializedr = await BluetoothLEHelpers.isInitializedp();
             console.log(`[ble] (isInitializedp)`, isInitializedr);
@@ -481,24 +517,37 @@ export class CordovaBluetoothLE implements BluetoothLE {
                 }
             }
             // isConnected throws an error if we were never connected to this device...
-            let isConnected = false;
+           /* let isConnected = false;
             try {
                 console.log("[ble] getting connection state");
                 const isconnectedr = await BluetoothLEHelpers.isConnectedp(address);
                 isConnected = isconnectedr.isConnected;
             } catch(e) {}
-            console.log(`[ble] (isConnectedp)`, { isConnected: isConnected });
+            console.log(`[ble] (isConnectedp)`, { isConnected: isConnected });*/
             // trying to solve dead object exception in the bluetooth stack and
             // other things (mts/disvocery) when it thinks it has a good connection
+
+            // if the app reloads it can happen that ble still remembers the previus connection as 
+            // "we once connected there" and wans a reconnect not connect, therefore we yust try to close both
+            // before we connect somewhere new, this is mostly a dev thing as is should not happen later on but 
+            // whatever, doenst hut.            
             //if(isConnected) {
             try {
-                console.log("[ble] close connection");
-                const closer = await BluetoothLEHelpers.closep(address);
+                console.log("[ble] close connection (prev");
+                const closer = await BluetoothLEHelpers.closep(prevConnected);
                 console.log(closer);
                 if(closer.status !== "closed") {
                     return false;
                 }
             } catch(e) {}
+            try {
+                console.log("[ble] close connection (prev");
+                const closer = await BluetoothLEHelpers.closep(address);
+                console.log(closer);
+                if(closer.status !== "closed") {
+                    return false;
+                }
+            } catch(e) {}            
             //}
             console.log("[ble] trying to connect");
             const connectr = await BluetoothLEHelpers.connectp(address, (result:BluetoothlePlugin.DeviceInfo) => {

@@ -32,6 +32,6 @@
         <allow-intent href="itms-apps:*" />
     </platform>
     <edit-config file="AndroidManifest.xml" target="/manifest/application/activity[@android:name='MainActivity']" mode="overwrite">
-        <activity android:name="MainActivity" android:label="BoulderBash" android:configChanges="orientation|screenSize" />
+        <activity android:name="MainActivity" android:label="KraftMaschine" android:configChanges="orientation|screenSize" />
     </edit-config>
 </widget>

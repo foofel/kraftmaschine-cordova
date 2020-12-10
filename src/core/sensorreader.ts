@@ -42,20 +42,20 @@ export interface TempSensorInterface {
 
 export type WeightMessageCallback = (data: WeightMessageInterface) => void;
 export type TempSensorCallback = (data: TempSensorInterface) => void;
-export type ChannelInfoCallback = (channel: string, isActive: boolean) => void;
+export type DeviceInfoCallback = (channel: string, isActive: boolean) => void;
 
 export interface SensorReaderInterface {
-    selectChannel(channel: string): void ;
-    isChannelActive(): boolean;
+    connect(address:string):void;
+    disconnect(): Promise<boolean>;
+    isDeviceSending(): boolean;
     registerWeightListener(cb: WeightMessageCallback): void;
     removeWeightListener(cb: WeightMessageCallback): void ;
     registerTempSensorCallback(cb: TempSensorCallback): void;
     removeTempSensorCallback(cb: TempSensorCallback): void;
-    registerChannelInfoCallback(cb: ChannelInfoCallback): void ;
-    removeChannelInfoCallback(cb: ChannelInfoCallback): void;
-    disconnect(): Promise<boolean>;
-    startChannelSearch(cb:(result: ScanCallbackInterface) => void): void;
-    stopChannelSearch(): void;
+    registerChannelInfoCallback(cb: DeviceInfoCallback): void ;
+    removeChannelInfoCallback(cb: DeviceInfoCallback): void;
+    startDeviceSearch(cb:(result: ScanCallbackInterface) => void): void;
+    stopDeviceSearch(): void;
 }
 
 export class BluetoothSensorReader implements SensorReaderInterface 
@@ -63,14 +63,16 @@ export class BluetoothSensorReader implements SensorReaderInterface
     bleBackend:BluetoothLE;
     weightListener: Array<WeightMessageCallback> = [];
     tempListener: Array<TempSensorCallback> = [];
-    channelInfoListener: Array<ChannelInfoCallback> = [];    
-    receivedPackages = 0;
+    deviceInfoListener: Array<DeviceInfoCallback> = [];    
+    receivedPackagesInLastSecond = 0;
     ppsLimitWatch: StopWatch = new StopWatch();
     activeResetWatch: StopWatch = new StopWatch(false);
-    lastid: number = 0;
+    lastPackageId: number = 0;
     calibrationData:Hx711CalibrationData;
-    elapsed:number = 0;
+    timeSinceConnected:number = 0;
     bleScanTimeout:any = null;
+    watchdogIntervall:any = null;
+    lastWatchdogState:"good"|"bad" = "bad";
 
     constructor() {
         if(window.hasOwnProperty("cordova")) {
@@ -88,23 +90,26 @@ export class BluetoothSensorReader implements SensorReaderInterface
     }
 
     disconnect(): Promise<boolean> {
-        return this.bleBackend.disconnect("");
+        this.stopWatchdog();
+        return this.bleBackend.disconnect(this.bleBackend.getAddress());
     }
 
     async connect(address:string) {
         try {
+            this.stopWatchdog();
             const connectr = await this.bleBackend.connect(address);
             if(!connectr) {
                 console.log("unable to connect");
                 return connectr;
             }
+            this.startWatchdog();
             const devId = this.bleBackend.getDeviceId();
             this.calibrationData = Hx711CalibrationList.getCalibrationValues(devId);
             await this.bleBackend.subscribe(BLEServiceInfo.weightCharacteristicId, (data:ArrayBuffer) => {
             if(this.ppsLimitWatch.elapsed() > 1) {
-                this.receivedPackages = 0;
+                this.receivedPackagesInLastSecond = 0;
             }
-            if(this.receivedPackages > 100) {
+            if(this.receivedPackagesInLastSecond > 100) {
                 console.log("too many messages/s, ignoring");
                 return;
             }
@@ -121,25 +126,25 @@ export class BluetoothSensorReader implements SensorReaderInterface
                 const timed = dataView.getUint16(2, true) / 1000000;
                 const left = dataView.getInt32(4, true) * this.calibrationData.left;
                 const right = dataView.getInt32(8, true) * this.calibrationData.right;
-                this.elapsed += timed;
+                this.timeSinceConnected += timed;
                 const msg: WeightMessageInterface = new WeightMessage(
                     left,
                     right,
                     left + right,
-                    this.elapsed,
+                    this.timeSinceConnected,
                     false
                 );
-                if(pkg < this.lastid) {
-                    this.lastid -= 255;
+                if(pkg < this.lastPackageId) {
+                    this.lastPackageId -= 255;
                 }
-                if(Math.abs(pkg - this.lastid) > 1) {
-                    console.log(`missed package(s): ${pkg - this.lastid}`);
+                if(Math.abs(pkg - this.lastPackageId) > 1) {
+                    console.log(`missed package(s): ${pkg - this.lastPackageId}`);
                 }
-                this.lastid = pkg;
+                this.lastPackageId = pkg;
                 for(const cb of this.weightListener) {
                     cb(msg);
                 }
-                this.receivedPackages++;
+                this.receivedPackagesInLastSecond++;
                 this.activeResetWatch.restart();
             } else if (messageType === 't') {
                 const temp = dataView.getInt16(1, true) / 100;
@@ -154,7 +159,7 @@ export class BluetoothSensorReader implements SensorReaderInterface
                     };
                     cb(obj);
                 }
-                this.receivedPackages++;
+                this.receivedPackagesInLastSecond++;
                 this.activeResetWatch.restart();
             } else {
                 console.log("unknown message");
@@ -166,22 +171,42 @@ export class BluetoothSensorReader implements SensorReaderInterface
         }
     }
 
-    public selectChannel(channel: string): void {
-        for(const cb of this.channelInfoListener) {
-            cb("ble", false);
+    stopWatchdog() {
+        if(this.watchdogIntervall) {
+            clearInterval(this.watchdogIntervall);
+            this.watchdogIntervall = null;
         }
     }
 
-    public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {
+    startWatchdog() {
+        this.watchdogIntervall = setInterval(() => {
+            if(this.activeResetWatch.elapsed() > 1 && this.lastWatchdogState == "good") {
+                for(const cb of this.deviceInfoListener) {
+                    cb(this.bleBackend.getAddress(), false);
+                }
+                this.lastWatchdogState = "bad";
+            } else if(this.activeResetWatch.elapsed() <= 0.1 && this.lastWatchdogState == "bad") {
+                this.lastWatchdogState = "good";
+            }
+        }, 100);
+    }
+
+    public selectDevice(address: string): void {
+        for(const cb of this.deviceInfoListener) {
+            cb(address, false);
+        }
+    }
+
+    public startDeviceSearch(cb:(result: ScanCallbackInterface) => void) {
         this.bleScanTimeout = this.bleBackend.startScan(cb, 5);
     }
 
-    public stopChannelSearch() {
+    public stopDeviceSearch() {
         this.bleBackend.stopScan(this.bleScanTimeout);
     }
 
-    public isChannelActive(): boolean {
-        return this.activeResetWatch.isStarted() &&  this.activeResetWatch.elapsed() < 1;
+    public isDeviceSending(): boolean {
+        return this.activeResetWatch.isStarted() &&  this.lastWatchdogState == "good";
     }
 
     public registerWeightListener(cb: WeightMessageCallback): void {
@@ -196,15 +221,15 @@ export class BluetoothSensorReader implements SensorReaderInterface
     public removeTempSensorCallback(cb: TempSensorCallback): void {
         this.tempListener = this.tempListener.filter((e) => e !== cb);
     }
-    public registerChannelInfoCallback(cb: ChannelInfoCallback): void {
-        this.channelInfoListener.push(cb);
+    public registerChannelInfoCallback(cb: DeviceInfoCallback): void {
+        this.deviceInfoListener.push(cb);
     }
-    public removeChannelInfoCallback(cb: ChannelInfoCallback): void {
-        this.channelInfoListener = this.channelInfoListener.filter((e) => e !== cb);
+    public removeChannelInfoCallback(cb: DeviceInfoCallback): void {
+        this.deviceInfoListener = this.deviceInfoListener.filter((e) => e !== cb);
     }
 }
 
-export class WebsocketSensorReader implements SensorReaderInterface {
+/*export class WebsocketSensorReader implements SensorReaderInterface {
     sampleAvgCount = 1;
     msgId = 0;
     weightListener: Array<WeightMessageCallback> = [];
@@ -327,6 +352,7 @@ export class WebsocketSensorReader implements SensorReaderInterface {
         }
     }
 
+    connect(address:string) {}
     public selectChannel(channel: string): void {
         if(this.socket) {
             this.channel = channel;
@@ -365,4 +391,4 @@ export class WebsocketSensorReader implements SensorReaderInterface {
     public removeChannelInfoCallback(cb: ChannelInfoCallback): void {
         this.channelInfoListener = this.channelInfoListener.filter((e) => e !== cb);
     }
-}
+}*/

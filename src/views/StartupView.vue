@@ -79,7 +79,7 @@
         <div class="splashcontent center-in-rows">
             <div>
                 <div class="splash-headline-container">
-                    <div class="splash-headline">BoulderBash</div>
+                    <div class="splash-headline">KraftMaschine</div>
                     <div class="subtitle">By Twin Peaks</div>
                 </div>
             </div>

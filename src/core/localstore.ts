@@ -40,6 +40,10 @@ export interface ConfigBoardSetup {
     [channel: string]: number;
 }
 
+export interface DeviceBoardMapping {
+    [device: string]: number;
+}
+
 export interface ConfigData {
     runCount: number;
     firstLogin: boolean;
@@ -50,6 +54,7 @@ export interface ConfigData {
     forceMaxVolumeBeep: boolean;
     enableVibrate: boolean;
     channel: string;
+    deviceBoardMapping:DeviceBoardMapping;
     boardSetups: ConfigBoardSetup;
     gbDrawTimeMarkers: boolean;
     gbDrawPercentileMarkers: boolean;
@@ -95,6 +100,7 @@ function BuildInitialConfig(): ConfigFile {
             forceMaxVolumeBeep: false,
             enableVibrate: true,
             channel: "",
+            deviceBoardMapping: {},
             boardSetups: {},
             gbDrawTimeMarkers: true,
             gbDrawPercentileMarkers: true          

@@ -117,7 +117,7 @@ export default class ConfigEditorComponent extends VueNavigation {
         if(propName === "channel") {
             const channel = newObj.value as string || "test";
             if(channel !== "") {
-                this.scale.selectChannel(channel);
+                this.scale.selectDevice(channel);
                 showToast(`Board changed to ${channel}`);
             }
         }
