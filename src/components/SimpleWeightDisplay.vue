@@ -52,7 +52,7 @@ export default class SimpleWeightDisplay extends VueNavigation {
 	}
 
 	mounted () {
-		this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20), clampPositive));
+		this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
 		this.scaleBackend.registerTempSensorCallback(this.onTempSensorMessage);
 		this.onTare();
 		this.intervallId = setInterval(() => {

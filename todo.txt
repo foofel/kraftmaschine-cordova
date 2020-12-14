@@ -1,3 +1,84 @@
+[next todo]
+- fix temp updater in the esp32 ble server
+- check for bad i2c values through the long cable 
+- finish the ble setup and program init setup steps
+- finish at least bm1k/2k/twinpeaks board (need a better name)
+- loading screen of reduce timeout for initial login
+- top spacing in menu bar
+- 
+
+
+[needed before release]
+- hardware solution for:
+    - faster caseing production (cutting right holes)
+    - faster pcb creation (either pdb layout or better streifenraster platine)
+    - the dsub buchs work good but we need a better and cheap housing
+    - make scale/bme280 interfhangeable secure (use lower pins for bme280)
+- buy and find aplace for a 3d printer or check printing cost
+
+
+[experiments]
+- when is the data from x711 really ready? save timestamp and print on serial
+
+[other]
+- setup wiki.js (or look for another but we need a wiki)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 [training sessions]
 - make nice graphs for hold size/train weight/percentage weight
 

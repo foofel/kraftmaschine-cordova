@@ -308,10 +308,8 @@ export default class StartupView extends Vue {
     }
 
     redirectToMain() {
-        // root-container fadeout
-        //this.$router.replace("swipe");
-        this.$router.replace("view/timer");
-        //console.log("REDIREEEEECT");
+        this.$router.replace("view/scale");
+        //TODO: if we are on a first run, push device selection screen
     }
 
     validUuid(uuid: string) {

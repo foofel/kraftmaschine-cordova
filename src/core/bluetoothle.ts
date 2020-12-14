@@ -585,9 +585,10 @@ export class CordovaBluetoothLE implements BluetoothLE {
             //}
             this.connectedAddress = address;
             console.log("[ble] getting device id");
-            const devId = await BluetoothLEHelpers.readp(address, BLEServiceInfo.servidceId, BLEServiceInfo.deviceIdCharacteristicId);
+            const devIdr = await BluetoothLEHelpers.readp(address, BLEServiceInfo.servidceId, BLEServiceInfo.deviceIdCharacteristicId);
+            const devId = atob(devIdr.value);
             console.log("[ble] (readp)", devId);
-            this.connectedDeviceId = devId.value;
+            this.connectedDeviceId = devId;
             console.log("[ble] DONE");
             return true;
         } catch(e) {
