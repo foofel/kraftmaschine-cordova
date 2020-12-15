@@ -2,7 +2,7 @@ import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexp
 import { BLEServiceInfo, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
 import { GlobalStore } from '@/main';
 import { runInContext } from 'lodash';
-import { BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
+import { BLEConnectionResult, BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
 import { StopWatch } from './stopwatch';
 
 export const ScaleOptions = {
@@ -45,7 +45,8 @@ export type TempSensorCallback = (data: TempSensorInterface) => void;
 export type DeviceInfoCallback = (channel: string, isActive: boolean) => void;
 
 export interface SensorReaderInterface {
-    connect(address:string):void;
+    init(): Promise<boolean>;
+    connect(address:string):Promise<BLEConnectionResult>;
     disconnect(): Promise<boolean>;
     isDeviceSending(): boolean;
     registerWeightListener(cb: WeightMessageCallback): void;
@@ -68,7 +69,7 @@ export class BluetoothSensorReader implements SensorReaderInterface
     ppsLimitWatch: StopWatch = new StopWatch();
     activeResetWatch: StopWatch = new StopWatch(false);
     lastPackageId: number = 0;
-    calibrationData:Hx711CalibrationData;
+    calibrationData:Hx711CalibrationData = Hx711CalibrationList.getIdentityCalibration();;
     timeSinceConnected:number = 0;
     bleScanTimeout:any = null;
     watchdogIntervall:any = null;
@@ -80,13 +81,10 @@ export class BluetoothSensorReader implements SensorReaderInterface
         } else {
             this.bleBackend = new CordovaBluetoothLE();
         }
-        this.calibrationData = Hx711CalibrationList.getCalibrationValues("");
-        const run = async () => {
-            if(GlobalStore.cfg.options.channel !== "") {
-                await this.connect(GlobalStore.cfg.options.channel);
-            }
-        };
-        run();
+    }
+
+    init(): Promise<boolean> {
+        return this.bleBackend.init();
     }
 
     disconnect(): Promise<boolean> {
@@ -94,83 +92,78 @@ export class BluetoothSensorReader implements SensorReaderInterface
         return this.bleBackend.disconnect(this.bleBackend.getAddress());
     }
 
-    async connect(address:string) {
-        try {
-            this.stopWatchdog();
-            const connectr = await this.bleBackend.connect(address);
-            if(!connectr) {
-                console.log("unable to connect");
-                return connectr;
+    async connect(address:string): Promise<BLEConnectionResult> {
+        this.stopWatchdog();
+        const connectr = await this.bleBackend.connect(address);
+        if(!connectr.success) {
+            console.log("unable to connect");
+            return connectr;
+        }
+        this.startWatchdog();
+        const devId = this.bleBackend.getDeviceId();
+        this.calibrationData = Hx711CalibrationList.getCalibrationValues(devId);
+        await this.bleBackend.subscribe(BLEServiceInfo.weightCharacteristicId, (data:ArrayBuffer) => this.handleMsg(data) );
+        return connectr;
+    }
+
+    handleMsg(data:ArrayBuffer) {
+        if(this.ppsLimitWatch.elapsed() > 1) {
+            this.receivedPackagesInLastSecond = 0;
+        }
+        if(this.receivedPackagesInLastSecond > 100) {
+            console.log("too many messages/s, ignoring");
+            return;
+        }
+        
+        if(data.byteLength < 12) {
+            console.log("invalid message length");
+            return;
+        }
+        //console.log(data);
+        const dataView = new DataView(data);
+        const messageType = String.fromCharCode(dataView.getUint8(0));
+        if(messageType === 'w') {
+            const pkg = dataView.getUint8(1);
+            const timed = dataView.getUint16(2, true) / 1000000;
+            const left = dataView.getInt32(4, true) * this.calibrationData.left;
+            const right = dataView.getInt32(8, true) * this.calibrationData.right;
+            this.timeSinceConnected += timed;
+            const msg: WeightMessageInterface = new WeightMessage(
+                left,
+                right,
+                left + right,
+                this.timeSinceConnected,
+                false
+            );
+            if(pkg < this.lastPackageId) {
+                this.lastPackageId -= 255;
             }
-            this.startWatchdog();
-            const devId = this.bleBackend.getDeviceId();
-            this.calibrationData = Hx711CalibrationList.getCalibrationValues(devId);
-            await this.bleBackend.subscribe(BLEServiceInfo.weightCharacteristicId, (data:ArrayBuffer) => {
-            if(this.ppsLimitWatch.elapsed() > 1) {
-                this.receivedPackagesInLastSecond = 0;
+            if(Math.abs(pkg - this.lastPackageId) > 1) {
+                console.log(`missed package(s): ${pkg - this.lastPackageId}`);
             }
-            if(this.receivedPackagesInLastSecond > 100) {
-                console.log("too many messages/s, ignoring");
-                return;
+            this.lastPackageId = pkg;
+            for(const cb of this.weightListener) {
+                cb(msg);
             }
-            
-            if(data.byteLength < 12) {
-                console.log("invalid message length");
-                return;
+            this.receivedPackagesInLastSecond++;
+            this.activeResetWatch.restart();
+        } else if (messageType === 't') {
+            const temp = dataView.getInt16(1, true) / 100;
+            const hum = dataView.getInt16(3, true) / 100;
+            const press = dataView.getInt16(5, true) / 10;
+            for(const cb of this.tempListener) {
+                const obj: TempSensorInterface = {
+                    time: new Date(),
+                    temp: temp,
+                    humidity: hum,
+                    pressure: press
+                };
+                cb(obj);
             }
-            //console.log(data);
-            const dataView = new DataView(data);
-            const messageType = String.fromCharCode(dataView.getUint8(0));
-            if(messageType === 'w') {
-                const pkg = dataView.getUint8(1);
-                const timed = dataView.getUint16(2, true) / 1000000;
-                const left = dataView.getInt32(4, true) * this.calibrationData.left;
-                const right = dataView.getInt32(8, true) * this.calibrationData.right;
-                this.timeSinceConnected += timed;
-                const msg: WeightMessageInterface = new WeightMessage(
-                    left,
-                    right,
-                    left + right,
-                    this.timeSinceConnected,
-                    false
-                );
-                if(pkg < this.lastPackageId) {
-                    this.lastPackageId -= 255;
-                }
-                if(Math.abs(pkg - this.lastPackageId) > 1) {
-                    console.log(`missed package(s): ${pkg - this.lastPackageId}`);
-                }
-                this.lastPackageId = pkg;
-                for(const cb of this.weightListener) {
-                    cb(msg);
-                }
-                this.receivedPackagesInLastSecond++;
-                this.activeResetWatch.restart();
-            } else if (messageType === 't') {
-                const temp = dataView.getInt16(1, true) / 100;
-                const hum = dataView.getInt16(3, true) / 100;
-                const press = dataView.getInt16(5, true) / 10;
-                for(const cb of this.tempListener) {
-                    const obj: TempSensorInterface = {
-                        time: new Date(),
-                        temp: temp,
-                        humidity: hum,
-                        pressure: press
-                    };
-                    cb(obj);
-                }
-                this.receivedPackagesInLastSecond++;
-                this.activeResetWatch.restart();
-            } else {
-                console.log("unknown message");
-            }
-            
-        });
-        } catch(e) {
-            /* if(e.code == 8){ // webble user cancel request
-                debugger;
-            }*/
-            console.log("error establishing connection:" , e);
+            this.receivedPackagesInLastSecond++;
+            this.activeResetWatch.restart();
+        } else {
+            console.log("unknown message");
         }
     }
 
@@ -231,167 +224,3 @@ export class BluetoothSensorReader implements SensorReaderInterface
         this.deviceInfoListener = this.deviceInfoListener.filter((e) => e !== cb);
     }
 }
-
-/*export class WebsocketSensorReader implements SensorReaderInterface {
-    sampleAvgCount = 1;
-    msgId = 0;
-    weightListener: Array<WeightMessageCallback> = [];
-    tempListener: Array<TempSensorCallback> = [];
-    channelInfoListener: Array<ChannelInfoCallback> = [];
-    maxPPS = 100; // the scale sends with 80 pps + 
-    receivedPackages = 0;
-    ppsLimitWatch: StopWatch = new StopWatch();
-    activeResetWatch: StopWatch = new StopWatch();
-    socket: WebSocket|null = null;
-    isConnected = false;
-    channelActive = false;
-    waitForChannelAnswer = true;
-    channelCheckAliveIntervall: any = null;
-    constructor(private connectionString: string, private channel: string) {
-        this.startReader();
-    }
-
-    async disconnect(): Promise<boolean> {
-        return true;
-    }    
-
-    private startReader() {
-        this.socket = new WebSocket(this.connectionString);
-        this.socket.onopen = (event: Event) => {
-            this.isConnected = true;
-            console.log("sensor reader websocket connected");
-            this.selectChannel(this.channel);
-            this.channelCheckAliveIntervall = setInterval(() => {
-                if(this.waitForChannelAnswer) {
-                    return;
-                }
-                if(this.activeResetWatch.elapsed() >= 1 && this.channelActive) {
-                    this.channelActive = false;
-                    console.log(`channel ${this.channel} inactive!`)
-                    for(const cb of this.channelInfoListener) {
-                        cb(this.channel, false);
-                    }
-                } else if(this.activeResetWatch.elapsed() < 1 && !this.channelActive) {
-                    this.channelActive = true;
-                    console.log(`channel ${this.channel} active!`);
-                    for(const cb of this.channelInfoListener) {
-                        cb(this.channel, true);
-                    }
-                }
-            }, 1000)            
-        }
-        this.socket.onmessage = (event: MessageEvent) => {
-            const data: string = event.data as string;
-            if(data.length < 2) {
-                console.log(`invalid message: ${data}`);
-                return;
-            }
-            if(this.ppsLimitWatch.elapsed() >= 1) {
-                this.receivedPackages = 0;
-                this.ppsLimitWatch.restart();
-            }
-            if(this.receivedPackages > this.maxPPS) {
-                return;
-            }
-            this.receivedPackages++;
-            this.activeResetWatch.restart();
-            const msgType: string = data[0];
-            if(this.waitForChannelAnswer && msgType !== "c") {
-                return;
-            }
-            if(msgType === "w") {
-                // packet number, packet time(s), left (kg), right (kg)
-                const weightData: Array<string> = data.substr(1).split(" ");
-                if(weightData.length < 4) {
-                    console.log(`invalid weight message: ${data}`);
-                    return;
-                }
-                const msg: WeightMessageInterface = new WeightMessage(+weightData[2], +weightData[3], (+weightData[2]) + (+weightData[3]), (+weightData[1]), false);
-                for(const cb of this.weightListener) {
-                    cb(msg);
-                }
-            } else if(msgType === "t") {
-                // packet time(s), temp (°C), humidity (%), preassure (hPA)
-                const tempData: Array<string> = data.substr(1).split(" ");
-                if(tempData.length < 4) {
-                    console.log(`invalid temperature message: ${data}`);
-                }
-                for(const cb of this.tempListener) {
-                    const obj: TempSensorInterface = {
-                        //time: +tempData[0],
-                        time: new Date(),
-                        temp: +tempData[1],
-                        humidity: +tempData[2],
-                        pressure: +tempData[3]
-                    };
-                    cb(obj);
-                }
-            } else if(msgType === "c") {
-                const channel = data.substr(1);
-                console.log(`selcted channel ${channel}`);
-                this.waitForChannelAnswer = false;
-            } else {
-                console.log(`received invalid message: '${data}'`);
-            }
-        }
-        this.socket.onerror = (event: Event) => {
-            console.log("sensor connection error");
-            console.log(event);
-        }
-        this.socket.onclose = (event: CloseEvent) => {
-            this.isConnected = false;
-            this.channelActive = false;
-            if(this.channelCheckAliveIntervall) {
-                clearInterval(this.channelCheckAliveIntervall);
-            }
-            console.log("sensor connection closed");
-            console.log(event);
-            for(const cb of this.channelInfoListener) {
-                cb(this.channel, false);
-            }
-            setTimeout(() => {
-                this.startReader();
-            }, 1000);
-        }
-    }
-
-    connect(address:string) {}
-    public selectChannel(channel: string): void {
-        if(this.socket) {
-            this.channel = channel;
-            this.channelActive = false;
-            for(const cb of this.channelInfoListener) {
-                cb(this.channel, false);
-            }              
-            this.socket.send(`c${channel}`);
-            console.log(`sending channel change request for channel ${channel}`);
-            this.waitForChannelAnswer = true;
-        }
-    }
-
-    public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {}
-    public stopChannelSearch() {}
-
-    public isChannelActive(): boolean {
-        return this.channelActive;
-    }
-
-    public registerWeightListener(cb: WeightMessageCallback): void {
-        this.weightListener.push(cb);
-    }
-    public removeWeightListener(cb: WeightMessageCallback): void {
-        this.weightListener = this.weightListener.filter((e) => e !== cb);
-    }
-    public registerTempSensorCallback(cb: TempSensorCallback): void {
-        this.tempListener.push(cb);
-    }
-    public removeTempSensorCallback(cb: TempSensorCallback): void {
-        this.tempListener = this.tempListener.filter((e) => e !== cb);
-    }
-    public registerChannelInfoCallback(cb: ChannelInfoCallback): void {
-        this.channelInfoListener.push(cb);
-    }
-    public removeChannelInfoCallback(cb: ChannelInfoCallback): void {
-        this.channelInfoListener = this.channelInfoListener.filter((e) => e !== cb);
-    }
-}*/

@@ -96,9 +96,9 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ConfigFile } from '@/core/storageinterface';
 import { RemoteAPI, EasyRemoteApiHelpers, clearAllCookies } from '@/core/util'
 import { GlobalConfig, AppVersion, RequiredBackendVersion } from '@/config'
-import { UserData } from '@/core/user'
 import { GlobalStore } from '../main';
 import Button from '@/components/Button.vue'
+import { HangboardConnector } from '@/core/hangboardconnector';
 
 @Component({
     components: {
@@ -107,6 +107,7 @@ import Button from '@/components/Button.vue'
 })
 export default class StartupView extends Vue {
     backend: RemoteAPI = this.$root.$data.backend;
+    hangboardConnector: HangboardConnector = this.$root.$data.scaleBackend;
     cfg: ConfigFile = this.$root.$data.cfg;
     //backendVersion:string = "";
     // visible (error) states and setup
@@ -136,8 +137,13 @@ export default class StartupView extends Vue {
         super();
     }
 
-    async mounted()  {
+    mounted()  {
+        console.log("MOUNTED StartupView");
         this.executeSetupSequence();
+    }
+
+    beforeDestroy() {
+        console.log("DESTROYED StartupView");
     }
 
     reloadApp() {
@@ -177,7 +183,6 @@ export default class StartupView extends Vue {
         if(result) {
             this.cfg.secret = result.secret;
             this.cfg.alias = result.alias;
-            //SaveConfigObject(this.cfg);
             console.log(`account '${this.cfg.alias}' created (key:${this.cfg.secret}, PRIVATE do not share!)`);
             const authPromise = await EasyRemoteApiHelpers.authenticate(this.backend, this.cfg.secret);
             if(authPromise.result.status !== 200) {
@@ -193,7 +198,6 @@ export default class StartupView extends Vue {
 
     async saveSecretClicked(evt: any) {
         this.cfg.secret = this.model.secret;
-        //SaveConfigObject(this.cfg);
         this.reloadApp();
     }
 
@@ -217,9 +221,18 @@ export default class StartupView extends Vue {
         }
         // if we have an id its not the first login
         if(this.cfg.secret !== "") {
-            this.cfg.options.firstLogin = false;
-            //SaveConfigObject(this.cfg);
+            this.cfg.options.firstRun = false;
         }
+        const bleInit = await this.hangboardConnector.init();	
+        if(!bleInit) {
+            console.log(`unable to init bluetooth`);
+        } else {
+            console.log(`ble initialized`)
+        }
+        if(GlobalStore.cfg.options.deviceAddress !== "") {
+            console.log("found previusly connected device, trying reconnect");
+            this.hangboardConnector.connect(GlobalStore.cfg.options.deviceAddress);
+        }        
         //TODO: do something if the first login thingi should be used
         // ...
         if(this.cfg.secret === "") {
@@ -234,7 +247,6 @@ export default class StartupView extends Vue {
             this.cfg.alias = authPromise.data.alias;
             this.cfg.email = authPromise.data.email;
             this.cfg.name = authPromise.data.name;
-            //SaveConfigObject(this.cfg);
             this.displayName = this.cfg.alias;
             console.log(`authentication successfull, hello ${this.cfg.alias} :)`);
             //GlobalStore.localSaveUploader.uploadLocalSaves();
@@ -292,7 +304,6 @@ export default class StartupView extends Vue {
     get hasName() {
         const alias = this.cfg.alias;
         const hn = alias != ''; // eslint-disable-line eqeqeq
-        console.log(hn);
         return hn;
     }
 
@@ -308,8 +319,11 @@ export default class StartupView extends Vue {
     }
 
     redirectToMain() {
-        this.$router.replace("view/scale");
-        this.$router.push("device-selector");
+        if(this.cfg.options.firstRun) {
+            this.$router.push("view/device-selector");
+        } else {
+            this.$router.push("view/scale");
+        }
         //TODO: if we are on a first run, push device selection screen
     }
 
@@ -322,7 +336,7 @@ export default class StartupView extends Vue {
         /*} else  {
             return true;
         }*/
-    }    
+    }
 }
 </script>
 

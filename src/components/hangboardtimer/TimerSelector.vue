@@ -171,7 +171,6 @@ export default class TimerSelector extends Vue {
         const newTimer = { ...this.customTimerData, id: makeid(10) };
         this.customTimers.push(newTimer as any);
         this.cfg.options.savedTimers = this.customTimers;
-        //SaveConfigObject(this.cfg);
         this.resetCustomTimerView();
     }
     onDeleteCurrentSelected() {
@@ -180,7 +179,6 @@ export default class TimerSelector extends Vue {
             if(confirm(`delete timer '${timer.name}'?`)) {
                 this.customTimers = this.customTimers.filter((val) => val.id !== timer!.id);
                 this.cfg.options.savedTimers = this.customTimers;
-                //SaveConfigObject(this.cfg);
                 this.customTimerData = { ...PredefinedTimers.default };
                 this.resetCustomTimerView();
             }
@@ -195,7 +193,6 @@ export default class TimerSelector extends Vue {
             if(confirm(`update timer '${timer.name}'?`)) {
                 this.customTimers[timerIdx] = {...this.customTimerData};
                 this.cfg.options.savedTimers = this.customTimers;
-                //SaveConfigObject(this.cfg);
             }
         } else {
             alert("please select a custom timer first");

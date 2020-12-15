@@ -4,11 +4,9 @@
             you need to reconnect!
         </div>
         <div class="view">
-            <!--keep-alive-->
             <vue-page-stack>
                 <router-view :key="$route.fullPath + getKey()" ref="routeView" />
             </vue-page-stack>
-            <!--/keep-alive-->
             <router-view name="overlay" />
         </div>
         <div class="drawer" :class="{'drawer-active': visible}" @click="hideDrawer()">
@@ -54,7 +52,7 @@
                     <div class="item clickable" @click="itemClicked('debug')">
                         <i class="fas fa-cogs icon"></i><span>Debug</span>
                     </div>
-                    <div class="item clickable" @click="itemClicked('connectionSelector')">
+                    <div class="item clickable" @click="itemClicked('device-selector')">
                         <i class="fas fa-cogs icon"></i><span>Device</span>
                     </div>                      
                 </div>

@@ -46,18 +46,18 @@ export const defaultConfigFile = () : ConfigFile => {
         secret: "",
         options: { 
             runCount: 0,
-            firstLogin: true,
+            firstRun: true,
             skipSplash: false,
             savedTimers: [],
             beepTimeOffset: 0.3,
             enableBeep: true,
             forceMaxVolumeBeep: false,
             enableVibrate: true,
-            channel: "",
+            deviceId: "",
+            deviceAddress: "",
             deviceBoardMapping: {},
-            boardSetups: {},
             gbDrawTimeMarkers: true,
-            gbDrawPercentileMarkers: true          
+            gbDrawPercentileMarkers: true     
         }
     }
 }

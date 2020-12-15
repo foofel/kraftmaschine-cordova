@@ -14,7 +14,6 @@ console.log("kraftmaschine main file loaded!")
 export interface GlobalStoreInterface {
 	scaleBackend: HangboardConnector,
 	backend: RemoteAPI,
-	//localSaveUploader: LocalSaveUploader,
 	storage: StorageInterface,
 	cfg: ConfigFile,
 	staticData: null
@@ -30,11 +29,9 @@ async function startupApp() {
 	GlobalStore.storage = storage;
 	GlobalStore.cfg = await storage.getConfigProxyObject();
 	const backendApi = new RemoteAPI();
-	const scaleDataBackend = new HangboardConnector(GlobalStore.cfg.options.channel);
-	//const saveUploader = new LocalSaveUploader(backendApi);
+	const scaleDataBackend = new HangboardConnector();
 	GlobalStore.scaleBackend = scaleDataBackend;
 	GlobalStore.backend = backendApi;
-	//GlobalStore.localSaveUploader = saveUploader;
 	console.log("starting vue");
 	const inst = new Vue({
 		router,
@@ -53,15 +50,10 @@ async function startupApp() {
 	}, false);
 }
 
-// cordova needs some startup time to load plugins and stuff
-const devReady = new Promise<void>((resolve, reject) => {
-	if (!RUNNING_WITH_CORDOVA()) {
-		resolve();
-	} else {
-		document.addEventListener("deviceready", () => {
-			resolve();
-		}, false);
-	}
-}).then(() => {
+if (!RUNNING_WITH_CORDOVA()) {
 	startupApp();
-});
+} else {
+	document.addEventListener("deviceready", () => {
+		startupApp();
+	}, false);
+}

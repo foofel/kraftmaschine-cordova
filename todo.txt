@@ -1,7 +1,7 @@
 [next todo]
 - fix temp updater in the esp32 ble server
-- check for bad i2c values through the long cable 
-- finish the ble setup and program init setup steps
+- check for bad i2c values through the long cable               [done (cant find any)]
+- finish the ble setup and program init setup steps             
 - finish at least bm1k/2k/twinpeaks board (need a better name)
 - loading screen of reduce timeout for initial login
 - top spacing in menu bar

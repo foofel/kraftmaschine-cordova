@@ -120,7 +120,6 @@ export default class AccountOptions extends VueNavigation {
             this.cfg.alias = result[0].alias;
             this.cfg.name = result[0].name;
             this.cfg.email = result[0].email;
-            //SaveConfigObject(this.cfg);
             clearAllCookies();
             window.location.reload(true);
         } else {

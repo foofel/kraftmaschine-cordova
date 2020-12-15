@@ -553,7 +553,6 @@ export async function reauth(backend: RemoteAPI) {
         cfg.alias = authPromise.data.alias;
         cfg.email = authPromise.data.email;
         cfg.name = authPromise.data.name;
-        //SaveConfigObject(cfg);
         console.log(`reauthentication successfull, hello ${cfg.alias} :)`);
         return true;
     } else {

@@ -10,7 +10,7 @@ import Button from '@/components/Button.vue'
 import { VueNavigation } from './vuenavigation';
 import { DataModelComponentDataInterface, DataModelComponentModelInterface, DataModelComponentValueInterface } from './typeexports';
 import DataEditorComponent from './DataEditorComponent.vue'
-import { ConfigData, ConfigFile } from '../core/storageinterface';
+import { ConfigData, ConfigFile, IteratableConfigData } from '../core/storageinterface';
 import { HangboardConnector } from '../core/hangboardconnector';
 import { showToast } from '../core/util';
 
@@ -38,10 +38,10 @@ export default class ConfigEditorComponent extends VueNavigation {
 
     buildModel(): any {
         return {
-            channel: {
+            /*channel: {
                 displayName: "Select Board",
                 desc: "Select the id of the board you want to use",
-                value: this.cfg.options.channel,
+                value: this.cfg.options.deviceId,
                 type: "string",
                 edit: "text",
                 validate: function(val: string) {
@@ -51,7 +51,7 @@ export default class ConfigEditorComponent extends VueNavigation {
                     return true;
                 },
                 validateMessage: "Board can not be empty"                
-            },
+            },*/
             enableBeep: {
                 displayName: "Enable Beep",
                 desc: "Beep on the last three seconds before the next rep",
@@ -109,20 +109,19 @@ export default class ConfigEditorComponent extends VueNavigation {
                 this.onPropertyChanged(idx, newObj, oldObj);
             }
         }
-        //SaveConfigObject(this.cfg);
     }
 
     onPropertyChanged(propName: string, newObj: DataModelComponentValueInterface, oldObj: DataModelComponentValueInterface) {
         console.log(`prop change: ${propName}, from: ${oldObj.value}, to:${newObj.value}`);
-        if(propName === "channel") {
+        /*if(propName === "channel") {
             const channel = newObj.value as string || "test";
             if(channel !== "") {
-                this.scale.selectDevice(channel);
+                this.scale.connect(channel);
                 showToast(`Board changed to ${channel}`);
             }
-        }
+        }*/
         oldObj.value = newObj.value;
-        const options = this.cfg.options;
+        const options = this.cfg.options as IteratableConfigData;
         if(options.hasOwnProperty(propName)) {
             if(newObj.type === "number") {
                 options[propName] = parseFloat(newObj.value as string);

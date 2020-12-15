@@ -1,7 +1,7 @@
 import { MessageTransformerIntrerface, pipe, sum } from "./messagetransformer";
 import { SensorReaderInterface,  WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, DeviceInfoCallback, BluetoothSensorReader } from "./sensorreader";
 import { BackendServers } from '../config';
-import { ScanCallbackInterface } from './bluetoothle';
+import { BLEConnectionResult, ScanCallbackInterface } from './bluetoothle';
 
 export type WeightCallbackEntry = { cb: WeightMessageCallback; transformer: MessageTransformerIntrerface };
 
@@ -16,9 +16,7 @@ export class HangboardConnector {
     channelInfoListener: Array<DeviceInfoCallback> = [];
     lastTempMessage: TempSensorInterface;
 
-    constructor(private initialChannel: string) {
-        console.log("starting core");
-        //this.dataReader = new WebsocketSensorReader(BackendServers.webscaleServer(), initialChannel);
+    constructor() {
         this.dataReader = new BluetoothSensorReader();
         this.dataReader.registerWeightListener((msg) => this.onWeightMessage(msg));
         this.dataReader.registerTempSensorCallback((msg) => this.onTempMessage(msg));
@@ -31,14 +29,18 @@ export class HangboardConnector {
         }
     }
 
-    public async  shutdown() {
+    init(): Promise<boolean> {
+        return this.dataReader.init();
+    }
+
+    public async disconnect() {
         const res = await this.dataReader.disconnect();
         console.log("[ble] disconnected, result:", res);
     }
 
-    public selectDevice(channel: string) {
-        this.dataReader.connect(channel);
+    public connect(address: string): Promise<BLEConnectionResult> {
         this.resetData();
+        return this.dataReader.connect(address);
     }
 
     public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {

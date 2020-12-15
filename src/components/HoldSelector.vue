@@ -93,7 +93,7 @@ export default class HoldSelector extends Vue {
         } else {
             this.canvas = elem;
         }
-        const board = this.cfg.options.boardSetups[this.cfg.options.channel];
+        const board = this.cfg.options.deviceBoardMapping[this.cfg.options.deviceId];
         if(!board){
             this.board = Hangboards.none;
         } else {
@@ -137,8 +137,7 @@ export default class HoldSelector extends Vue {
             this.waitForObjectCreation = true;
             this.textLookup.clear();
         }
-        this.cfg.options.boardSetups[this.cfg.options.channel] = parseInt(selection);
-        //SaveConfigObject(this.cfg);
+        this.cfg.options.deviceBoardMapping[this.cfg.options.deviceId] = parseInt(selection);
     }
 
     onResize() {

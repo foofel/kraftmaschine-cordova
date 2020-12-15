@@ -8,8 +8,15 @@ export interface ScanCallbackInterface {
     error:string;
 }
 
+export interface BLEConnectionResult {
+    id: string;
+    address: string;
+    success: boolean;
+}
+
 export interface BluetoothLE {
-    connect: (address:string) => Promise<boolean>;
+    init: (forced?:boolean) => Promise<boolean>;
+    connect: (address:string) => Promise<BLEConnectionResult>;
     disconnect: (address:string) => Promise<boolean>;
     subscribe: (characteristic:string, cb:(data:ArrayBuffer) => void) => Promise<boolean>;
     unsubscribe: (characteristic:string) => Promise<boolean>;
@@ -190,29 +197,6 @@ class BluetoothLEHelpers {
             }
         );
     });
-    /*static startScanp = (cb: (result: BluetoothlePlugin.ScanStatus) => void) => new Promise<BluetoothlePlugin.ScanStatus>((resolve, reject) => {
-        const params = {
-            services: ["181D"], // "180D", "180F", 
-            allowDuplicates: false,
-            scanMode: BluetoothlePlugin.BluetoothScanMode.SCAN_MODE_LOW_LATENCY,
-            matchMode: BluetoothlePlugin.BluetoothMatchMode.MATCH_MODE_AGRESSIVE,
-            matchNum: BluetoothlePlugin.BluetoothMatchNum.MATCH_NUM_ONE_ADVERTISEMENT,
-            callbackType: BluetoothlePlugin.BluetoothCallbackType.CALLBACK_TYPE_ALL_MATCHES,
-            isConnectable: true
-        };
-        bluetoothle.startScan(
-            (result: BluetoothlePlugin.ScanStatus) => {
-                if(result.status === "scanStarted") {
-                    resolve(result);
-                } else if(result.status === "scanResult") {
-                    cb(result);
-                }
-            },
-            (error: BluetoothlePlugin.Error) => {
-                reject(error);
-            }
-        , params);
-    });*/
     static stopScanp = () => new Promise<{ status: string }>((resolve, reject) => {
         bluetoothle.stopScan(
             (result: { status: string }) => {
@@ -223,36 +207,6 @@ class BluetoothLEHelpers {
             }
         );
     });
-    /*static easyScanp = async (duration: number) => new Promise<Array<BluetoothlePlugin.ScanStatus>>((resolve, reject) => {
-        const params = {
-            services: ["0x2a98"],
-            allowDuplicates: false
-            scanMode: BluetoothlePlugin.BluetoothScanMode.SCAN_MODE_LOW_LATENCY,
-            matchMode: BluetoothlePlugin.BluetoothMatchMode.MATCH_MODE_AGRESSIVE,
-            matchNum: BluetoothlePlugin.BluetoothMatchNum.MATCH_NUM_ONE_ADVERTISEMENT,
-            callbackType: BluetoothlePlugin.BluetoothCallbackType.CALLBACK_TYPE_ALL_MATCHES
-        };
-        const results: Array<BluetoothlePlugin.ScanStatus> = [];
-        bluetoothle.startScan(
-            (result: BluetoothlePlugin.ScanStatus) => {
-                if(result.status === "scanStarted") {
-                    setTimeout(async () => {
-                        //bluetoothle.stopScan(() => {}, () => {});
-                        const result = await BluetoothLEHelpers.stopScanp() as any;
-                        if(result.status !== "scanStopped") {
-                            console.log("unable to stop scan, really?");
-                        }
-                        resolve(results);
-                    }, duration * 1000);
-                } else if(result.status === "scanResult") {
-                    results.push(result);
-                }
-            },
-            (error: BluetoothlePlugin.Error) => {
-                reject(error);
-            }
-        , params);
-    });*/
     //TODO: bonding?/read/write/isbonded?
     static isConnectedp = (address:string) => new Promise<BluetoothlePlugin.CurrConnectionStatus>((resolve, reject) => {
         const parama = {
@@ -378,8 +332,8 @@ class BluetoothLEHelpers {
         if(timoeutId) {
             clearTimeout(timoeutId);
             timoeutId = null;
-            return BluetoothLEHelpers.stopScanp();
         }
+        return BluetoothLEHelpers.stopScanp();
     }
 }
 
@@ -449,152 +403,158 @@ export class CordovaBluetoothLE implements BluetoothLE {
     connectedDeviceId:string = "";
     startupSuccess:boolean = false;
 
-    constructor() {
-        const start = async () => {
-            console.log("[ble] STARTING BLUETOOTH");
-            console.log("[ble] getting initislized state");
-            const isInitializedr = await BluetoothLEHelpers.isInitializedp();
-            console.log(`[ble] (isInitializedp)`, isInitializedr);
-            if(!isInitializedr.isInitialized) {
-                console.log("[ble] not initialized, trying init");
-                const initr = await BluetoothLEHelpers.initializep((result: { status: 'enabled' | 'disabled' }) => {
-                    console.log(`[ble] #################################### enabled state changed: ${result.status}`);
-                });
-                console.log(`[ble] (initializep)`, initr);
-                if(initr.status !== "enabled") {
-                    return false;
-                }
-            }
-            console.log("[ble] getting enabled state");
-            const isEnabledr = await BluetoothLEHelpers.isEnabledp();
-            console.log(`[ble] (isEnabledp)`, isEnabledr);            
-            if(!isEnabledr.isEnabled) {
-                console.log("[ble] not enabled, trying enable");
-                const enabler = await BluetoothLEHelpers.enablep();
-                console.log(`[ble] (enablep)`, enabler);
-                if(!enabler.status) {
-                    return false;
-                }
-            }
-            this.startupSuccess = true;
+    constructor() {}
+
+    async init(forced?:boolean) {
+        if(this.startupSuccess && !forced) {
+            return true;
         }
-        start();
+        console.log("[ble] STARTING BLUETOOTH");
+        console.log("[ble] getting initislized state");
+        const isInitializedr = await BluetoothLEHelpers.isInitializedp();
+        console.log(`[ble] (isInitializedp)`, isInitializedr);
+        if(!isInitializedr.isInitialized) {
+            console.log("[ble] not initialized, trying init");
+            const initr = await BluetoothLEHelpers.initializep((result: { status: 'enabled' | 'disabled' }) => {
+                console.log(`[ble] #################################### enabled state changed: ${result.status}`);
+            });
+            console.log(`[ble] (initializep)`, initr);
+            if(initr.status !== "enabled") {
+                return false;
+            }
+        } else {
+            console.log("[ble] already initialized");
+        }
+        console.log("[ble] getting enabled state");
+        const isEnabledr = await BluetoothLEHelpers.isEnabledp();
+        console.log(`[ble] (isEnabledp)`, isEnabledr);            
+        if(!isEnabledr.isEnabled) {
+            console.log("[ble] not enabled, trying enable");
+            const enabler = await BluetoothLEHelpers.enablep();
+            console.log(`[ble] (enablep)`, enabler);
+            if(!enabler.status) {
+                return false;
+            }
+        } else {
+            console.log("[ble] already enabled");
+        }
+        this.startupSuccess = true;
+        return true;
     }
 
-    async connect(address:string): Promise<boolean>
+    async connect(address:string): Promise<BLEConnectionResult>
     {
         if(!this.startupSuccess) {
-            console.log("[ble] blue startup war not cuccessfull unable to use bluetooth");
-            return false;
+            console.log("[ble] ble not initialized (wrong entry point?), initializing now");
+            const initr = await this.init();
+            if(!initr) {
+                console.log("[ble] could not start ble");
+                return { id: "", address: "", success: false };
+            }
         }
         const prevConnected = this.connectedAddress
         this.connectedAddress = "";
         this.connectedDeviceId = "";
-        try {
-            console.log("[ble] trying to connect");
-            console.log("[ble] getting initislized state");
-            const isInitializedr = await BluetoothLEHelpers.isInitializedp();
-            console.log(`[ble] (isInitializedp)`, isInitializedr);
-            if(!isInitializedr.isInitialized) {
-                console.log("[ble] not initialized, trying init");
-                const initr = await BluetoothLEHelpers.initializep((result: { status: 'enabled' | 'disabled' }) => {
-                    console.log(`[ble] #################################### enabled state changed: ${result.status}`);
-                });
-                console.log(`[ble] (initializep)`, initr);
-                if(initr.status !== "enabled") {
-                    return false;
-                }
-            }
-            console.log("[ble] getting enabled state");
-            const isEnabledr = await BluetoothLEHelpers.isEnabledp();
-            console.log(`[ble] (isEnabledp)`, isEnabledr);            
-            if(!isEnabledr.isEnabled) {
-                console.log("[ble] not enabled, trying enable");
-                const enabler = await BluetoothLEHelpers.enablep();
-                console.log(`[ble] (enablep)`, enabler);
-                if(!enabler.status) {
-                    return false;
-                }
-            }
-            // isConnected throws an error if we were never connected to this device...
-           /* let isConnected = false;
-            try {
-                console.log("[ble] getting connection state");
-                const isconnectedr = await BluetoothLEHelpers.isConnectedp(address);
-                isConnected = isconnectedr.isConnected;
-            } catch(e) {}
-            console.log(`[ble] (isConnectedp)`, { isConnected: isConnected });*/
-            // trying to solve dead object exception in the bluetooth stack and
-            // other things (mts/disvocery) when it thinks it has a good connection
-
-            // if the app reloads it can happen that ble still remembers the previus connection as 
-            // "we once connected there" and wans a reconnect not connect, therefore we yust try to close both
-            // before we connect somewhere new, this is mostly a dev thing as is should not happen later on but 
-            // whatever, doenst hut.            
-            //if(isConnected) {
-            try {
-                console.log("[ble] close connection (prev");
-                const closer = await BluetoothLEHelpers.closep(prevConnected);
-                console.log(closer);
-                if(closer.status !== "closed") {
-                    return false;
-                }
-            } catch(e) {}
-            try {
-                console.log("[ble] close connection (prev");
-                const closer = await BluetoothLEHelpers.closep(address);
-                console.log(closer);
-                if(closer.status !== "closed") {
-                    return false;
-                }
-            } catch(e) {}            
-            //}
-            console.log("[ble] trying to connect");
-            const connectr = await BluetoothLEHelpers.connectp(address, (result:BluetoothlePlugin.DeviceInfo) => {
-                console.log(`[ble] connection status change`, result);
+        console.log("[ble] trying to connect");
+        console.log("[ble] getting initislized state");
+        const isInitializedr = await BluetoothLEHelpers.isInitializedp();
+        console.log(`[ble] (isInitializedp)`, isInitializedr);
+        if(!isInitializedr.isInitialized) {
+            console.log("[ble] not initialized, trying init");
+            const initr = await BluetoothLEHelpers.initializep((result: { status: 'enabled' | 'disabled' }) => {
+                console.log(`[ble] #################################### enabled state changed: ${result.status}`);
             });
-            console.log(`[ble] (connectp)`, connectr);
-            if(connectr.status !== "connected") {
-                return false;
+            console.log(`[ble] (initializep)`, initr);
+            if(initr.status !== "enabled") {
+                return { id: "", address: "", success: false };
             }
-            console.log("[ble] getting bonding state");
-            const isbondedr = await BluetoothLEHelpers.isBondedp(address);
-            console.log(`[ble] (isBondedp)`, isbondedr);
-            if(!isbondedr.isBonded) {
-                console.log("[ble] trying to bond");
-                const bondr = await BluetoothLEHelpers.bondp(address);
-                console.log(`[ble] (bondp)`, bondr); 
-                if(bondr.status !== "bonded") {
-                    console.log("[ble] unable to bond?! what now? :D");
-                }
-            }
-            console.log("[ble] trying to get service discovered state");
-            const isdiscoveredr = await BluetoothLEHelpers.isDiscovered(address);
-            console.log(`[ble] (isDiscovered)`, isdiscoveredr);
-            if(!isdiscoveredr.isDiscovered) {
-                console.log("[ble] trying to discover services");
-                const discoverr = await BluetoothLEHelpers.discoverp(address);
-                console.log(`[ble] (discoverp)`, discoverr);
-            }
-            // we now use the binary format that uses 12/13 bytes only so no mtu chnage needed anymore
-            //console.log("[ble] trying to set mtu");
-            //const mtur = await BluetoothLEHelpers.mtup(address, 64);
-            //console.log(`[ble] (mtup)`, mtur);
-            //if(mtur.mtu !== 64) {
-            //    console.log("[ble] unable to set mtu");
-            //}
-            this.connectedAddress = address;
-            console.log("[ble] getting device id");
-            const devIdr = await BluetoothLEHelpers.readp(address, BLEServiceInfo.servidceId, BLEServiceInfo.deviceIdCharacteristicId);
-            const devId = atob(devIdr.value);
-            console.log("[ble] (readp)", devId);
-            this.connectedDeviceId = devId;
-            console.log("[ble] DONE");
-            return true;
-        } catch(e) {
-            console.log(`[ble] error while connecting`, e);
         }
-        return false;
+        console.log("[ble] getting enabled state");
+        const isEnabledr = await BluetoothLEHelpers.isEnabledp();
+        console.log(`[ble] (isEnabledp)`, isEnabledr);            
+        if(!isEnabledr.isEnabled) {
+            console.log("[ble] not enabled, trying enable");
+            const enabler = await BluetoothLEHelpers.enablep();
+            console.log(`[ble] (enablep)`, enabler);
+            if(!enabler.status) {
+                return { id: "", address: "", success: false };
+            }
+        }
+        // isConnected throws an error if we were never connected to this device...
+        /* let isConnected = false;
+        try {
+            console.log("[ble] getting connection state");
+            const isconnectedr = await BluetoothLEHelpers.isConnectedp(address);
+            isConnected = isconnectedr.isConnected;
+        } catch(e) {}
+        console.log(`[ble] (isConnectedp)`, { isConnected: isConnected });*/
+        // trying to solve dead object exception in the bluetooth stack and
+        // other things (mts/disvocery) when it thinks it has a good connection
+
+        // if the app reloads it can happen that ble still remembers the previus connection as 
+        // "we once connected there" and wans a reconnect not connect, therefore we yust try to close both
+        // before we connect somewhere new, this is mostly a dev thing as is should not happen later on but 
+        // whatever, doenst hut.            
+        //if(isConnected) {
+        try {
+            console.log("[ble] close connection (prev");
+            const closer = await BluetoothLEHelpers.closep(prevConnected);
+            console.log(closer);
+            if(closer.status !== "closed") {
+                return { id: "", address: "", success: false };
+            }
+        } catch(e) {}
+        try {
+            console.log("[ble] close connection (prev");
+            const closer = await BluetoothLEHelpers.closep(address);
+            console.log(closer);
+            if(closer.status !== "closed") {
+                return { id: "", address: "", success: false };
+            }
+        } catch(e) {}            
+        //}
+        console.log("[ble] trying to connect");
+        const connectr = await BluetoothLEHelpers.connectp(address, (result:BluetoothlePlugin.DeviceInfo) => {
+            console.log(`[ble] connection status change`, result);
+        });
+        console.log(`[ble] (connectp)`, connectr);
+        if(connectr.status !== "connected") {
+            return { id: "", address: "", success: false };
+        }
+        console.log("[ble] getting bonding state");
+        const isbondedr = await BluetoothLEHelpers.isBondedp(address);
+        console.log(`[ble] (isBondedp)`, isbondedr);
+        if(!isbondedr.isBonded) {
+            console.log("[ble] trying to bond");
+            const bondr = await BluetoothLEHelpers.bondp(address);
+            console.log(`[ble] (bondp)`, bondr); 
+            if(bondr.status !== "bonded") {
+                console.log("[ble] unable to bond?! what now? :D");
+            }
+        }
+        console.log("[ble] trying to get service discovered state");
+        const isdiscoveredr = await BluetoothLEHelpers.isDiscovered(address);
+        console.log(`[ble] (isDiscovered)`, isdiscoveredr);
+        if(!isdiscoveredr.isDiscovered) {
+            console.log("[ble] trying to discover services");
+            const discoverr = await BluetoothLEHelpers.discoverp(address);
+            console.log(`[ble] (discoverp)`, discoverr);
+        }
+        // we now use the binary format that uses 12/13 bytes only so no mtu chnage needed anymore
+        //console.log("[ble] trying to set mtu");
+        //const mtur = await BluetoothLEHelpers.mtup(address, 64);
+        //console.log(`[ble] (mtup)`, mtur);
+        //if(mtur.mtu !== 64) {
+        //    console.log("[ble] unable to set mtu");
+        //}
+        this.connectedAddress = address;
+        console.log("[ble] getting device id");
+        const devIdr = await BluetoothLEHelpers.readp(address, BLEServiceInfo.servidceId, BLEServiceInfo.deviceIdCharacteristicId);
+        const devId = atob(devIdr.value);
+        console.log("[ble] (readp)", devId);
+        this.connectedDeviceId = devId;
+        console.log("[ble] DONE");
+        return { id: devId, address: address, success: true };
     }
 
     async disconnect(address:string): Promise<boolean> {
@@ -642,7 +602,16 @@ export class CordovaBluetoothLE implements BluetoothLE {
         return this.connectedDeviceId;
     }
 
-    startScan(cb:(result: ScanCallbackInterface) => void, duration:number) {
+    async startScan(cb:(result: ScanCallbackInterface) => void, duration:number) {
+        if(!this.startupSuccess) {
+            console.log("[ble] ble not initialized (wrong entry point?), initializing now");
+            const initr = await this.init();
+            if(!initr) {
+                console.log("[ble] could not start ble");
+                return { id: "", address: "", success: false };
+            }
+        }
+        await BluetoothLEHelpers.easyScanStopp(0);
         return BluetoothLEHelpers.easyScanStart(cb, duration);
     }
 
@@ -667,10 +636,13 @@ export class WebBluetoothLE implements BluetoothLE {
 
     constructor() {}
 
-    async connect(_:string): Promise<boolean>
+    async init() {
+        return true;
+    }
+
+    async connect(_:string, domElement?:any): Promise<BLEConnectionResult>
     {
-        return false;
-        /*const devices = await navigator.bluetooth.getDevices();
+        const devices = await navigator.bluetooth.getDevices();
         let device:BluetoothDevice;
         if(devices.length > 0) {
             device = devices[0];
@@ -687,7 +659,8 @@ export class WebBluetoothLE implements BluetoothLE {
             console.log("+++ USER INTERACTION FOR BLUETOOTH NEEDED +++");
             const userInteraction = new Promise<void>((resolve, reject) => {
                 const listener = (ev:MouseEvent) => {
-                    window.removeEventListener("mousedown", listener);
+                    const elem = domElement || window;
+                    elem.removeEventListener("mousedown", listener);
                     console.log("user event found");
                     ev.preventDefault();
                     resolve();
@@ -720,7 +693,7 @@ export class WebBluetoothLE implements BluetoothLE {
                 const devIdBuffer = await devIdC.readValue();
                 const devId = new TextDecoder().decode(devIdBuffer.buffer);
                 console.log("connected to device", devId);
-                this.connectionData = { 
+                this.connectionData = {
                     device: device,
                     server: server,
                     service: service,
@@ -728,12 +701,12 @@ export class WebBluetoothLE implements BluetoothLE {
                     deviceId: devId
                 }
                 console.log('Connected!');
-                return true;
+                return { id: devId, address: "", success: true };
             }
         } else {
-            return false;
+            return { id: "", address: "", success: false };
         }
-        return false;*/
+        return { id: "", address: "", success: false };
     }
 
     async disconnect(address:string): Promise<boolean> {
@@ -757,6 +730,8 @@ export class WebBluetoothLE implements BluetoothLE {
                 }
             });
             return true;
+        } else {
+            console.log("no active connection, cant subscribe")
         }
         return false;
     }
@@ -766,6 +741,8 @@ export class WebBluetoothLE implements BluetoothLE {
         if(this.connectionData !== null) {
             const characteristic = await this.connectionData.characteristic.stopNotifications();
             return true;
+        } else {
+            console.log("no active connection, cant unsubscribe")
         }
         return false;
     }
@@ -778,7 +755,11 @@ export class WebBluetoothLE implements BluetoothLE {
         return this.connectionData?.deviceId || "";
     }
 
-    startScan(cb:(result: ScanCallbackInterface) => void, duration:number) {}
-    stopScan(timerId:any) {}
+    startScan(cb:(result: ScanCallbackInterface) => void, duration:number) {
+
+    }
+    stopScan(timerId:any) {
+
+    }
 
 }

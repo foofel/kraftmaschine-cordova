@@ -301,6 +301,9 @@ export class Hx711CalibrationList {
         }
         return { id: "00000", left: 1, right: 1 }
     }
+    static getIdentityCalibration() {
+        return { id: "", left: 1, right: 1 }
+    }    
     private static readonly deviceIds = [
         { id: "00000", left: 0.00003521584442541458, right: 0.00003562402048972537 },
         { id: "00001", left: 1, right: 1 },

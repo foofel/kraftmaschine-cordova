@@ -1,27 +1,26 @@
 import { TimerSelectorEntry } from '@/components/typeexports';
 
-export interface ConfigBoardSetup {
-    [channel: string]: number;
-}
-
 export interface DeviceBoardMapping {
     [device: string]: number;
 }
 
 export interface ConfigData {
     runCount: number;
-    firstLogin: boolean;
+    firstRun: boolean;
     skipSplash: boolean;
     savedTimers: Array<TimerSelectorEntry>;
     enableBeep: boolean;
     beepTimeOffset: number;
     forceMaxVolumeBeep: boolean;
     enableVibrate: boolean;
-    channel: string;
+    deviceId: string;
+    deviceAddress: string;
     deviceBoardMapping:DeviceBoardMapping;
-    boardSetups: ConfigBoardSetup;
     gbDrawTimeMarkers: boolean;
     gbDrawPercentileMarkers: boolean;
+}
+
+export interface IteratableConfigData {
     [key: string]: any;
 }
 

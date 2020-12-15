@@ -72,6 +72,7 @@ export default class BluetoothConnectionSelector extends VueNavigation {
     created() {
         this.scaleBackend = this.$root.$data.scaleBackend as HangboardConnector;
         this.cfg = this.$root.$data.cfg;
+        console.log(this.cfg);
     }
     mounted() {
         //this.scaleBackend.registerChannelInfoCallback(this.onChannelInfo);
@@ -98,24 +99,33 @@ export default class BluetoothConnectionSelector extends VueNavigation {
             this.devices.push({ name: result.name, address: result.address});
         });
     }
-    deviceSelected(dev:{ name: string, address: string }) {
+    async deviceSelected(dev:{ name: string, address: string }) {
         console.log("selected", dev);
         this.scaleBackend.stopChannelSearch();
-        this.scaleBackend.selectDevice(dev.address);
-        const board = this.cfg.options.deviceBoardMapping[dev.address];
-        this.selectedDevice = dev;
-        this.isScanning = false;
-        if(board == undefined) {
+        const res = await this.scaleBackend.connect(dev.address);
+        if(res.success){
+            this.cfg.options.deviceId = res.id;
+            this.cfg.options.deviceAddress = res.address;
+            const board = this.cfg.options.deviceBoardMapping[res.address];
+            this.selectedDevice = dev;
+            this.isScanning = false;
             this.state = "board";
-        }
-        else {
-            this.state = "done";
+            /*if(board == undefined) {
+                this.state = "board";
+            }
+            else {
+                this.state = "done";
+            }*/
+        } else {
+            console.log("unable to connect to ble device")
         }
     }
     boardSelected(board: Hangboard) {
         this.cfg.options.deviceBoardMapping[this.selectedDevice.address] = board.id;
-        //SaveConfigObject(this.cfg);
         this.state = "done";
+        if(this.cfg.options.firstRun) {
+            this.$router.replace("scale");
+        }
     }
 
     getBoards() {

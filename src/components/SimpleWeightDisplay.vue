@@ -61,11 +61,6 @@ export default class SimpleWeightDisplay extends VueNavigation {
 	}
 
 	async mounted () {
-		const data = this.$root.$data.cfg as ConfigFile;
-		data.alias = "lol";
-		data.options.boardSetups["ise"] = 324;
-		//writeScoped("", defaultConfigFile());
-		//const cf = getConfigFile();
 		console.log("MOUNTED SimpleWeightDisplay")
 		this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
 		this.scaleBackend.registerTempSensorCallback(this.onTempSensorMessage);

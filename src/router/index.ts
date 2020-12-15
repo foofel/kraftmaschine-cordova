@@ -127,8 +127,14 @@ const router = new VueRouter({
 Vue.use(VuePageStack, { router });
 
 router.beforeEach((to, from, next) => {
-  console.log(`+++ nav event, from: ${from.fullPath} -> ${to.fullPath}`);
-  next();
+  // "/" is our init/
+  const isRootNav = (from.path == "/" && to.path == "/");
+  if(!isRootNav && to.path === "/") {
+    next(false);
+  } else {
+    console.log(`+++ nav event, from: ${from.fullPath} -> ${to.fullPath}`);
+    next();
+  }
 });
 
 /*router.beforeEach((to, from, next) => {
