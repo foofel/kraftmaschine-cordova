@@ -45,6 +45,11 @@ export interface ConfigFile {
 export interface StorageInterface {
     init():Promise<boolean>;
     getConfigProxyObject():Promise<ConfigFile>;
-    writeData(path:string, data:Blob): Promise<boolean>;
-    readData(path:string): Promise<any>;
+    writeObject(key:string, data:any): Promise<string>;
+    readObject(key:string): Promise<any>;
+    getObjectKeys():Promise<string[]>;
+    writeTypedObject(key:string, type:string, data:any): Promise<number>;
+    readTypedObject(key:number): Promise<any[]>;
+    readTypedObjects(type:string): Promise<any[]> ;
+    getTypedObjectKeys():Promise<number[]>;
 }

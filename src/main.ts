@@ -4,7 +4,7 @@ import router from './router'
 import { HangboardConnector } from './core/hangboardconnector'
 import { RemoteAPI, reauth, clearAllCookies } from './core/util'
 import { ConfigFile, StorageInterface } from '@/core/storageinterface';
-import { FileStorageImpl } from './core/persistentstore'
+import { IndexedDBStorageImpl } from './core/persistentstore'
 import { RUNNING_WITH_CORDOVA } from './config'
 
 Vue.config.productionTip = false
@@ -25,7 +25,7 @@ async function startupApp() {
 	console.log("startApp()");
 	// this "fixes" missing keys when we add new properties to the specified default values, 
 	// oterweise those new keys are missing on exsiting configs
-	const storage = new FileStorageImpl();
+	const storage = new IndexedDBStorageImpl();
 	await storage.init();
 	GlobalStore.storage = storage;
 	GlobalStore.cfg = await storage.getConfigProxyObject();
@@ -55,8 +55,7 @@ async function startupApp() {
 
 // cordova needs some startup time to load plugins and stuff
 const devReady = new Promise<void>((resolve, reject) => {
-	const isCordovaApp = window.hasOwnProperty("cordova");
-	if (!isCordovaApp) {
+	if (!RUNNING_WITH_CORDOVA()) {
 		resolve();
 	} else {
 		document.addEventListener("deviceready", () => {
@@ -64,32 +63,5 @@ const devReady = new Promise<void>((resolve, reject) => {
 		}, false);
 	}
 }).then(() => {
-	// see: https://github.com/apache/cordova-plugin-file#chrome-quirks
-	// we can check this using navigator.platform which returns "Win32" on the
-	// desktop system (windows) and "Linux armv8l" on the cordove side running
-	// on the actual device, on linux desktop we may ned to specify the platform
-	// string
-	const fileReady = new Promise<void>((resolve, reject) => {
-		if(RUNNING_WITH_CORDOVA()) {
-			console.log("checking for file plugin");
-			if((window as any).isFilePluginReadyRaised()) {
-				resolve();
-			}
-			else {
-				window.addEventListener('filePluginIsReady', () => { 
-					console.log("file plugin ready");
-					resolve();
-				}, false);
-			}
-		} else {
-			resolve();
-		}
-	}).then(() => {
-		startupApp();
-	});
-});
-
-
-/*Promise.all([devReady, fileReady]).then(() => {
 	startupApp();
-});*/
+});
