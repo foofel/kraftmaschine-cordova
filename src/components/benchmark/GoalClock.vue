@@ -22,7 +22,7 @@ import ProgressClockCanvas from '../hangboardtimer/ProgressClockCanvas.vue'
 import { clamp } from '../../core/math';
 import { UpdateLimiter, findNextHighscoreUser } from '../../core/util';
 import cloneDeep from 'lodash/cloneDeep';
-import { ConfigFile } from '@/core/localstore';
+import { ConfigFile } from '@/core/storageinterface';
 
 @Component({
     components: {

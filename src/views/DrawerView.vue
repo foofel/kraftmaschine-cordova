@@ -5,7 +5,9 @@
         </div>
         <div class="view">
             <!--keep-alive-->
-                <router-view :key="getKey()" ref="routeView" />
+            <vue-page-stack>
+                <router-view :key="$route.fullPath + getKey()" ref="routeView" />
+            </vue-page-stack>
             <!--/keep-alive-->
             <router-view name="overlay" />
         </div>
@@ -72,6 +74,10 @@ import { Route } from 'vue-router';
 import { VueNavigation } from '../components/vuenavigation';
 import { showToast } from '../core/util';
 import { GlobalStore } from '../main';
+import VuePageStack from 'vue-page-stack';
+import router from '../router/index'
+
+
 
 @Component({
 	components: {}  
@@ -79,6 +85,7 @@ import { GlobalStore } from '../main';
 export default class DrawerView extends Vue {
     visible = false;
     itemKey = "";
+    rndItemKey = "123";
     keyLookup: Map<string, string> = new Map<string, string>();
     channelError = false;
     constructor() {
@@ -111,47 +118,43 @@ export default class DrawerView extends Vue {
         this.visible = false;
     }
 
+    routeRnd() {
+        return "abc";
+    }
+
     connectionMenuClicked(event: any) {
 
     }
 
-    itemClicked(item: string) {
-        const canChange = () => {
-            const currentView = this.$refs.routeView as VueNavigation;
-            if(currentView) {
-                const leaveAction = currentView.canLeaveComponent();
-                if(leaveAction === "ask") {
-                    currentView.onBeforeShowDialog();
-                    const leave = window.confirm("Leave current page?");
-                    if(leave) {
-                        return true;
-                    }
-                } else if(leaveAction === "block") {
-                    showToast("Unable to leave, please wait while action in progress", 5000);
-                } else {
+    canChange() {
+        const currentView = this.$refs.routeView as VueNavigation;
+        if(currentView) {
+            const leaveAction = currentView.canLeaveComponent();
+            if(leaveAction === "ask") {
+                currentView.onBeforeShowDialog();
+                const leave = window.confirm("Leave current page?");
+                if(leave) {
                     return true;
-                }              
+                }
+            } else if(leaveAction === "block") {
+                showToast("Unable to leave, please wait while action in progress", 5000);
             } else {
                 return true;
-            }
-            return false;
-        }
-        const cr = this.$router.currentRoute;
-        const idx = cr.path.lastIndexOf("/");
-        if(!this.keyLookup.has(item)) {
-            this.keyLookup.set(item, ""+Math.random());
-        }
-        
-        if(idx !== -1 && cr.path.substr(idx + 1) === item) {
-            if(canChange()) {
-                this.itemKey = ""+Math.random();
-                this.keyLookup.set(item, this.itemKey);
-            }
+            }              
         } else {
-            if(canChange()) {
-                this.itemKey = this.keyLookup.get(item) || "";
-                this.$router.push(item);
+            return true;
+        }
+        return false;
+    }    
+
+    itemClicked(item: string) {
+        const target = `/view/${item}`
+        const sameTarget = this.$router.currentRoute.path.startsWith(target);
+        if(this.canChange()) {
+            if(sameTarget) {
+                this.rndItemKey = Math.random().toString();
             }
+            this.$router.replace(item);
         }
     }
 
@@ -160,7 +163,7 @@ export default class DrawerView extends Vue {
     }
 
     getKey() {
-        return this.itemKey;
+        return this.rndItemKey;
     }
 }
 </script>

@@ -26,6 +26,7 @@ import { TareWeights, DataModelComponentDataInterface, DataModelComponentModelIn
 import { Calibration } from '@/core/calibration';
 import { VueNavigation } from './vuenavigation';
 import { round } from '../core/math';
+import { ConfigFile } from '@/core/storageinterface';
 
 @Component({
 	components: {
@@ -51,7 +52,21 @@ export default class SimpleWeightDisplay extends VueNavigation {
 		this.tempInfo = this.scaleBackend.getLastTempSensorData();
 	}
 
-	mounted () {
+    created() {
+        console.log("CREATED SimpleWeightDisplay")
+	}
+	
+	activated() {
+		console.log("ACTIVATED SimpleWeightDisplay")
+	}
+
+	async mounted () {
+		const data = this.$root.$data.cfg as ConfigFile;
+		data.alias = "lol";
+		data.options.boardSetups["ise"] = 324;
+		//writeScoped("", defaultConfigFile());
+		//const cf = getConfigFile();
+		console.log("MOUNTED SimpleWeightDisplay")
 		this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
 		this.scaleBackend.registerTempSensorCallback(this.onTempSensorMessage);
 		this.onTare();
@@ -61,6 +76,7 @@ export default class SimpleWeightDisplay extends VueNavigation {
 	}
 
 	beforeDestroy() {
+		console.log("DESTROYED SimpleWeightDisplay")
 		this.scaleBackend.removeWeightCallback(this.onWeightMessage);
 		this.scaleBackend.removeTempSensorCallback(this.onTempSensorMessage)
 		if(this.calib) {

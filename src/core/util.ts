@@ -1,4 +1,5 @@
-import { GetLocalUploadSaves, DeleteLocalUploadSave, GetConfigObject, SaveConfigObject } from './localstore';
+//import { GetLocalUploadSaves, DeleteLocalUploadSave, GetConfigObject, SaveConfigObject } from './storageinterface';
+import { GlobalStore } from '@/main';
 import { LocalBenchmarkSaveData, SelectedHolds, BenchmarkVisualHighscoreEntry } from '../components/typeexports';
 import { BackendServers, RequiredBackendVersion } from '../config'
 
@@ -320,7 +321,7 @@ export class EasyRemoteApiHelpers {
     }                       
 }
 
-export class LocalSaveUploader {
+/*export class LocalSaveUploader {
     //uploadInterval:number = 60;
     constructor (private backend: RemoteAPI) {}
     async uploadLocalSaves() {
@@ -362,7 +363,7 @@ export class LocalSaveUploader {
             console.log("error while uploading local saves: " + e);
         }
     }
-}
+}*/
 
 export function makeSound(source: any, actx: any, loadHandler: any) {
     const o: any = {};
@@ -546,13 +547,13 @@ export async function reauth(backend: RemoteAPI) {
         console.log("invalid version while reauth");
         return false;
     }
-    const cfg = GetConfigObject();
+    const cfg = GlobalStore.cfg;
     const authPromise = await EasyRemoteApiHelpers.authenticate(backend, cfg.secret);
     if(authPromise.result.status === 200) {
         cfg.alias = authPromise.data.alias;
         cfg.email = authPromise.data.email;
         cfg.name = authPromise.data.name;
-        SaveConfigObject(cfg);
+        //SaveConfigObject(cfg);
         console.log(`reauthentication successfull, hello ${cfg.alias} :)`);
         return true;
     } else {

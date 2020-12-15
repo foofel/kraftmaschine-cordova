@@ -10,6 +10,14 @@ export function CORDOVA_BASE_PATH(): string {
     return CORDOVA_BASE_PATH_VAL;
 }
 
+export function RUNNING_WITH_CORDOVA(): boolean {
+    return isCordovaApp;
+}
+
+export function RUNNING_ON_DEV_MACHINE(): boolean {
+    return navigator.platform === "Win32";
+}
+
 export const GlobalConfig = {
     configKey: "config",
     compressLocalSaves: true

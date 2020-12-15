@@ -1,5 +1,5 @@
 import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexports';
-import { BLEServiceInfo, GlobalConfig } from '@/config';
+import { BLEServiceInfo, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
 import { GlobalStore } from '@/main';
 import { runInContext } from 'lodash';
 import { BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
@@ -75,10 +75,10 @@ export class BluetoothSensorReader implements SensorReaderInterface
     lastWatchdogState:"good"|"bad" = "bad";
 
     constructor() {
-        if(window.hasOwnProperty("cordova")) {
-            this.bleBackend = new CordovaBluetoothLE();
-        } else {
+        if(RUNNING_ON_DEV_MACHINE()) {
             this.bleBackend = new WebBluetoothLE();
+        } else {
+            this.bleBackend = new CordovaBluetoothLE();
         }
         this.calibrationData = Hx711CalibrationList.getCalibrationValues("");
         const run = async () => {
@@ -167,6 +167,9 @@ export class BluetoothSensorReader implements SensorReaderInterface
             
         });
         } catch(e) {
+            /* if(e.code == 8){ // webble user cancel request
+                debugger;
+            }*/
             console.log("error establishing connection:" , e);
         }
     }

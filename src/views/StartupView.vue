@@ -93,8 +93,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { ConfigFile, SaveConfigObject } from '@/core/localstore';
-import { RemoteAPI, LocalSaveUploader, EasyRemoteApiHelpers, clearAllCookies } from '@/core/util'
+import { ConfigFile } from '@/core/storageinterface';
+import { RemoteAPI, EasyRemoteApiHelpers, clearAllCookies } from '@/core/util'
 import { GlobalConfig, AppVersion, RequiredBackendVersion } from '@/config'
 import { UserData } from '@/core/user'
 import { GlobalStore } from '../main';
@@ -177,7 +177,7 @@ export default class StartupView extends Vue {
         if(result) {
             this.cfg.secret = result.secret;
             this.cfg.alias = result.alias;
-            SaveConfigObject(this.cfg);
+            //SaveConfigObject(this.cfg);
             console.log(`account '${this.cfg.alias}' created (key:${this.cfg.secret}, PRIVATE do not share!)`);
             const authPromise = await EasyRemoteApiHelpers.authenticate(this.backend, this.cfg.secret);
             if(authPromise.result.status !== 200) {
@@ -193,7 +193,7 @@ export default class StartupView extends Vue {
 
     async saveSecretClicked(evt: any) {
         this.cfg.secret = this.model.secret;
-        SaveConfigObject(this.cfg);
+        //SaveConfigObject(this.cfg);
         this.reloadApp();
     }
 
@@ -218,7 +218,7 @@ export default class StartupView extends Vue {
         // if we have an id its not the first login
         if(this.cfg.secret !== "") {
             this.cfg.options.firstLogin = false;
-            SaveConfigObject(this.cfg);
+            //SaveConfigObject(this.cfg);
         }
         //TODO: do something if the first login thingi should be used
         // ...
@@ -234,10 +234,10 @@ export default class StartupView extends Vue {
             this.cfg.alias = authPromise.data.alias;
             this.cfg.email = authPromise.data.email;
             this.cfg.name = authPromise.data.name;
-            SaveConfigObject(this.cfg);
+            //SaveConfigObject(this.cfg);
             this.displayName = this.cfg.alias;
             console.log(`authentication successfull, hello ${this.cfg.alias} :)`);
-            GlobalStore.localSaveUploader.uploadLocalSaves();
+            //GlobalStore.localSaveUploader.uploadLocalSaves();
             /*GlobalStore.staticData = {
                 boards: initData as 
             }*/
@@ -309,6 +309,7 @@ export default class StartupView extends Vue {
 
     redirectToMain() {
         this.$router.replace("view/scale");
+        this.$router.push("device-selector");
         //TODO: if we are on a first run, push device selection screen
     }
 

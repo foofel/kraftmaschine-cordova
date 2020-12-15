@@ -99,8 +99,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { LocalTrainingSaveData, HighscoreEntry } from '@/components/typeexports'
-import { RemoteAPI, EasyRemoteApiHelpers, LocalSaveUploader } from '../../core/util';
-import { LocalStorage, GetLocalUploadSaves } from '../../core/localstore';
+import { RemoteAPI, EasyRemoteApiHelpers } from '../../core/util';
 import moment from 'moment';
 import { HANGTIMER_FINISHED } from '../../messages';
 import { StopWatch } from '../../core/stopwatch';

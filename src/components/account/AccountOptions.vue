@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { ConfigFile, SaveConfigObject } from '../../core/localstore';
+import { ConfigFile } from '../../core/storageinterface';
 import { EasyRemoteApiHelpers, clearAllCookies } from '../../core/util';
 import Button from '@/components/Button.vue'
 import { GlobalConfig, AppVersion } from '../../config';
@@ -120,7 +120,7 @@ export default class AccountOptions extends VueNavigation {
             this.cfg.alias = result[0].alias;
             this.cfg.name = result[0].name;
             this.cfg.email = result[0].email;
-            SaveConfigObject(this.cfg);
+            //SaveConfigObject(this.cfg);
             clearAllCookies();
             window.location.reload(true);
         } else {

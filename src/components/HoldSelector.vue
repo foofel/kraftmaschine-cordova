@@ -58,7 +58,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Hold, Hangboards, Hangboard } from '@/components/typeexports';
 import Button from './Button.vue'
-import { ConfigFile, SaveConfigObject } from '../core/localstore';
+import { ConfigFile } from '../core/storageinterface';
 
 @Component({
     components: {
@@ -138,7 +138,7 @@ export default class HoldSelector extends Vue {
             this.textLookup.clear();
         }
         this.cfg.options.boardSetups[this.cfg.options.channel] = parseInt(selection);
-        SaveConfigObject(this.cfg);
+        //SaveConfigObject(this.cfg);
     }
 
     onResize() {

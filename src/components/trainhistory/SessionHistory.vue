@@ -64,14 +64,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LocalTrainingSaveData } from '@/components/typeexports'
-import { RemoteAPI, EasyRemoteApiHelpers, LocalSaveUploader } from '../../core/util';
-import { LocalStorage, GetLocalUploadSaves } from '../../core/localstore';
+import { LocalTrainingSaveData } from '../../components/typeexports'
 import moment from 'moment';
 import { HANGTIMER_FINISHED } from '../../messages';
 import { StopWatch } from '../../core/stopwatch';
 import CustomBarChart from '../hangboardtimer/CustomBarChart.vue';
-import HeadlineView from '@/components/HeadlineView.vue';
+import HeadlineView from '../../components/HeadlineView.vue';
 import { VueNavigation } from '../vuenavigation';
 
 interface DisplaySaveDataEntry {
@@ -89,18 +87,27 @@ export default class SessionHistory extends VueNavigation {
     saveEntries: Array<DisplaySaveDataEntry> = [];
     timerId: any = 0;
     //storage:LocalStorage<LocalTrainingSaveData> = new LocalStorage<LocalTrainingSaveData>();
-    backend: RemoteAPI;
+    //backend: RemoteAPI;
     constructor() {
         super();
-        this.backend = this.$root.$data.backend;
+        //this.backend = this.$root.$data.backend;
         this.$root.$on(HANGTIMER_FINISHED, (run: LocalTrainingSaveData) => {
             this.buildRows();
         });
     }
+    created() {
+        console.log("CREATED SessionHistory");
+	}
+	
+	activated() {
+		console.log("ACTIVATED SessionHistory");
+	}    
     mounted() {
+        console.log("MOUNTED SessionHistory");
         this.buildRows();
     }
     beforeDestroy() {
+        console.log("DESTROYED SessionHistory");
         if(this.timerId !== 0) {
             clearInterval(this.timerId);
         }
@@ -116,7 +123,8 @@ export default class SessionHistory extends VueNavigation {
     }
 
     async buildRows() {
-        if(!this.backend.isAuthenticated()) {
+        // TODO: fix!
+        /*if(!this.backend.isAuthenticated()) {
             console.log("no backend yet");
             return;
         }
@@ -141,12 +149,13 @@ export default class SessionHistory extends VueNavigation {
             });
         }
         this.saveEntries = newEntries.sort((a: DisplaySaveDataEntry, b: DisplaySaveDataEntry) => +new Date(b.data.date) - +new Date(a.data.date));
-        console.log("history reloaded");
+        console.log("history reloaded");*/
     }
 
     async reloadHistory() {
-        await (this.$root.$data.localSaveUploader as LocalSaveUploader).uploadLocalSaves();
-        this.buildRows();
+        // TODO: fix!
+        //await (this.$root.$data.localSaveUploader as LocalSaveUploader).uploadLocalSaves();
+        //this.buildRows();
     }
 
     getChartOptions(entry: DisplaySaveDataEntry){

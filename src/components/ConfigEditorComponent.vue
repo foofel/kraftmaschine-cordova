@@ -10,7 +10,7 @@ import Button from '@/components/Button.vue'
 import { VueNavigation } from './vuenavigation';
 import { DataModelComponentDataInterface, DataModelComponentModelInterface, DataModelComponentValueInterface } from './typeexports';
 import DataEditorComponent from './DataEditorComponent.vue'
-import { SaveConfigObject, ConfigData, ConfigFile } from '../core/localstore';
+import { ConfigData, ConfigFile } from '../core/storageinterface';
 import { HangboardConnector } from '../core/hangboardconnector';
 import { showToast } from '../core/util';
 
@@ -109,7 +109,7 @@ export default class ConfigEditorComponent extends VueNavigation {
                 this.onPropertyChanged(idx, newObj, oldObj);
             }
         }
-        SaveConfigObject(this.cfg);
+        //SaveConfigObject(this.cfg);
     }
 
     onPropertyChanged(propName: string, newObj: DataModelComponentValueInterface, oldObj: DataModelComponentValueInterface) {

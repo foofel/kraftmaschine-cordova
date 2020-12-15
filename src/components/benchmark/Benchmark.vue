@@ -107,8 +107,8 @@ import { sum, round, pipe, guard, movingAverage, tared } from '@/core/messagetra
 import { BenchmarkController, ProcessingEvent } from '@/components/benchmark/ts/BenchmarkController'
 import { SimpleBenchmarkController } from '@/components/benchmark/ts/SimpleBenchmarkController'
 import { DataHistory } from '../../core/history'
-import { AddLocalUploadSave, LocalUploadSave } from '../../core/localstore'
-import { LocalSaveUploader, getProp, getHoldString, makeid, findNextHighscoreUser } from '../../core/util'
+//import { AddLocalUploadSave, LocalUploadSave } from '../../core/storageinterface'
+import { getProp, getHoldString, makeid, findNextHighscoreUser } from '../../core/util'
 import { Hangboards, LocalBenchmarkSaveData, BenchmarkSetupData, BenchmarkVisualHighscoreEntry, BenchmarkVisualModel, BenchmarkVisualModelMarker, HighscoreEntry } from '../typeexports'
 import { GlobalConfig } from '../../config'
 import GoalBar from './GoalBar.vue'
@@ -355,7 +355,8 @@ export default class Benchmark extends Vue {
                 temperatureInfo: this.scaleBackend.getLastTempSensorData()
             }
         }
-        const save: LocalUploadSave = {
+        //TODO: fixme
+        /*const save: LocalUploadSave = {
             type: "save-benchmark",
             params: [],
             date: new Date(),
@@ -364,7 +365,7 @@ export default class Benchmark extends Vue {
         };
         AddLocalUploadSave(save);
         const uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
-        uploader.uploadLocalSaves();
+        uploader.uploadLocalSaves();*/
     }
 
     reset() {

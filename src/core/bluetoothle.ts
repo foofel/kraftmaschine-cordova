@@ -669,7 +669,8 @@ export class WebBluetoothLE implements BluetoothLE {
 
     async connect(_:string): Promise<boolean>
     {
-        const devices = await navigator.bluetooth.getDevices();
+        return false;
+        /*const devices = await navigator.bluetooth.getDevices();
         let device:BluetoothDevice;
         if(devices.length > 0) {
             device = devices[0];
@@ -705,7 +706,7 @@ export class WebBluetoothLE implements BluetoothLE {
             console.log('closing connection');
             device.gatt?.disconnect();
             console.log('connection closed');
-            if(device.gatt !== undefined) {
+            if(device.gatt !== undefined && device.gatt !== null) {
                 console.log('Connecting to GATT Server...');
                 const server = await device.gatt.connect();
                 console.log("connection done, result: ");
@@ -732,7 +733,7 @@ export class WebBluetoothLE implements BluetoothLE {
         } else {
             return false;
         }
-        return false;
+        return false;*/
     }
 
     async disconnect(address:string): Promise<boolean> {

@@ -22,7 +22,9 @@ import DataEditorComponent from '@/components/DataEditorComponent.vue'
 import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
 import BluetoothConnectionSelector from '@/components/connectionselector/BluetoothConnectionSelector.vue'
 import { GlobalStore } from '@/main'
+import VuePageStack from 'vue-page-stack'
 
+// vue-router is necessary
 Vue.use(VueRouter)
 
 const routes = [
@@ -109,7 +111,7 @@ const routes = [
         path: 'debug',
         component: DebugViewComponent
       }, {
-        path: 'connectionSelector',
+        path: 'device-selector',
         component: BluetoothConnectionSelector
       }
     ]
@@ -121,6 +123,13 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+Vue.use(VuePageStack, { router });
+
+router.beforeEach((to, from, next) => {
+  console.log(`+++ nav event, from: ${from.fullPath} -> ${to.fullPath}`);
+  next();
+});
 
 /*router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.needAuth)) {

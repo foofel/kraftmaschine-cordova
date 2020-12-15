@@ -85,8 +85,8 @@ import { WeightMessage, ScaleOptions, TempSensorInterface } from '@/core/sensorr
 import { CORDOVA_BASE_PATH, GlobalConfig } from '../../config'
 import { HangTimerData, HangTimerSetupData, HangTimerGraphData, TimerBarChartData, LocalTrainingSaveData, Hangboards, TareWeights, SelectedHolds, Hold } from '@/components/typeexports'
 import { TimerEntryPointInTime, TimerWithActiveTracking, TimerState, CalculateTimerLength, GetOverallReps, BeepType } from './ts/timerrunner'
-import { LocalStorage, SaveConfigObject, AddLocalUploadSave, LocalUploadSave, ConfigFile } from '../../core/localstore'
-import { uuidv4, makeSound, LocalSaveUploader, getProp, getHoldString } from  '../../core/util'
+import { ConfigFile } from '../../core/storageinterface'
+import { uuidv4, makeSound, getProp, getHoldString } from  '../../core/util'
 //import Media from '../../types/cordova-plugin-media'
 import { HANGTIMER_FINISHED } from  '../../messages'
 import moment from 'moment';
@@ -266,7 +266,7 @@ export default class HangTimer extends Vue {
             });
         }
     }
-    buildSaveData(stars: number): LocalUploadSave {
+    /*buildSaveData(stars: number): LocalUploadSave {
         return {
             type: "save-training",
             date: new Date(),
@@ -292,7 +292,7 @@ export default class HangTimer extends Vue {
             },
             params: []
         }
-    }
+    }*/
     takeWakeLock() {
         if((window as any).plugins) {
             (window as any).plugins.insomnia.keepAwake();
@@ -465,11 +465,12 @@ export default class HangTimer extends Vue {
         this.buildProgressTimerGraphData();
     }
     saveRunData(stars: number) {      
-        const data = this.buildSaveData(stars);
-        AddLocalUploadSave(data);
-        const uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
-        uploader.uploadLocalSaves();
-        this.$root.$emit(HANGTIMER_FINISHED, data);
+        //TODO: fix
+        //const data = this.buildSaveData(stars);
+        //AddLocalUploadSave(data);
+        //const uploader = this.$root.$data.localSaveUploader as LocalSaveUploader;
+        //uploader.uploadLocalSaves();
+        //this.$root.$emit(HANGTIMER_FINISHED, data);
     }
     get repRemainingoComputed() {
          return moment.utc((this.graphData.repDuration - this.graphData.repProgress) * 1000).format("mm:ss.S");

@@ -49,7 +49,7 @@ import HeadlineView from '@/components/HeadlineView.vue'
 import { HangboardConnector } from '../../core/hangboardconnector';
 import { VueNavigation } from '../vuenavigation';
 import { ScanCallbackInterface } from '../../core/bluetoothle';
-import { ConfigFile, SaveConfigObject } from '../../core/localstore';
+import { ConfigFile } from '../../core/storageinterface';
 import { Hangboards, Hangboard } from '../typeexports';
 import { DeviceInfoCallback } from '../../core/sensorreader';
 
@@ -114,7 +114,7 @@ export default class BluetoothConnectionSelector extends VueNavigation {
     }
     boardSelected(board: Hangboard) {
         this.cfg.options.deviceBoardMapping[this.selectedDevice.address] = board.id;
-        SaveConfigObject(this.cfg);
+        //SaveConfigObject(this.cfg);
         this.state = "done";
     }
 

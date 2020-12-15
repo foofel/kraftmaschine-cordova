@@ -132,11 +132,21 @@ export default class TimerMain extends VueNavigation {
         this.scaleBackend = this.$root.$data.scaleBackend;
     }
 
+    created() {
+        console.log("CREATED TimerMain")
+    }
+
+	activated() {
+		console.log("ACTIVATED TimerMain")
+	}    
+
     mounted() {
         //this.navState.advance();
+        console.log("MOUNTED TimerMain")
     }
 
     beforeDestroy() {
+        console.log("DESTROYED TimerMain")
         if(this.continueTimerId) {
             clearTimeout(this.continueTimerId);
             this.continueTimerId = null;
