@@ -1,7 +1,7 @@
 <template>
     <div class="main">
-        <div v-if="this.channelError" @click="connectionMenuClicked()" class="notification-container">
-            you need to reconnect!
+        <div v-if="!this.isConnected" @click="connectionMenuClicked()" class="notification-container center-only">
+            No device connection :(
         </div>
         <div class="view">
             <vue-page-stack>
@@ -11,57 +11,73 @@
         </div>
         <div class="drawer" :class="{'drawer-active': visible}" @click="hideDrawer()">
             <div class="items">
-                <!--div class="channel-error">
-                    <div v-if="this.channelError" class="error-bg"></div>
-                    <div v-if="this.channelError" class="error-msg center-in-rows">no data from scale</div>
-                </div-->                
+                <div class="channel-error">
+                    <div v-if="true" class="error-bg"></div>
+                    <div v-if="true" class="error-msg center-in-rows">Board: 00000</div>
+                </div>
                 <div class="scroll-container">
                     <div class="item clickable" @click="itemClicked('scale')">
                         <i class="fas fa-balance-scale icon"></i><span>Scale</span>
                     </div>
                     <div class="item clickable" @click="itemClicked('timer')">
-                        <i class="fas fa-stopwatch icon"></i><span>Hang Timer</span>
-                    </div>                    
-                    <div class="item clickable deactivated" @click="itemClicked('trainplan')">
-                        <i class="fas fa-chart-line icon"></i><span>Guided Training</span>
+                        <i class="fas fa-stopwatch icon"></i><span>Timer</span>
                     </div>
+                    <div class="item noborder clickable" @click="itemClicked('benchmark')">
+                        <i class="fas fa-trophy icon"></i><span>Competition</span>
+                    </div>                    
+                    <div class="item half noborder center-only">
+                        <hr class="seperator" />
+                    </div>
+                    <!--div class="item clickable deactivated" @click="itemClicked('trainplan')">
+                        <i class="fas fa-chart-line icon"></i><span>Guided Training</span>
+                    </div-->
                     <div class="item clickable" @click="itemClicked('history')">
                         <i class="far fa-chart-bar icon"></i><span>Timer History</span>
-                    </div>                                        
-                    <div class="item clickable" @click="itemClicked('benchmark')">
-                        <i class="fas fa-arrow-alt-circle-up icon"></i><span>Benchmark</span>
                     </div>
-                    <div class="item clickable" @click="itemClicked('highscore')">
-                        <i class="fas fa-trophy icon"></i><span>Highscore</span>
+                    <div class="item clickable" @click="itemClicked('history')">
+                        <i class="fas fa-chart-line icon"></i><span>Competition Hist.</span>
+                    </div>                    
+                    <div class="item clickable noborder" @click="itemClicked('highscore')">
+                        <i class="fas fa-arrow-alt-circle-up icon"></i><span>Overall Rankings</span>
                     </div>
-                    <div class="item clickable deactivated" @click="itemClicked('perks')">
+                  <div class="item half noborder center-only">
+                        <hr class="seperator" />
+                    </div>
+                    <div class="item clickable" @click="itemClicked('account')">
+                        <i class="fas fa-user icon"></i><span>Profile</span>
+                    </div>
+                    <!--div class="item clickable deactivated" @click="itemClicked('perks')">
                         <i class="fas fa-medal icon"></i><span>Perks</span>
-                    </div>
+                    </div-->
                     <div class="item clickable" @click="itemClicked('friends')">
                         <i class="fas fa-people-arrows icon"></i><span>Friends</span>
                     </div>                
                     <div class="item clickable" @click="itemClicked('users')">
                         <i class="fas fa-users icon"></i><span>Users</span>
                     </div>
-                    <div class="item clickable" @click="itemClicked('account')">
-                        <i class="fas fa-user icon"></i><span>Account</span>
-                    </div>
-                    <div class="item clickable" @click="itemClicked('options')">
+                    <div class="item clickable noborder" @click="itemClicked('options')">
                         <i class="fas fa-cogs icon"></i><span>Options</span>
                     </div>
-                    <div class="item clickable" @click="itemClicked('debug')">
-                        <i class="fas fa-cogs icon"></i><span>Debug</span>
+                  <div class="item half noborder center-only">
+                        <hr class="seperator" />
                     </div>
-                    <div class="item clickable" @click="itemClicked('device-selector')">
+                    <div class="item clickable noborder" @click="itemClicked('device-selector')">
                         <i class="fas fa-cogs icon"></i><span>Device</span>
-                    </div>                      
+                    </div>
+                  <div class="item half noborder center-only">
+                        <hr class="seperator" />
+                    </div>
+                    <div class="item clickable noborder" @click="itemClicked('debug')">
+                        <i class="fas fa-cogs icon"></i><span>Debug</span>
+                    </div>                    
+
                 </div>
             </div>
         </div>
         <div class="drawer-click-overlay" :class="{'drawer-click-overlay-active': visible}" @click="overlayClicked($event)"
         ></div>
         <div class="burger-icon clickable" @click="burgerClicked()" :class="{'burger-icon-active': visible}" >
-                <span class="fas fa-bars"></span>
+            <span class="fas fa-bars"></span>
         </div>
     </div>
 </template>
@@ -85,21 +101,22 @@ export default class DrawerView extends Vue {
     itemKey = "";
     rndItemKey = "123";
     keyLookup: Map<string, string> = new Map<string, string>();
-    channelError = false;
+    isConnected = true;
     constructor() {
         super();
     }
 
     mounted() {
-        GlobalStore.scaleBackend.registerChannelInfoCallback(this.onChannelInfo);
+        GlobalStore.hangboardConnector.registerChannelInfoCallback(this.onChannelInfo);
+        this.isConnected = GlobalStore.hangboardConnector.isConnected();
     }
 
     beforeDestroy() {
-        GlobalStore.scaleBackend.removeChannelInfoCallback(this.onChannelInfo);
+        GlobalStore.hangboardConnector.removeChannelInfoCallback(this.onChannelInfo);
     }
 
     onChannelInfo(channel: string, isActive: boolean) {
-        this.channelError = !isActive;
+        this.isConnected = isActive;
     }
 
     burgerClicked() {
@@ -121,7 +138,7 @@ export default class DrawerView extends Vue {
     }
 
     connectionMenuClicked(event: any) {
-
+        this.$router.push("device-selector");
     }
 
     canChange() {
@@ -143,7 +160,7 @@ export default class DrawerView extends Vue {
             return true;
         }
         return false;
-    }    
+    }
 
     itemClicked(item: string) {
         const target = `/view/${item}`
@@ -167,16 +184,6 @@ export default class DrawerView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@keyframes fadeInOut {
-  0%   { opacity:1; }
-  50%  { opacity:0; }
-  100% { opacity:1; }
-}
-@keyframes fadeInOutHalf {
-  0%   { opacity:1; }
-  50%  { opacity:0.5; }
-  100% { opacity:1; }
-}
 .main {
 	height: 100vh;
     width: 100vw;
@@ -190,6 +197,9 @@ export default class DrawerView extends Vue {
         bottom: 0;
         left: 0;
         z-index: 97;
+        background-color: #ed2828;
+        width: 100%;
+        height: 50px;
         //pointer-events: none;
         /*.drawer-blink {
             position: absolute;
@@ -251,13 +261,15 @@ export default class DrawerView extends Vue {
                     position: absolute;
                     width: 100%;
                     height: 80%;
+                    font-weight: 300;
                 }  
                 .error-bg {
+                    box-sizing: border-box;
                     position: absolute;
-                    background-color: #ed2828;
+                    //background-color: #ed2828;
+                    background-color: #4fed2811;
                     border-radius: 3px;
-                    animation: fadeInOutHalf 2s infinite;
-                    animation-timing-function: ease-in-out;                      
+                    border: 2px solid #4fed2877;
                     width: 100%;
                     height: 80%;
                 }            
@@ -283,8 +295,18 @@ export default class DrawerView extends Vue {
                         }
                     }
                 }
+                .seperator{
+                    width: 100%;
+                    border: 1px solid lightgray;
+                }
+                .item.half {
+                    height: 4px;
+                }
                 .deactivated {
                     color: gray;
+                }
+                .item.noborder {
+                    border: none;
                 }
                 .item:last-child {
                     border: none;

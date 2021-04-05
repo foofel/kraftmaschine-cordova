@@ -43,6 +43,8 @@ export const RequiredBackendVersion = {
 export const BLEServiceInfo = {
     servidceId: "03257878-beb5-4087-ab68-ae6a82e4c4d9",
     weightCharacteristicId: "095aac41-c04d-436f-93c1-8ef1cea45016",
+    envCharacteristicId: "cccffd3c-04d9-4cfc-abfc-995fc7f5fdac",
+    lightCharacteristicId: "328f1bc1-0fb7-4bcd-b646-374917218331",
     hwVersionCharacteristicId: "abe57162-bb8a-4689-a9df-1af2268bf398",
     deviceIdCharacteristicId: "b19e6ca8-4d24-4e1b-9f66-5b3990eeac4f"
 }

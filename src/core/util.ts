@@ -321,50 +321,6 @@ export class EasyRemoteApiHelpers {
     }                       
 }
 
-/*export class LocalSaveUploader {
-    //uploadInterval:number = 60;
-    constructor (private backend: RemoteAPI) {}
-    async uploadLocalSaves() {
-        try {
-            const entries = GetLocalUploadSaves();
-            for(const entry of entries) {
-                const [key, save] = entry;
-                if(save.type === "save-training") {
-                    const result = await this.backend.addTraining(save.data);
-                    if(result.status === 200) {
-                        console.log(`uploaded training from: ${save.date}`);
-                        DeleteLocalUploadSave(key);
-                    } else {
-                        console.log(`unable to upload training from ${save.date}, error: ${result.status}`);
-                    }
-                }
-                else if(save.type === "save-benchmark") {
-                    const obj: LocalBenchmarkSaveData = save.data as LocalBenchmarkSaveData;
-                    if(obj) {
-                        const result = await this.backend.addBenchmark(
-                            obj.boardId,
-                            obj.leftId,
-                            obj.rightId,
-                            obj.userWeight,
-                            obj.hangWeight, 
-                            obj.activeTime,
-                            obj.data
-                        );
-                        if(result.status === 200) {
-                            console.log(`uploaded benchmark from: ${save.date}`);
-                            DeleteLocalUploadSave(key);
-                        } else {
-                            console.log(`unable to upload benchmark from ${save.date}, error: ${result.status}`);
-                        }
-                    }
-                }
-            }
-        } catch(e) {
-            console.log("error while uploading local saves: " + e);
-        }
-    }
-}*/
-
 export function makeSound(source: any, actx: any, loadHandler: any) {
     const o: any = {};
     //Set the default properties.
@@ -642,4 +598,20 @@ export function findNextHighscoreUser(highscore: Array<BenchmarkVisualHighscoreE
         return { idx: i, next: highscore[i], prev: prev };
     }
     return { idx: highscore.length - 1, next: null, prev: prev };
+}
+
+export function asyncSleep(s: number) {
+    return new Promise(resolve => setTimeout(resolve, s * 1000));
+}
+
+export function asyncBarrier(seconds: number): { promise: Promise<void>, resolve: () => void } {
+    let r = () => {};
+    const p = new Promise<void>((resolve, _) => {
+        r = resolve;
+        setTimeout(() => {
+            console.log("barrier resolved");
+            resolve();
+        }, seconds * 1000)
+    });
+    return { promise: p, resolve: r };
 }

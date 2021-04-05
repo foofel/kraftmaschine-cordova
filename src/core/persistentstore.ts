@@ -172,6 +172,10 @@ export class IndexedDBStorageImpl implements StorageInterface {
         const result = await db.keyVal.get(key);
         return result?.data;
     }
+    async deleteObject(key:string) {
+        const result = await db.keyVal.delete(key);
+        return result;
+    }
     async getObjectKeys():Promise<string[]> {
         const result = await db.keyVal.toCollection().primaryKeys();
         return result;
@@ -183,6 +187,10 @@ export class IndexedDBStorageImpl implements StorageInterface {
     async readTypedObject(key:number): Promise<any[]> {
         const result = await db.typedData.get(key);
         return result?.data;
+    }
+    async deleteTypedObject(key:number) {
+        const result = await db.typedData.delete(key);
+        return result;
     }
     async readTypedObjects(type:string): Promise<any[]> {
         const result = await db.typedData.where("type").equals(type);

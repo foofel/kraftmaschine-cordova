@@ -119,7 +119,7 @@ const SCHEDULER_GROUPS = {
 export default class HangTimer extends Vue {
     @Prop() setupData!: HangTimerSetupData;
     activeTrackingTimer: TimerWithActiveTracking;
-    scaleBackend: HangboardConnector;
+    hangboardConnector: HangboardConnector;
     hangTimerData: HangTimerData;
     activationWeightFactor: number;
     graphData: HangTimerGraphData;
@@ -160,7 +160,7 @@ export default class HangTimer extends Vue {
     constructor() {
         super();
         this.cfg = this.$root.$data.cfg;
-        this.scaleBackend = this.$root.$data.scaleBackend;
+        this.hangboardConnector = this.$root.$data.hangboardConnector;
         this.activationWeightFactor = 0.95;
         this.hangTimerData = { 
             ...this.setupData, 
@@ -200,7 +200,7 @@ export default class HangTimer extends Vue {
         }
         this.activeTrackingTimer = new TimerWithActiveTracking(
             this.hangTimerData,
-            this.scaleBackend,
+            this.hangboardConnector,
             (pit, weight, activeTime) => this.onTimerStep(pit, weight, activeTime),
             (pit, weight, activeTime) => this.onLastStep(pit, weight, activeTime),
             (beepType) => this.beep(beepType)
@@ -213,7 +213,7 @@ export default class HangTimer extends Vue {
         this.normalBeepSound = null
         this.lastBeepSound = null
         this.frameDone = true;
-        this.tempInfo = this.scaleBackend.getLastTempSensorData();
+        this.tempInfo = this.hangboardConnector.getLastTempSensorData();
         this.canTare = true;
         this.tareWeights = this.setupData.tareWeights;
         this.calib = null;
@@ -225,7 +225,7 @@ export default class HangTimer extends Vue {
     mounted() {
         //console.log(JSON.stringify(this.setupData));
         this.buildProgressTimerGraphData();
-        this.scaleBackend.registerTempSensorCallback(this.onTempSensorMessage);
+        this.hangboardConnector.registerTempSensorCallback(this.onTempSensorMessage);
         //let board = { id: 2, name: "Beastmaker 1000", width: 580, height: 150, holds: [], officialBenchmarkHolds: { left: 17, right: 22 } };
         //let left = { pos: { x: 15.0, y: 58.0  }, size: { x: 85.0, y: 22.0 }, id:  6, complementary:  3, name: "", shortName: "", type: "", defaultHand: "", depth: 0, fingers: 5 };
         //let right = { pos: { x: 115.0, y: 58.0  }, size: { x: 40.0, y: 22.0 }, id:  6, complementary:  3, name: "", shortName: "", type: "", defaultHand: "", depth: 0, fingers: 5 };
@@ -235,7 +235,7 @@ export default class HangTimer extends Vue {
         } else {
             p = passTrough
         }
-        this.scaleBackend.registerWeightCallback(
+        this.hangboardConnector.registerWeightCallback(
             this.onWeightMessage, 
             pipe(taredByObject(this.tareWeights), p, clampPositive)
         );
@@ -243,8 +243,8 @@ export default class HangTimer extends Vue {
     beforeDestroy() {
         this.activeTrackingTimer.destroy();
         this.releaseWakeLock();
-        this.scaleBackend.removeTempSensorCallback(this.onTempSensorMessage)
-        this.scaleBackend.removeWeightCallback(this.onWeightMessage);
+        this.hangboardConnector.removeTempSensorCallback(this.onTempSensorMessage)
+        this.hangboardConnector.removeWeightCallback(this.onWeightMessage);
     }
 	onTempSensorMessage(msg: TempSensorInterface) {
 		this.tempInfo = msg;
@@ -352,11 +352,11 @@ export default class HangTimer extends Vue {
             this.buildProgressTimerGraphData();
         }
         if(this.timerState !== "ACTIVE" && pit.state === "ACTIVE") {
-            this.activeTimeTemps.push(this.scaleBackend.getLastTempSensorData());
+            this.activeTimeTemps.push(this.hangboardConnector.getLastTempSensorData());
         }
         if(this.calib === null && this.canTare && this.timerState === "PAUSE" && pit.repLength - pit.repElapsed <= 30) {
             this.canTare = false;
-            this.calib = new Calibration(this.scaleBackend, 
+            this.calib = new Calibration(this.hangboardConnector, 
 			(weights: TareWeights) => {
 				console.log(`new tare weights, left: ${weights.left}, right: ${weights.right}`);
 				this.tareWeights.left = weights.left;
@@ -456,7 +456,7 @@ export default class HangTimer extends Vue {
         };        
         this.activeTrackingTimer = new TimerWithActiveTracking(
             this.hangTimerData,
-            this.scaleBackend,
+            this.hangboardConnector,
             (pit, weight, activeTime) => this.onTimerStep(pit, weight, activeTime),
             (pit, weight, activeTime) => this.onLastStep(pit, weight, activeTime),
             (beepType) => this.beep(beepType)

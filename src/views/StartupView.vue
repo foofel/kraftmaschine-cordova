@@ -95,7 +95,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ConfigFile } from '@/core/storageinterface';
 import { RemoteAPI, EasyRemoteApiHelpers, clearAllCookies } from '@/core/util'
-import { GlobalConfig, AppVersion, RequiredBackendVersion } from '@/config'
+import { GlobalConfig, AppVersion, RequiredBackendVersion, RUNNING_ON_DEV_MACHINE } from '@/config'
 import { GlobalStore } from '../main';
 import Button from '@/components/Button.vue'
 import { HangboardConnector } from '@/core/hangboardconnector';
@@ -107,7 +107,7 @@ import { HangboardConnector } from '@/core/hangboardconnector';
 })
 export default class StartupView extends Vue {
     backend: RemoteAPI = this.$root.$data.backend;
-    hangboardConnector: HangboardConnector = this.$root.$data.scaleBackend;
+    hangboardConnector: HangboardConnector = this.$root.$data.hangboardConnector;
     cfg: ConfigFile = this.$root.$data.cfg;
     //backendVersion:string = "";
     // visible (error) states and setup
@@ -140,6 +140,10 @@ export default class StartupView extends Vue {
     mounted()  {
         console.log("MOUNTED StartupView");
         this.executeSetupSequence();
+    }
+
+    activated() {
+        console.log("ACTIVATED StartupView");
     }
 
     beforeDestroy() {
@@ -223,16 +227,21 @@ export default class StartupView extends Vue {
         if(this.cfg.secret !== "") {
             this.cfg.options.firstRun = false;
         }
-        const bleInit = await this.hangboardConnector.init();	
-        if(!bleInit) {
-            console.log(`unable to init bluetooth`);
+        if(!RUNNING_ON_DEV_MACHINE()) {
+            const bleInit = await this.hangboardConnector.init();	
+            if(!bleInit) {
+                console.log(`unable to init bluetooth`);
+            } else {
+                console.log(`ble initialized`)
+            }
+            if(GlobalStore.cfg.options.deviceAddress !== "") {
+                console.log("found previusly connected device, trying reconnect");
+                this.hangboardConnector.connect(GlobalStore.cfg.options.deviceAddress);
+            }
         } else {
-            console.log(`ble initialized`)
+            console.log("running on dev machine, skipping ble init");
+            this.hangboardConnector.connect("webble");
         }
-        if(GlobalStore.cfg.options.deviceAddress !== "") {
-            console.log("found previusly connected device, trying reconnect");
-            this.hangboardConnector.connect(GlobalStore.cfg.options.deviceAddress);
-        }        
         //TODO: do something if the first login thingi should be used
         // ...
         if(this.cfg.secret === "") {

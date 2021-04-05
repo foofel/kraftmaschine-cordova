@@ -178,7 +178,7 @@ export class TimerWithActiveTracking {
     updateIntervall: any;
     constructor(
         private hangTimerData: HangTimerData,
-        private scaleBackend: HangboardConnector, 
+        private hangboardConnector: HangboardConnector, 
         private timerProgressCallback: ActiveTrackingTimerCallback,
         private timerDoneCallback: ActiveTrackingTimerCallback,
         private beepCallback: BeepCallback) 

@@ -163,7 +163,7 @@ import { avg } from '../../core/math'
 export default class Benchmark extends Vue {
     @Prop({default: () => {}}) setupData!: BenchmarkSetupData;
     @Prop({default: () => {}}) highscoreData!: Array<HighscoreEntry>;
-    scaleBackend: HangboardConnector;
+    hangboardConnector: HangboardConnector;
     bc!: SimpleBenchmarkController;
     benchmarkGraph: BenchmarkGraph|null = null;
     //weightGoals:MaxWeightGoals|null = null;
@@ -178,7 +178,7 @@ export default class Benchmark extends Vue {
 
     constructor() {
         super();
-        this.scaleBackend = this.$root.$data.scaleBackend;
+        this.hangboardConnector = this.$root.$data.hangboardConnector;
         //this.highscore = genNames(30, 30);
     }
 
@@ -199,7 +199,7 @@ export default class Benchmark extends Vue {
 
     mounted() {
         //console.log(JSON.stringify(this.setupData));
-        this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(tared(this.setupData.tareWeights.left, this.setupData.tareWeights.right), round(0.1)));
+        this.hangboardConnector.registerWeightCallback(this.onWeightMessage, pipe(tared(this.setupData.tareWeights.left, this.setupData.tareWeights.right), round(0.1)));
         this.benchmarkGraph = this.$refs.graph as BenchmarkGraph;
         //this.weightGoals = this.$refs.weightGoals as MaxWeightGoals;
         //this.timeline = this.$refs.timeline as UserTimeline;
@@ -226,7 +226,7 @@ export default class Benchmark extends Vue {
         }, 30);
     }
     beforeDestroy() {
-        this.scaleBackend.removeWeightCallback(this.onWeightMessage);
+        this.hangboardConnector.removeWeightCallback(this.onWeightMessage);
         this.bc.stop();
     }
 
@@ -352,7 +352,7 @@ export default class Benchmark extends Vue {
                 date: new Date(),
                 time: reportData.time,
                 weight: reportData.weight,
-                temperatureInfo: this.scaleBackend.getLastTempSensorData()
+                temperatureInfo: this.hangboardConnector.getLastTempSensorData()
             }
         }
         //TODO: fixme

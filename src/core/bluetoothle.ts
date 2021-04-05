@@ -1,6 +1,8 @@
 import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexports';
 import { BLEServiceInfo } from '@/config';
 import { WeightMessage } from './sensorreader';
+import { asyncBarrier } from './util';
+
 
 export interface ScanCallbackInterface {
     name:string;
@@ -16,7 +18,7 @@ export interface BLEConnectionResult {
 
 export interface BluetoothLE {
     init: (forced?:boolean) => Promise<boolean>;
-    connect: (address:string) => Promise<BLEConnectionResult>;
+    connect: (address:string, domElement?:any) => Promise<BLEConnectionResult>;
     disconnect: (address:string) => Promise<boolean>;
     subscribe: (characteristic:string, cb:(data:ArrayBuffer) => void) => Promise<boolean>;
     unsubscribe: (characteristic:string) => Promise<boolean>;
@@ -24,6 +26,10 @@ export interface BluetoothLE {
     getDeviceId: () => string;
     startScan: (cb:(result: ScanCallbackInterface) => void, duration:number) => any;
     stopScan: (timerId:any) => void;
+    isBusy: () => boolean;
+    isConnected: () => boolean;
+    read: (characteristic:string) => Promise<string>;
+    write: (characteristic:string, data:ArrayBuffer) => Promise<boolean>;
 }
 
 class BluetoothLEHelpers {
@@ -31,9 +37,9 @@ class BluetoothLEHelpers {
     constructor() {}
     static initializep = (cb: (result: { status: 'enabled' | 'disabled' }) => void) => new Promise<{ status: 'enabled' | 'disabled' }>((resolve, reject) => {
         const params = { 
-            request: true, 
-            statusReceiver: false, 
-            restoreKey : "bluetoothleplugin" 
+            request: true,
+            statusReceiver: false,
+            restoreKey : "bluetoothleplugin"
         };
         bluetoothle.initialize((result: { status: 'enabled' | 'disabled' }) => { 
             if(result.status === "enabled") {
@@ -294,7 +300,25 @@ class BluetoothLEHelpers {
             params
         );
     });
-    static easyScanStart = (cb:(result: ScanCallbackInterface) => void, duration:number) => {
+    static writep = (address:string, service:string, characteristic:string, data:string) => new Promise<BluetoothlePlugin.OperationResult>((resolve, reject) => {
+        const params = {
+            value: data,
+            type: "noResponse",
+            address: address,
+            service: service,
+            characteristic: characteristic
+        }
+        bluetoothle.write(
+            (result: BluetoothlePlugin.OperationResult) => {
+                resolve(result);
+            },
+            (error: BluetoothlePlugin.Error) => {
+                reject(error);
+            },
+            params
+        );
+    });    
+    static easyScanStart = (cb:(result: ScanCallbackInterface) => void, duration:number) : number => {
         // we need the location permission to be allowed to scan for (non paired) devices, request if not already granted... howe to check this?
         const params = {
             services: [BLEServiceInfo.servidceId],
@@ -302,7 +326,7 @@ class BluetoothLEHelpers {
             isConnectable: true
         }
         // TODO: need to implement retrieveConnected for ios
-        let timeout:any = setTimeout(async () => {
+        let timeout:number = setTimeout(async () => {
             try {
                 BluetoothLEHelpers.easyScanTimeout = null;
                 const stopScanr = await BluetoothLEHelpers.stopScanp();
@@ -320,7 +344,7 @@ class BluetoothLEHelpers {
                 cb({name: "", address: "", error: error.message});
                 if(timeout) {
                     clearTimeout(timeout);
-                    timeout = null;
+                    timeout = 0;
                 }
             }, 
             params
@@ -402,14 +426,21 @@ export class CordovaBluetoothLE implements BluetoothLE {
     connectedAddress:string = "";
     connectedDeviceId:string = "";
     startupSuccess:boolean = false;
+    _isInitializing = false;
+    _isConnecting = false;
+    _isConnected = false;
 
     constructor() {}
 
     async init(forced?:boolean) {
+        if(this._isConnecting || this._isInitializing) {
+            console.log(`[ble] invalid state for init (c: ${this._isConnecting}, i:${this._isInitializing})`);
+        }        
         if(this.startupSuccess && !forced) {
             return true;
         }
-        console.log("[ble] STARTING BLUETOOTH");
+        this._isInitializing = true;
+        console.log("[ble] initializing bluetooth");
         console.log("[ble] getting initislized state");
         const isInitializedr = await BluetoothLEHelpers.isInitializedp();
         console.log(`[ble] (isInitializedp)`, isInitializedr);
@@ -420,6 +451,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             });
             console.log(`[ble] (initializep)`, initr);
             if(initr.status !== "enabled") {
+                this._isInitializing = false;
                 return false;
             }
         } else {
@@ -433,22 +465,31 @@ export class CordovaBluetoothLE implements BluetoothLE {
             const enabler = await BluetoothLEHelpers.enablep();
             console.log(`[ble] (enablep)`, enabler);
             if(!enabler.status) {
+                this._isInitializing = false;
                 return false;
             }
         } else {
             console.log("[ble] already enabled");
         }
         this.startupSuccess = true;
+        this._isInitializing = false;
         return true;
     }
 
     async connect(address:string): Promise<BLEConnectionResult>
     {
+        if(this._isConnecting || this._isInitializing) {
+            console.log(`[ble] invalid state for connect (c: ${this._isConnecting}, i:${this._isInitializing})`);
+            return { id: "", address: "", success: false };
+        }
+        this._isConnecting = true;
+        this._isConnected = false;
         if(!this.startupSuccess) {
             console.log("[ble] ble not initialized (wrong entry point?), initializing now");
             const initr = await this.init();
             if(!initr) {
                 console.log("[ble] could not start ble");
+                this._isConnecting = false;
                 return { id: "", address: "", success: false };
             }
         }
@@ -466,6 +507,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             });
             console.log(`[ble] (initializep)`, initr);
             if(initr.status !== "enabled") {
+                this._isConnecting = false;
                 return { id: "", address: "", success: false };
             }
         }
@@ -477,6 +519,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             const enabler = await BluetoothLEHelpers.enablep();
             console.log(`[ble] (enablep)`, enabler);
             if(!enabler.status) {
+                this._isConnecting = false;
                 return { id: "", address: "", success: false };
             }
         }
@@ -497,28 +540,42 @@ export class CordovaBluetoothLE implements BluetoothLE {
         // whatever, doenst hut.            
         //if(isConnected) {
         try {
-            console.log("[ble] close connection (prev");
+            console.log(`[ble] close connection (prev: '${prevConnected}')`);
             const closer = await BluetoothLEHelpers.closep(prevConnected);
             console.log(closer);
             if(closer.status !== "closed") {
+                this._isConnecting = false;
                 return { id: "", address: "", success: false };
             }
         } catch(e) {}
         try {
-            console.log("[ble] close connection (prev");
+            console.log(`[ble] close connection (current: '${address}')`);
             const closer = await BluetoothLEHelpers.closep(address);
             console.log(closer);
             if(closer.status !== "closed") {
+                this._isConnecting = false;
                 return { id: "", address: "", success: false };
             }
         } catch(e) {}            
         //}
         console.log("[ble] trying to connect");
+        const barrier = asyncBarrier(5);
+        let connectionEstablished = false;
         const connectr = await BluetoothLEHelpers.connectp(address, (result:BluetoothlePlugin.DeviceInfo) => {
             console.log(`[ble] connection status change`, result);
+            if(result.status == "connected") {
+                connectionEstablished = true;
+                barrier.resolve();
+            }
         });
+        await barrier.promise;
+        if(!connectionEstablished) {
+            this._isConnecting = false;
+            return { id: "", address: "", success: false };
+        }
         console.log(`[ble] (connectp)`, connectr);
         if(connectr.status !== "connected") {
+            this._isConnecting = false;
             return { id: "", address: "", success: false };
         }
         console.log("[ble] getting bonding state");
@@ -553,7 +610,9 @@ export class CordovaBluetoothLE implements BluetoothLE {
         const devId = atob(devIdr.value);
         console.log("[ble] (readp)", devId);
         this.connectedDeviceId = devId;
-        console.log("[ble] DONE");
+        console.log("[ble] connected");
+        this._isConnecting = false;
+        this._isConnected = true;
         return { id: devId, address: address, success: true };
     }
 
@@ -594,15 +653,11 @@ export class CordovaBluetoothLE implements BluetoothLE {
         return false;
     }
 
-    getAddress(): string {
-        return this.connectedAddress;
-    }
-
-    getDeviceId(): string {
-        return this.connectedDeviceId;
-    }
-
     async startScan(cb:(result: ScanCallbackInterface) => void, duration:number) {
+        if(this._isInitializing) {
+            console.log(`[ble] invalid state for startScan (i:${this._isInitializing})`);
+            return
+        }
         if(!this.startupSuccess) {
             console.log("[ble] ble not initialized (wrong entry point?), initializing now");
             const initr = await this.init();
@@ -611,12 +666,41 @@ export class CordovaBluetoothLE implements BluetoothLE {
                 return { id: "", address: "", success: false };
             }
         }
-        await BluetoothLEHelpers.easyScanStopp(0);
+        try {
+            await BluetoothLEHelpers.easyScanStopp(0);
+        } catch(e) {}
         return BluetoothLEHelpers.easyScanStart(cb, duration);
     }
 
     async stopScan(timerId:any) {
         await BluetoothLEHelpers.easyScanStopp(timerId);
+    }
+
+    async read(characteristic:string): Promise<string> {
+        const result = await BluetoothLEHelpers.readp(this.connectedAddress, BLEServiceInfo.servidceId, characteristic);
+        return result.value;
+    }
+
+    async write(characteristic:string, buffer:ArrayBuffer): Promise<boolean> {
+        const base64Data = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+        await BluetoothLEHelpers.writep(this.connectedAddress, BLEServiceInfo.servidceId, characteristic, base64Data);
+        return true;
+    }
+
+    getAddress(): string {
+        return this.connectedAddress;
+    }
+
+    getDeviceId(): string {
+        return this.connectedDeviceId;
+    }    
+
+    isBusy() {
+        return this._isConnecting || this._isInitializing;
+    }
+
+    isConnected() {
+        return this._isConnected;
     }
 }
 
@@ -626,7 +710,7 @@ interface ConnectionData {
     device:BluetoothDevice;
     server:BluetoothRemoteGATTServer;
     service:BluetoothRemoteGATTService;
-    characteristic:BluetoothRemoteGATTCharacteristic;
+    characteristics: { [id: string]: BluetoothRemoteGATTCharacteristic; }
     deviceId:string;
 }
 
@@ -644,7 +728,7 @@ export class WebBluetoothLE implements BluetoothLE {
     {
         const devices = await navigator.bluetooth.getDevices();
         let device:BluetoothDevice;
-        if(devices.length > 0) {
+        if(devices.length > 0 && !domElement) {
             device = devices[0];
             device.watchAdvertisements();
             await new Promise<void>((resolve, reject) => {
@@ -688,7 +772,14 @@ export class WebBluetoothLE implements BluetoothLE {
                 const service = await server.getPrimaryService(BLEServiceInfo.servidceId);
                 console.log('Getting Characteristic...');
                 const testAllChars = await service.getCharacteristics();
-                const characteristic = await service.getCharacteristic(BLEServiceInfo.weightCharacteristicId);
+                const weightCharacteristic = await service.getCharacteristic(BLEServiceInfo.weightCharacteristicId);
+                const envCharacteristic = await service.getCharacteristic(BLEServiceInfo.envCharacteristicId);
+                const lightCharacteristic = await service.getCharacteristic(BLEServiceInfo.lightCharacteristicId);
+                const requestedCharacteristics = {
+                    [BLEServiceInfo.weightCharacteristicId]: weightCharacteristic,
+                    [BLEServiceInfo.envCharacteristicId]: envCharacteristic,
+                    [BLEServiceInfo.lightCharacteristicId]: lightCharacteristic
+                }
                 const devIdC = await service.getCharacteristic(BLEServiceInfo.deviceIdCharacteristicId);
                 const devIdBuffer = await devIdC.readValue();
                 const devId = new TextDecoder().decode(devIdBuffer.buffer);
@@ -697,7 +788,7 @@ export class WebBluetoothLE implements BluetoothLE {
                     device: device,
                     server: server,
                     service: service,
-                    characteristic: characteristic,
+                    characteristics: requestedCharacteristics,
                     deviceId: devId
                 }
                 console.log('Connected!');
@@ -714,14 +805,14 @@ export class WebBluetoothLE implements BluetoothLE {
         return true;
     }
 
-    async subscribe(characteristic:string, cb:(data:ArrayBuffer) => void): Promise<boolean>
+    async subscribe(characteristic:any, cb:(data:ArrayBuffer) => void): Promise<boolean>
     {
         if(this.connectionData !== null) {
-            const characteristic = await this.connectionData.characteristic.startNotifications();
-            console.log(characteristic)
+            const characteristicObject = await this.connectionData.characteristics[characteristic].startNotifications();
+            console.log(characteristicObject)
             console.log('> Notifications started');
             const decoder = new TextDecoder("utf-8");
-            characteristic.addEventListener('characteristicvaluechanged', (evt:Event) => {
+            characteristicObject.addEventListener('characteristicvaluechanged', (evt:Event) => {
                 if(evt.target) {
                     const internal = (evt.target as BluetoothRemoteGATTCharacteristic);
                     if(internal.value) {
@@ -739,7 +830,7 @@ export class WebBluetoothLE implements BluetoothLE {
     async unsubscribe(characteristic:string): Promise<boolean>
     {
         if(this.connectionData !== null) {
-            const characteristic = await this.connectionData.characteristic.stopNotifications();
+            const _ = await this.connectionData.characteristics[characteristic].stopNotifications();
             return true;
         } else {
             console.log("no active connection, cant unsubscribe")
@@ -748,7 +839,7 @@ export class WebBluetoothLE implements BluetoothLE {
     }
 
     getAddress(): string {
-        return "invalid for webble";
+        return "webble";
     }
 
     getDeviceId(): string {
@@ -762,4 +853,23 @@ export class WebBluetoothLE implements BluetoothLE {
 
     }
 
+    isBusy() {
+        return false;
+    }
+
+    isConnected() {
+        return true;
+    }
+
+    async read(characteristic:string) {
+        return "";
+    }
+
+    async write(characteristic:string, buffer:ArrayBuffer): Promise<boolean> {
+        if(this.connectionData !== null) {
+            //const buffer = new TextEncoder().encode(data);
+            this.connectionData.characteristics[characteristic].writeValue(buffer);
+        }
+        return true;
+    }
 }

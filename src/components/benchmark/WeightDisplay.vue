@@ -14,22 +14,22 @@ import { sprintf } from "sprintf-js";
     }
 })
 export default class WeightDisplay extends Vue {
-    scaleBackend: HangboardConnector;
+    hangboardConnector: HangboardConnector;
     currentWeight = 0;
     @Prop({default: "%s"}) format!: string;
     @Prop({default: () => pipe(passTrough)}) pipeline!: any;
     constructor(){
         super();
-        this.scaleBackend = this.$root.$data.scaleBackend
+        this.hangboardConnector = this.$root.$data.hangboardConnector
     }
     mounted() {
-        this.scaleBackend.registerWeightCallback(this.onWeightMessage,
+        this.hangboardConnector.registerWeightCallback(this.onWeightMessage,
             this.pipeline
         );
     }
     
     beforeDestroy() {
-        this.scaleBackend.removeWeightCallback(this.onWeightMessage);
+        this.hangboardConnector.removeWeightCallback(this.onWeightMessage);
     }
 
     onWeightMessage(wm: WeightMessage) {

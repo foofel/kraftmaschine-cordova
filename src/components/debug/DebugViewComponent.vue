@@ -3,7 +3,9 @@
         <!--textarea class="text" v-model="textString" ref="ta"></textarea-->
         <div class="graph-container">
             <BenchmarkGraph ref="graph" />
-        </div>        
+        </div>
+        <input v-model="colorText" type="text" />
+        <button @click="sendColor">send color</button>
     </div>
 </template>
 
@@ -31,14 +33,15 @@ export default {
     },
     dataObject: new Data(),
     data() { return {
-        scaleBackend: null,
+        hangboardConnector: null,
         interval: null,
-        benchmarkGraph: null
+        benchmarkGraph: null,
+        colorText: "0 0 0"
     }},    
     created() {
-        this.scaleBackend = this.$root.scaleBackend;
+        this.hangboardConnector = this.$root.hangboardConnector;
         const self = this;
-        this.scaleBackend.registerWeightCallback((wm) => { 
+        this.hangboardConnector.registerWeightCallback((wm) => { 
             self.$options.onNewData(self, wm);
         }, passTrough);
     },
@@ -47,7 +50,7 @@ export default {
         this.$options.startRedraw(this);
     },
     beforeDestroy() {
-        this.scaleBackend.removeWeightCallback(this.$options.onNewData);
+        this.hangboardConnector.removeWeightCallback(this.$options.onNewData);
         this.stopUpdate = true;
         if(this.interval) {
             clearInterval(this.interval);
@@ -101,7 +104,12 @@ export default {
     methods: {
         canLeaveComponent: function() {
             return "ok"; // NavigatorLeaveResponse
-        }
+        },
+        sendColor() {
+            const [r, g, b] = this.colorText.split(" ").map(x => parseInt(x));
+            console.log(r, g, b);
+            this.hangboardConnector.setLightColor(r, g, b);
+        },        
     }
 }
 
@@ -115,12 +123,12 @@ export default class DebugViewComponent extends VueNavigation {
     interval: any = null;
     benchmarkGraph!: BenchmarkGraph;
     stopUpdate = false;
-    scaleBackend: HangboardConnector;
+    hangboardConnector: HangboardConnector;
     dataObject:Data|undefined = undefined;
 
     constructor() {
         super();
-        this.scaleBackend = this.$root.$data.scaleBackend;
+        this.hangboardConnector = this.$root.$data.hangboardConnector;
     }
 
     created() {
@@ -134,13 +142,13 @@ export default class DebugViewComponent extends VueNavigation {
     }
 
     mounted() { 
-        this.scaleBackend.registerWeightCallback(this.onWeightMessage, passTrough);
+        this.hangboardConnector.registerWeightCallback(this.onWeightMessage, passTrough);
         this.benchmarkGraph = this.$refs.graph as BenchmarkGraph;
         this.startRedraw();
     }
 
     beforeDestroy() {
-        this.scaleBackend.removeWeightCallback(this.onWeightMessage);
+        this.hangboardConnector.removeWeightCallback(this.onWeightMessage);
         this.stopUpdate = true;
         if(this.interval) {
             clearInterval(this.interval);

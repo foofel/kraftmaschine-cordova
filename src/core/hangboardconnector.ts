@@ -38,9 +38,10 @@ export class HangboardConnector {
         console.log("[ble] disconnected, result:", res);
     }
 
-    public connect(address: string): Promise<BLEConnectionResult> {
+    public async connect(address: string, domElement?:any): Promise<BLEConnectionResult> {
         this.resetData();
-        return this.dataReader.connect(address);
+        const result = await this.dataReader.connect(address, domElement);
+        return result;
     }
 
     public startChannelSearch(cb:(result: ScanCallbackInterface) => void) {
@@ -49,7 +50,15 @@ export class HangboardConnector {
 
     public stopChannelSearch() {
         this.dataReader.stopDeviceSearch();
-    }    
+    }
+
+    public isConnected() {
+        return this.dataReader.isDeviceAlive();
+    }
+
+    public setLightColor(r:number, g:number, b:number) {
+        this.dataReader.setLightColor(r, g, b);
+    }
 
     private resetData() {
         this.lastTempMessage = {

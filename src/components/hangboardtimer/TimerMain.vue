@@ -115,7 +115,7 @@ class NavigationState {
     }*/
 })
 export default class TimerMain extends VueNavigation {
-    scaleBackend: HangboardConnector;
+    hangboardConnector: HangboardConnector;
     navState: NavigationState = new NavigationState(['setup', 'timer']);
     preperationProgress = 0;
     continueTime = 3;
@@ -129,11 +129,7 @@ export default class TimerMain extends VueNavigation {
 
     constructor() {
         super();
-        this.scaleBackend = this.$root.$data.scaleBackend;
-    }
-
-    created() {
-        console.log("CREATED TimerMain")
+        this.hangboardConnector = this.$root.$data.hangboardConnector;
     }
 
 	activated() {

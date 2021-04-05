@@ -9,7 +9,7 @@
                     <div class="header-device center-only">
                         <div class="" v-if="state == 'scan'">
                             <div class="center-only" @click="scanForDevices()">
-                                Searching for devices
+                                {{ isScanning ? "Searching for devices" : "Found Devices" }}
                             </div>
                         </div>
                         <div v-if="state == 'board'">Select Board</div>
@@ -23,6 +23,9 @@
                         <div class="item-container center-only">
                             {{item.name}}
                         </div>
+                        <div v-if="isConnecting" class="loader-box">
+                            <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+                        </div>                        
                     </div>
                 </div>
                 <div v-if="state == 'board'" class="device-list expand-item">
@@ -52,6 +55,8 @@ import { ScanCallbackInterface } from '../../core/bluetoothle';
 import { ConfigFile } from '../../core/storageinterface';
 import { Hangboards, Hangboard } from '../typeexports';
 import { DeviceInfoCallback } from '../../core/sensorreader';
+import { asyncSleep, showToast } from '@/core/util';
+import { RUNNING_ON_DEV_MACHINE } from '@/config';
 
 @Component({
     components: {
@@ -62,31 +67,48 @@ export default class BluetoothConnectionSelector extends VueNavigation {
     devices:Array<{name:string, address:string}> = [];
     state:"scan"|"board"|"done" = "scan";
     connectSuccess = true;
-    scaleBackend:HangboardConnector = {} as HangboardConnector;
+    hangboardConnector:HangboardConnector = {} as HangboardConnector;
     isScanning = false;
+    isConnecting = false;
     cfg!:ConfigFile;
     selectedDevice!: { name: string, address: string };
     constructor() {
         super();
     }
     created() {
-        this.scaleBackend = this.$root.$data.scaleBackend as HangboardConnector;
+        this.hangboardConnector = this.$root.$data.hangboardConnector as HangboardConnector;
         this.cfg = this.$root.$data.cfg;
         console.log(this.cfg);
     }
+
+	activated() {
+		console.log("ACTIVATED BluetoothConnectionSelector")
+	}    
+
     mounted() {
-        //this.scaleBackend.registerChannelInfoCallback(this.onChannelInfo);
+        console.log("MOUNTED BluetoothConnectionSelector");
         this.scanForDevices()
     }
+
     beforeDestroy() {
-        this.isScanning = false;
-        this.scaleBackend.stopChannelSearch();
-    }    
+        console.log("DESTROYED BluetoothConnectionSelector");
+        if(this.isScanning) {
+            this.hangboardConnector.stopChannelSearch();
+        }
+    }
+    
     async scanForDevices() {
+        if(this.isScanning){
+            return;
+        }
         console.log("start scan");
         this.devices = [];
+        if(RUNNING_ON_DEV_MACHINE()) {
+            this.devices.push({ name: "webble", address: "webble" });
+            return;
+        }        
         this.isScanning = true;
-        this.scaleBackend.startChannelSearch((result:ScanCallbackInterface) => {
+        this.hangboardConnector.startChannelSearch((result:ScanCallbackInterface) => {
             const idx = this.devices.findIndex((e) => e.address === result.address);
             if(idx !== -1) {
                 return;
@@ -94,15 +116,27 @@ export default class BluetoothConnectionSelector extends VueNavigation {
             console.log(result);
             if(result.error !== "") {
                 this.isScanning = false;
+                if(this.devices.length == 0) {
+                    showToast(`no bluetooth devices found :'(`, 2000);
+                }
                 return;
             }
             this.devices.push({ name: result.name, address: result.address});
         });
     }
     async deviceSelected(dev:{ name: string, address: string }) {
+        if(this.isConnecting){
+            return;
+        }
+        //TODO: wait until connection is done, then show next screen
         console.log("selected", dev);
-        this.scaleBackend.stopChannelSearch();
-        const res = await this.scaleBackend.connect(dev.address);
+        this.isConnecting = true;
+        if(this.isScanning) {
+            this.hangboardConnector.stopChannelSearch();
+        }
+        this.isScanning = false;
+        const res = await this.hangboardConnector.connect(dev.address, window);
+        this.isConnecting = false;
         if(res.success){
             this.cfg.options.deviceId = res.id;
             this.cfg.options.deviceAddress = res.address;
@@ -110,14 +144,9 @@ export default class BluetoothConnectionSelector extends VueNavigation {
             this.selectedDevice = dev;
             this.isScanning = false;
             this.state = "board";
-            /*if(board == undefined) {
-                this.state = "board";
-            }
-            else {
-                this.state = "done";
-            }*/
         } else {
-            console.log("unable to connect to ble device")
+            console.log("unable to connect to bluetooth device")
+            showToast(`unable to connect to device`, 2000);
         }
     }
     boardSelected(board: Hangboard) {
@@ -147,6 +176,49 @@ export default class BluetoothConnectionSelector extends VueNavigation {
         display: flex;
         flex-flow: column;
         width: 100vw;
+        .loader-box {
+            width: 32px;
+            height: 32px;
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -12px);
+            right: 15px;
+            .lds-ring {
+                display: inline-block;
+                position: relative;
+                width: 24px;
+                height: 24px;
+            }
+            .lds-ring div {
+                box-sizing: border-box;
+                display: block;
+                position: absolute;
+                width: 24px;
+                height: 24px;
+                margin: 0px;
+                border: 2px solid lightgray;
+                border-radius: 50%;
+                animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+                border-color:lightgray transparent transparent transparent;
+            }
+            .lds-ring div:nth-child(1) {
+                animation-delay: -0.45s;
+            }
+            .lds-ring div:nth-child(2) {
+                animation-delay: -0.3s;
+            }
+            .lds-ring div:nth-child(3) {
+                animation-delay: -0.15s;
+            }
+            @keyframes lds-ring {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        }           
         .relative {
             position: relative;
         }
@@ -154,50 +226,7 @@ export default class BluetoothConnectionSelector extends VueNavigation {
             flex: 0 1 auto;         
         }
         .loader-item {
-            flex: 0 1 auto; 
-            .loader-box {
-                width: 32px;
-                height: 32px;
-                position: absolute;
-                top: 50%;
-                transform: translate(0, -12px);
-                right: 15px;
-                .lds-ring {
-                    display: inline-block;
-                    position: relative;
-                    width: 24px;
-                    height: 24px;
-                }
-                .lds-ring div {
-                    box-sizing: border-box;
-                    display: block;
-                    position: absolute;
-                    width: 24px;
-                    height: 24px;
-                    margin: 0px;
-                    border: 2px solid lightgray;
-                    border-radius: 50%;
-                    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-                    border-color:lightgray transparent transparent transparent;
-                }
-                .lds-ring div:nth-child(1) {
-                    animation-delay: -0.45s;
-                }
-                .lds-ring div:nth-child(2) {
-                    animation-delay: -0.3s;
-                }
-                .lds-ring div:nth-child(3) {
-                    animation-delay: -0.15s;
-                }
-                @keyframes lds-ring {
-                    0% {
-                        transform: rotate(0deg);
-                    }
-                    100% {
-                        transform: rotate(360deg);
-                    }
-                }
-            }               
+            flex: 0 1 auto;             
         }
         .expand-item {
             flex: 1 1 auto;
@@ -222,6 +251,7 @@ export default class BluetoothConnectionSelector extends VueNavigation {
                 font-weight: 300;
                 cursor: pointer;
                 //background-color: aquamarine;             
+                position: relative;
                 .item-container {
                     font-size: 16;
                     width: 100%;

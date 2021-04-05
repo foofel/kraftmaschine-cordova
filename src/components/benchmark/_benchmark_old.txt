@@ -123,7 +123,7 @@ import GoalBar from './GoalBar.vue'
 })
 export default class Benchmark extends Vue {
     @Prop({default: () => {}}) setupData!:BenchmarkSetupData;
-    scaleBackend:HangboardConnector;
+    hangboardConnector:HangboardConnector;
     bc!:BenchmarkController;
     benchmarkGraph:BenchmarkGraph|null = null;
     weightGoals!:MaxWeightGoals;
@@ -138,7 +138,7 @@ export default class Benchmark extends Vue {
     }
     constructor(){
         super();
-        this.scaleBackend = this.$root.$data.scaleBackend;
+        this.hangboardConnector = this.$root.$data.hangboardConnector;
         console.log(JSON.stringify(this.setupData));
     }
 
@@ -147,7 +147,7 @@ export default class Benchmark extends Vue {
         this.weightGoals = this.$refs.weightGoals as MaxWeightGoals;
         this.timeline = this.$refs.timeline as UserTimeline;
         this.bc = new BenchmarkController(
-            this.scaleBackend, 
+            this.hangboardConnector, 
             this.onStart,
             this.onFinish,
             this.onFixInitial,
@@ -225,7 +225,7 @@ export default class Benchmark extends Vue {
                 date: new Date(),
                 time: reportData.time,
                 weight: reportData.weight,
-                temperatureInfo: this.scaleBackend.getLastTempSensorData()
+                temperatureInfo: this.hangboardConnector.getLastTempSensorData()
             }
         }
         let save:LocalUploadSave = {

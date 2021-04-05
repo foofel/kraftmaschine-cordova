@@ -35,7 +35,7 @@ import { ConfigFile } from '@/core/storageinterface';
 export default class SimpleWeightDisplay extends VueNavigation {
 	@Prop({default: 8}) rate!: number;
 	weight: WeightDataInterface;
-	scaleBackend: HangboardConnector;
+	hangboardConnector: HangboardConnector;
 	hidden: boolean;
 	calib: Calibration|null;
 	tareWeights: TareWeights = { left: 0, right: 0 };
@@ -48,12 +48,8 @@ export default class SimpleWeightDisplay extends VueNavigation {
 		this.hidden = true;
 		this.weight = new WeightData(0, 0, 0);
 		this.calib = null;
-		this.scaleBackend = this.$root.$data.scaleBackend as HangboardConnector;
-		this.tempInfo = this.scaleBackend.getLastTempSensorData();
-	}
-
-    created() {
-        console.log("CREATED SimpleWeightDisplay")
+		this.hangboardConnector = this.$root.$data.hangboardConnector as HangboardConnector;
+		this.tempInfo = this.hangboardConnector.getLastTempSensorData();
 	}
 	
 	activated() {
@@ -62,8 +58,8 @@ export default class SimpleWeightDisplay extends VueNavigation {
 
 	async mounted () {
 		console.log("MOUNTED SimpleWeightDisplay")
-		this.scaleBackend.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
-		this.scaleBackend.registerTempSensorCallback(this.onTempSensorMessage);
+		this.hangboardConnector.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
+		this.hangboardConnector.registerTempSensorCallback(this.onTempSensorMessage);
 		this.onTare();
 		this.intervallId = setInterval(() => {
 			this.onTare();
@@ -72,8 +68,8 @@ export default class SimpleWeightDisplay extends VueNavigation {
 
 	beforeDestroy() {
 		console.log("DESTROYED SimpleWeightDisplay")
-		this.scaleBackend.removeWeightCallback(this.onWeightMessage);
-		this.scaleBackend.removeTempSensorCallback(this.onTempSensorMessage)
+		this.hangboardConnector.removeWeightCallback(this.onWeightMessage);
+		this.hangboardConnector.removeTempSensorCallback(this.onTempSensorMessage)
 		if(this.calib) {
 			this.calib.stop();
 			this.calib = null;
@@ -108,7 +104,7 @@ export default class SimpleWeightDisplay extends VueNavigation {
 			return;
 		}
 		console.log("start calibration");
-		this.calib = new Calibration(this.scaleBackend, 
+		this.calib = new Calibration(this.hangboardConnector, 
 			(weights: TareWeights) => {
 				console.log(`new tare weights, left: ${weights.left}, right: ${weights.right}`);
 				this.tareWeights.left = weights.left;

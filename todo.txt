@@ -1,3 +1,7 @@
+-/was.preloaded.using.link/ -/Download.the.Vue.Devtools/
+
+
+
 [next todo]
 - fix temp updater in the esp32 ble server
 - check for bad i2c values through the long cable               [done (cant find any)]
@@ -24,7 +28,12 @@
 - setup wiki.js (or look for another but we need a wiki)
 
 
-
+[needed]
+- flexor bruch test
+    - mit schraube/unterlegscheibe
+    - mit schraube + alu barren
+- board bruch test
+- 
 
 
 

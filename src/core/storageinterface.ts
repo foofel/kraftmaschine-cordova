@@ -44,11 +44,15 @@ export interface ConfigFile {
 export interface StorageInterface {
     init():Promise<boolean>;
     getConfigProxyObject():Promise<ConfigFile>;
+
     writeObject(key:string, data:any): Promise<string>;
     readObject(key:string): Promise<any>;
+    deleteObject(key:string): Promise<void>;
     getObjectKeys():Promise<string[]>;
+
     writeTypedObject(key:string, type:string, data:any): Promise<number>;
     readTypedObject(key:number): Promise<any[]>;
-    readTypedObjects(type:string): Promise<any[]> ;
+    deleteTypedObject(key:number): Promise<void>;
+    readTypedObjects(type:string): Promise<any[]>;
     getTypedObjectKeys():Promise<number[]>;
 }

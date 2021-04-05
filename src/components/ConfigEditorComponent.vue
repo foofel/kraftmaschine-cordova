@@ -27,7 +27,7 @@ export default class ConfigEditorComponent extends VueNavigation {
 
     constructor() {
         super();
-        this.scale = this.$root.$data.scaleBackend;
+        this.scale = this.$root.$data.hangboardConnector;
     }
 
     created() {

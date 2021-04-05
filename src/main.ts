@@ -12,7 +12,7 @@ Vue.config.productionTip = false
 console.log("kraftmaschine main file loaded!")
 
 export interface GlobalStoreInterface {
-	scaleBackend: HangboardConnector,
+	hangboardConnector: HangboardConnector,
 	backend: RemoteAPI,
 	storage: StorageInterface,
 	cfg: ConfigFile,
@@ -28,10 +28,9 @@ async function startupApp() {
 	await storage.init();
 	GlobalStore.storage = storage;
 	GlobalStore.cfg = await storage.getConfigProxyObject();
-	const backendApi = new RemoteAPI();
-	const scaleDataBackend = new HangboardConnector();
-	GlobalStore.scaleBackend = scaleDataBackend;
-	GlobalStore.backend = backendApi;
+	GlobalStore.hangboardConnector = new HangboardConnector();
+	GlobalStore.backend = new RemoteAPI();
+	//(window as any).StatusBar.backgroundColorByHexString('#99000000');
 	console.log("starting vue");
 	const inst = new Vue({
 		router,
@@ -39,14 +38,14 @@ async function startupApp() {
 		render: h => h(App)
 	}).$mount('#app');
 	document.addEventListener("pause", () => {
-		GlobalStore.scaleBackend.onGlobalMessage("appPause");
+		GlobalStore.hangboardConnector.onGlobalMessage("appPause");
 	}, false);
 	document.addEventListener("resume", () => {
 		if (GlobalStore.cfg.secret !== "" && !reauth(GlobalStore.backend)) {
 			clearAllCookies();
 			window.location.reload(true);
 		}
-		GlobalStore.scaleBackend.onGlobalMessage("appResume");
+		GlobalStore.hangboardConnector.onGlobalMessage("appResume");
 	}, false);
 }
 

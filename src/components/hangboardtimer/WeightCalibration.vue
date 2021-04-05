@@ -26,7 +26,7 @@ export default class WeightCalibration extends Vue {
     @Prop({default: "hang onto board"}) initFormat!: number;
     @Prop({default: "%d%%"}) progressFormat!: number;
     @Prop({default: () => { return { left: 0, right: 0 } }}) tareWeights!: TareWeights;
-    scaleBackend: HangboardConnector;
+    hangboardConnector: HangboardConnector;
     calib: Calibration|null = null;
     //progressBar:ProgressBar|null = null;
     progressValue = 0;
@@ -36,13 +36,13 @@ export default class WeightCalibration extends Vue {
 
     constructor() {
         super();
-        this.scaleBackend = this.$root.$data.scaleBackend;
+        this.hangboardConnector = this.$root.$data.hangboardConnector;
     }
 
     mounted() {
         //this.progressBar = this.$refs.progress as ProgressBar;
         if(this.calib === null) {
-            this.calib = new Calibration(this.scaleBackend, 
+            this.calib = new Calibration(this.hangboardConnector, 
                 (weights: TareWeights) => {
                     console.log("done");
                     this.$emit("calibrationDone", new WeightData(weights.left, weights.right, weights.left + weights.right))
