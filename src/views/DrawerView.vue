@@ -87,7 +87,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Route } from 'vue-router';
 import { VueNavigation } from '../components/vuenavigation';
 import { showToast } from '../core/util';
-import { GlobalStore } from '../main';
+import { AppContext } from '../main';
 import VuePageStack from 'vue-page-stack';
 import router from '../router/index'
 
@@ -107,12 +107,12 @@ export default class DrawerView extends Vue {
     }
 
     mounted() {
-        GlobalStore.hangboardConnector.registerChannelInfoCallback(this.onChannelInfo);
-        this.isConnected = GlobalStore.hangboardConnector.isConnected();
+        AppContext.hangboardConnector.registerChannelInfoCallback(this.onChannelInfo);
+        this.isConnected = AppContext.hangboardConnector.isConnected();
     }
 
     beforeDestroy() {
-        GlobalStore.hangboardConnector.removeChannelInfoCallback(this.onChannelInfo);
+        AppContext.hangboardConnector.removeChannelInfoCallback(this.onChannelInfo);
     }
 
     onChannelInfo(channel: string, isActive: boolean) {

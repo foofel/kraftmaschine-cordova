@@ -1,6 +1,6 @@
 import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexports';
 import { BLEServiceInfo, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
-import { GlobalStore } from '@/main';
+import { AppContext } from '@/main';
 import { runInContext } from 'lodash';
 import { BLEConnectionResult, BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
 import { StopWatch } from './stopwatch';

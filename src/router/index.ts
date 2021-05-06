@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 //import SwipeView from '@/views/SwipeView.vue'
 import SimpleWeight from '@/views/SimpleWeight.vue'
 import StartupView from '@/views/StartupView.vue'
+import Startup from '@/components/startup/StartUp.vue'
 import DebugView from '@/views/DebugView.vue'
 import DrawerView from '@/views/DrawerView.vue'
 import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
@@ -21,7 +22,7 @@ import TrainPlanView from '@/components/plan/TrainPlanView.vue'
 import DataEditorComponent from '@/components/DataEditorComponent.vue'
 import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
 import BluetoothConnectionSelector from '@/components/connectionselector/BluetoothConnectionSelector.vue'
-import { GlobalStore } from '@/main'
+import { AppContext } from '@/main'
 import VuePageStack from 'vue-page-stack'
 
 // vue-router is necessary
@@ -31,7 +32,7 @@ const routes = [
   {
     path: '/',
     name: 'startup',
-    component: StartupView
+    component: Startup //StartupView
   },
   /*{
     path: '/swipe',
@@ -139,7 +140,7 @@ router.beforeEach((to, from, next) => {
 
 /*router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.needAuth)) {
-    if(!GlobalStore.backend.isAuthenticated()) {
+    if(!AppContext.backend.isAuthenticated()) {
       next({
         path: '/'
         //params: { nextUrl: to.fullPath }

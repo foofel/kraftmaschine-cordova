@@ -4,7 +4,7 @@ import { WeightMessage } from '@/core/sensorreader';
 import { HangTimerData, TimerEntry } from '../../typeexports';
 import { clamp, round, roundDown } from '@/core/math';
 import { nowSeconds } from '@/core/util';
-import { GlobalStore } from '@/main';
+import { AppContext } from '@/main';
 
 export type TimerState = "INIT" | "WARMUP" | "ACTIVE" | "PASSIVE" | "PAUSE" | "COOLDOWN" | "DONE" | "INVALID";
 
@@ -183,7 +183,7 @@ export class TimerWithActiveTracking {
         private timerDoneCallback: ActiveTrackingTimerCallback,
         private beepCallback: BeepCallback) 
     {
-        const cfg = GlobalStore.cfg
+        const cfg = AppContext.cfg
         this.beepTimeOffset = cfg.options.beepTimeOffset;
         this.updateIntervall = setInterval(() => {
             this.executeUpdateTick();

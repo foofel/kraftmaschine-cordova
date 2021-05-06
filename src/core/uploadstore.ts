@@ -1,4 +1,4 @@
-import { GlobalStore } from '@/main';
+import { AppContext } from '@/main';
 import { compress, decompress } from 'lz-string';
 import { RemoteAPI } from './util';
 
@@ -36,7 +36,7 @@ export async function GetLocalUploadSaves(): Promise<Map<string, LocalUploadSave
     const saves: Map<string, LocalUploadSave> = new Map<string, LocalUploadSave>();
     for(const type of Object.entries(LocalUploadSaveKey)) {
         const [key, val] = type;
-        const entries = await GlobalStore.storage.readTypedObjects(key);
+        const entries = await AppContext.storage.readTypedObjects(key);
         for(const entry of entries) {
             const typedSave: LocalUploadSave = entry as LocalUploadSave;
             if(typedSave) {
@@ -57,23 +57,23 @@ export async function GetLocalUploadSaves(): Promise<Map<string, LocalUploadSave
     return saves;
 }
 export function AddLocalUploadSave(data: LocalUploadSave) {
-    const saveData = { ...data };
+    /*const saveData = { ...data };
     if(data.compressData) {
         saveData.data = compress(JSON.stringify(data.data));
     }
-    GlobalStore.storage.writeTypedObject(MakeSaveName(), data.type, saveData);
+    AppContext.storage.writeTypedObject(MakeSaveName(), data.type, saveData);*/
 }
 
 export function DeleteLocalUploadSave(storageId: number) {
-    GlobalStore.storage.deleteTypedObject(storageId);
+    AppContext.storage.deleteTypedObject(storageId);
 }
 
 export class LocalSaveUploader {
     //uploadInterval:number = 60;
     constructor (private backend: RemoteAPI) {}
     async uploadLocalSaves() {
-        try {
-            const entries = async GetLocalUploadSaves();
+       /* try {
+            const entries = await GetLocalUploadSaves();
             for(const entry of entries) {
                 const [key, save] = entry;
                 if(save.type === "save-training") {
@@ -108,6 +108,6 @@ export class LocalSaveUploader {
             }
         } catch(e) {
             console.log("error while uploading local saves: " + e);
-        }
+        }*/
     }
 }

@@ -1,5 +1,5 @@
 //import { GetLocalUploadSaves, DeleteLocalUploadSave, GetConfigObject, SaveConfigObject } from './storageinterface';
-import { GlobalStore } from '@/main';
+import { AppContext } from '@/main';
 import { LocalBenchmarkSaveData, SelectedHolds, BenchmarkVisualHighscoreEntry } from '../components/typeexports';
 import { BackendServers, RequiredBackendVersion } from '../config'
 
@@ -495,7 +495,8 @@ export function throttle(cb: any, limit: number) {
 }
 
 export async function reauth(backend: RemoteAPI) {
-    const version = await EasyRemoteApiHelpers.getVersion(backend);
+    return true;
+    /*const version = await EasyRemoteApiHelpers.getVersion(backend);
     if(!version) {
       return false;
     }
@@ -503,19 +504,18 @@ export async function reauth(backend: RemoteAPI) {
         console.log("invalid version while reauth");
         return false;
     }
-    const cfg = GlobalStore.cfg;
+    const cfg = AppContext.cfg;
     const authPromise = await EasyRemoteApiHelpers.authenticate(backend, cfg.secret);
     if(authPromise.result.status === 200) {
-        cfg.alias = authPromise.data.alias;
+        cfg.username = authPromise.data.alias;
         cfg.email = authPromise.data.email;
-        cfg.name = authPromise.data.name;
-        console.log(`reauthentication successfull, hello ${cfg.alias} :)`);
+        cfg.realname = authPromise.data.name;
+        console.log(`reauthentication successfull, hello ${cfg.username} :)`);
         return true;
     } else {
         console.log(`reauthentication failed, userKey:'${cfg.secret}' (this key is PRIVATE, do not share)`);
         return false;
-    }
-    //return true;
+    }*/
 }
 
 export function showToast(msg: string, duration = 2000, pos = "center") {
@@ -614,4 +614,27 @@ export function asyncBarrier(seconds: number): { promise: Promise<void>, resolve
         }, seconds * 1000)
     });
     return { promise: p, resolve: r };
+}
+
+export async function restGet(host="https://localhost/api", endpoint="/") {
+    const rawResponse = await fetch(new URL(endpoint, host).href, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      return rawResponse;
+}
+
+export async function restPost(host="https://localhost/api", endpoint="/", data:any) {
+  const rawResponse = await fetch(new URL(endpoint, host).href, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  return rawResponse;
 }

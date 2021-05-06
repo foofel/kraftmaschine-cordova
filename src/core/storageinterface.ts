@@ -1,4 +1,5 @@
 import { TimerSelectorEntry } from '@/components/typeexports';
+import { ApplicationStoreInterface } from "@/core/applicationstore"
 
 export interface DeviceBoardMapping {
     [device: string]: number;
@@ -26,10 +27,10 @@ export interface IteratableConfigData {
 
 export interface ConfigFile {
     id: number;
-    secret: string;
-    alias: string;
+    userName: string;
     email: string;
-    name: string;
+    displayName: string;
+    password: string;
     options: ConfigData;
 }
 
@@ -42,8 +43,7 @@ export interface ConfigFile {
 }*/
 
 export interface StorageInterface {
-    init():Promise<boolean>;
-    getConfigProxyObject():Promise<ConfigFile>;
+    getApplicationStore():Promise<ApplicationStoreInterface>;
 
     writeObject(key:string, data:any): Promise<string>;
     readObject(key:string): Promise<any>;

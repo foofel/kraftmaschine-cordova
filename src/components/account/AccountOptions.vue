@@ -32,8 +32,8 @@
                         <tr v-if="expertMode">
                             <td class="label noselect">Secret</td>
                             <td class="grow uuid-input-container ">
-                                <div v-if="!validUuid(model.secret)" class="invalid-uuid noselect">The secret must be in the UUID format</div>
-                                <input class="input" type="text" value="" placeholder="00000000-0000-0000-0000-000000000000" v-model="model.secret" />
+                                <div v-if="!validUuid(model.password)" class="invalid-uuid noselect">The secret must be in the UUID format</div>
+                                <input class="input" type="text" value="" placeholder="00000000-0000-0000-0000-000000000000" v-model="model.password" />
                             </td>
                         </tr>
                         <tr v-if="expertMode">
@@ -77,7 +77,7 @@ export default class AccountOptions extends VueNavigation {
         alias: "",
         name: "",
         email: "",
-        secret: ""
+        password: ""
     }
     cfg: ConfigFile = this.$root.$data.cfg;
     enableUuidValidation= true;
@@ -92,10 +92,10 @@ export default class AccountOptions extends VueNavigation {
     }
 
     load() {
-        this.model.alias = this.cfg.alias;
-        this.model.name = this.cfg.name;
+        this.model.alias = this.cfg.userName;
+        this.model.name = this.cfg.displayName;
         this.model.email = this.cfg.email;
-        this.model.secret = this.cfg.secret;
+        this.model.password = this.cfg.password;
     }
 
     onToggleExpertMode() {
@@ -113,12 +113,12 @@ export default class AccountOptions extends VueNavigation {
 
     save = async () => {
         if(this.expertMode) {
-            this.cfg.secret = this.model.secret;
+            this.cfg.password = this.model.password;
         }
         const result = await EasyRemoteApiHelpers.updateUserData(this.backend, this.model.name, this.model.email, null);
         if(result) {
-            this.cfg.alias = result[0].alias;
-            this.cfg.name = result[0].name;
+            this.cfg.userName = result[0].username;
+            this.cfg.displayName = result[0].displayname;
             this.cfg.email = result[0].email;
             clearAllCookies();
             window.location.reload(true);
