@@ -1,5 +1,5 @@
-var webpack = require('webpack');
-var fs = require('fs');
+const webpack = require('webpack');
+const fs = require('fs');
 
 module.exports = {
   publicPath: '',
@@ -16,7 +16,7 @@ module.exports = {
           : `webpack-yourCode:///${info.resourcePath}`;
   
       config.output.devtoolFallbackModuleFilenameTemplate = 'webpack:///[resource-path]?[hash]'        
-    };
+    }
     config.plugins.push(
       new webpack.IgnorePlugin({ resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/ })
     );

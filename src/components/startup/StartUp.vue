@@ -3,7 +3,7 @@
         <div>facebook</div>
 		<div>instagram</div>
 		<div>
-			<div>username</div>
+			<div class="text-teal-200">username</div>
 			<div>password</div>
 		</div>
 		<div>name: "{{userName}}"</div>
@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import "@/assets/styles/tailwind.css"
 export default {
     name: "Startup",
     components: {},

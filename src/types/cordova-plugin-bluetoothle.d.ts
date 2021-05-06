@@ -968,4 +968,4 @@ interface Window {
     bluetoothle: BluetoothlePlugin.Bluetoothle
 }
 
-declare var bluetoothle: BluetoothlePlugin.Bluetoothle;
+declare let bluetoothle: BluetoothlePlugin.Bluetoothle;

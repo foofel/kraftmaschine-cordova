@@ -24,13 +24,17 @@
     "cordova-serve-osx": "cross-env CORDOVA_PLATFORM=osx vue-cli-service cordova-serve-osx"
   },
   "dependencies": {
+    "@tailwindcss/postcss7-compat": "^2.0.2",
+    "autoprefixer": "^9",
     "core-js": "^3.6.5",
     "dexie": "^3.0.3",
     "file-saver": "^2.0.2",
     "lodash": "^4.17.20",
     "lz-string": "^1.4.4",
     "moment": "^2.26.0",
+    "postcss": "^7",
     "sprintf-js": "^1.1.2",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "uplot": "git+https://github.com/leeoniya/uPlot.git",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
@@ -62,6 +66,7 @@
     "sass-loader": "^8.0.2",
     "typescript": "~3.9.3",
     "vue-cli-plugin-cordova": "~2.4.1",
+    "vue-cli-plugin-tailwind": "~2.0.6",
     "vue-template-compiler": "^2.6.11"
   }
 }

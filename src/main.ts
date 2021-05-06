@@ -8,6 +8,7 @@ import { ConfigFile, StorageInterface } from '@/core/storageinterface';
 import { proxylize, ApplicationStoreInterface } from '@/core/applicationstore'
 import { IndexedDBStorageImpl, writeConfigObject } from './core/persistentstore'
 import { RUNNING_WITH_CORDOVA } from './config'
+//import './assets/tailwind.css'
 
 Vue.config.productionTip = false
 //Vue.use(Vuex)
