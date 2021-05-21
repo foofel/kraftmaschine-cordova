@@ -206,6 +206,7 @@ export default class SimpleWeightDisplay extends VueNavigation {
     //z-index: -1;
 	font-weight: 300;
 	bottom: 10px;
+	bla: #acdd84;
 	//transform: translate(-50%, 0);
 	.temp {}
 	.hum {

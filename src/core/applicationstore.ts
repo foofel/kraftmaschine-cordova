@@ -86,7 +86,7 @@ export function defaultApplicationStoreObject(): ApplicationStoreInterface {
     }
 }
 
-function createOnChangeProxy(onChange:Function, target:any, path:string = ""):any {
+function createOnChangeProxy(onChange:(path:string, value:any) => void, target:any, path:string = ""):any {
     return new Proxy(target, {
         get(target, property) {
             const item = target[property]

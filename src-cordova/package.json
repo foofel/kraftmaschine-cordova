@@ -1,5 +1,5 @@
 {
-  "name": "de.kraftmaschine.cordova",
+  "name": "org.kraftmaschine",
   "displayName": "KraftMaschine",
   "version": "1.0.0",
   "description": "Makes you a Maschine",
@@ -13,7 +13,7 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "devDependencies": {
-    "cordova-android": "^9.0.0",
+    "cordova-android": "^9.1.0",
     "cordova-plugin-bluetoothle": "^6.1.0",
     "cordova-plugin-cleartext": "^1.0.0",
     "cordova-plugin-statusbar": "^2.4.3",
@@ -28,10 +28,18 @@
       "cordova-plugin-vibration": {},
       "cordova-plugin-x-toast": {},
       "cordova-plugin-cleartext": {},
-      "cordova-plugin-statusbar": {}
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-facebook-connect": {
+        "APP_ID": "311272643683412",
+        "APP_NAME": "Kraftmaschine",
+        "FACEBOOK_AUTO_LOG_APP_EVENTS": "false"
+      }
     },
     "platforms": [
       "android"
     ]
+  },
+  "dependencies": {
+    "cordova-plugin-facebook-connect": "2.3.0"
   }
 }

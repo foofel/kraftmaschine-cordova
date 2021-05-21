@@ -36,12 +36,12 @@ module.exports = {
     })
   },
   devServer: {
-    /*https: {
+    https: {
       //key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
       //cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
       key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
       cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
-    },*/
+    },
     port: 8880
   }  
 }

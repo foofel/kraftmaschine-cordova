@@ -69,7 +69,7 @@ export class BluetoothSensorReader implements SensorReaderInterface
     deviceInfoListener: Array<DeviceInfoCallback> = [];    
     ppsLimitWatch: StopWatch = new StopWatch();
     activeResetWatch: StopWatch = new StopWatch(false);
-    calibrationData:Hx711CalibrationData = Hx711CalibrationList.getIdentityCalibration();;
+    calibrationData:Hx711CalibrationData = Hx711CalibrationList.getIdentityCalibration();
     receivedPackagesInLastSecond = 0;
     lastPackageId: number = -1;
     timeSinceConnected:number = 0;

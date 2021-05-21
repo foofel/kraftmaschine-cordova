@@ -22,7 +22,7 @@ interface ClockData {
     }
 })
 export default class ProgressClockCanvas extends Vue {
-    dprFixer!: Function;
+    dprFixer!: () => void;
     //offscreenCanvas:OffscreenCanvas;
     @Prop({default: 0.5}) rep!: number;
     @Prop({default: 0.5}) set!: number;
@@ -67,14 +67,14 @@ export default class ProgressClockCanvas extends Vue {
         this.drawClock(ctx, width, height, clockDataInit);
     }
 
-    drawClock(ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, width: number, height: number, clockData: Array<ClockData>) {
+    drawClock(ctx: CanvasRenderingContext2D/*|OffscreenCanvasRenderingContext2D*/, width: number, height: number, clockData: Array<ClockData>) {
         const center = { x: width/2, y:height/2 };
         this.drawCircle(ctx, clockData[0].c, 4, 0.92, width, height, clockData[0].p);
         this.drawCircle(ctx, clockData[1].c, 1, 0.96, width, height, clockData[1].p);
         this.drawCircle(ctx, clockData[2].c, 1, 1, width, height, clockData[2].p);
     }
 
-    drawCircle(ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, color: string, lineWidth: number, size: number, width: number, height: number, progress: number) {
+    drawCircle(ctx: CanvasRenderingContext2D/*|OffscreenCanvasRenderingContext2D*/, color: string, lineWidth: number, size: number, width: number, height: number, progress: number) {
         const center = { x: width/2, y:height/2 };
         const lineWidthPx = width / 100 * lineWidth;
         const sizePx = (width / 2) * size;
@@ -85,7 +85,7 @@ export default class ProgressClockCanvas extends Vue {
         ctx.stroke(); 
     }
 
-    arc(ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D, x: number, y: number, radius: number, sa: number, ea: number) {
+    arc(ctx: CanvasRenderingContext2D/*|OffscreenCanvasRenderingContext2D*/, x: number, y: number, radius: number, sa: number, ea: number) {
         const step = 0.01;
         let a = sa + step;
         ctx.moveTo(x + radius * Math.cos(sa), y + radius * Math.sin(sa));

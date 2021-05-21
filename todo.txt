@@ -33,14 +33,6 @@
     - mit schraube/unterlegscheibe
     - mit schraube + alu barren
 - board bruch test
-- 
-
-
-
-
-
-
-
 
 
 

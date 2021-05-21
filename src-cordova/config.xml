@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="schemas.android.com/apk/res/android"
-    id="de.kraftmaschine.cordova" 
+    id="org.kraftmaschine" 
     android-versionCode="10000"
     version="1.0.0">
     <name>KraftMaschine</name>
     <description>
         App for the Kraftmachine instrument
     </description>
-    <author email="jakob@urbsch.at" href="https://urbsch.at">
+    <author email="app@kraftmaschine.org" href="https://kraftmaschine.org">
         Jakob Urbschat
     </author>
     <!-- needed to scan for bluetooth devices -->
@@ -31,6 +31,7 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
+	<preference name="AndroidXEnabled" value="true" />
     <edit-config file="AndroidManifest.xml" target="/manifest/application/activity[@android:name='MainActivity']" mode="overwrite">
         <activity android:name="MainActivity" android:label="KraftMaschine" android:configChanges="orientation|screenSize" />
     </edit-config>

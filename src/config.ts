@@ -18,6 +18,11 @@ export function RUNNING_ON_DEV_MACHINE(): boolean {
     return navigator.platform === "Win32";
 }
 
+export function IS_PRODUCTION(): boolean {
+    return false;
+    //return true;
+}
+
 export const GlobalConfig = {
     configKey: "config",
     compressLocalSaves: true
@@ -49,11 +54,14 @@ export const BLEServiceInfo = {
     deviceIdCharacteristicId: "b19e6ca8-4d24-4e1b-9f66-5b3990eeac4f"
 }
 
-export const BackendServers = {
-    webscaleServerRemote: "wss://bb.urbsch.at:7324/",
-    webscaleServerLocal: "wss://192.168.1.20:7324/",
-    webscaleServer: () => { return BackendServers.webscaleServerRemote },
-    backendLocal: "https://192.168.1.20:25834/",
-    backendRemote: "https://bb.urbsch.at:25834/",
-    backend: () => { return BackendServers.backendLocal; }
+export const BackendConfig = {
+    backendDev: "https://192.168.1.20/api",
+    backendLive: "https://kraftmaschine.org/api",
+    backendUrl: () => { 
+        if(IS_PRODUCTION()){
+            return BackendConfig.backendLive;
+        } else {
+            return BackendConfig.backendDev;
+        }
+    }
 };

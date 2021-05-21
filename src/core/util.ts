@@ -1,7 +1,7 @@
 //import { GetLocalUploadSaves, DeleteLocalUploadSave, GetConfigObject, SaveConfigObject } from './storageinterface';
 import { AppContext } from '@/main';
 import { LocalBenchmarkSaveData, SelectedHolds, BenchmarkVisualHighscoreEntry } from '../components/typeexports';
-import { BackendServers, RequiredBackendVersion } from '../config'
+import { BackendConfig, RequiredBackendVersion } from '../config'
 
 export function uuidv4(): string {
     const str = ""+[1e7]+-1e3+-4e3+-8e3+-1e11;
@@ -27,7 +27,7 @@ export function makeid(length: number) {
 export type RemoteAPIMethod = "GET" | "POST" | "PUT" | "DELETE"
 
 export class RemoteAPI {
-    connectionString: string = BackendServers.backend();
+    connectionString: string = BackendConfig.backendUrl();
     authenticated = false;
     constructor() {
     }

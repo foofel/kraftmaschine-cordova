@@ -15,7 +15,7 @@ type DrawFunctionType = (ctx: DrawContextInfo) => void;
     }
 })
 export default class HiDpiCanvas extends Vue {
-    dprFixer!: Function;
+    dprFixer!: () => void;
     cachedWidth = 0;
     cachedHeight = 0;
     @Prop({default: null}) drawFunction!: DrawFunctionType|null;
@@ -23,7 +23,7 @@ export default class HiDpiCanvas extends Vue {
     constructor() {
         super();
     }
-    mounted() {
+    mounted(): void {
         const makeDpxFixer = () => {
             const size = { x:0, y:0 };
             let lastRatio = 1;
@@ -52,11 +52,11 @@ export default class HiDpiCanvas extends Vue {
         window.addEventListener("resize", this.onResize);
     }
 
-    beforeDestroy() {
+    beforeDestroy(): void {
         window.addEventListener("resize", this.onResize)
     }
 
-    onResize() {
+    onResize(): void {
         this.adjustCanvasToBaseElemSize();
         if(this.drawFunction) {
             const dc = this.getDrawContext();
@@ -68,7 +68,7 @@ export default class HiDpiCanvas extends Vue {
         }
     }    
 
-    getDevicePixelRatio() {
+    getDevicePixelRatio(): number {
         const elems = this.getCanvasElements()
         if(elems.ctx) {
             const ctx = elems.ctx as any;
@@ -82,7 +82,7 @@ export default class HiDpiCanvas extends Vue {
         }
     }
 
-    adjustCanvasToBaseElemSize() {
+    adjustCanvasToBaseElemSize(): void {
         const elems = this.getCanvasElements()
         if(elems.canvas && elems.base) {
             elems.canvas.width = elems.base.clientWidth;

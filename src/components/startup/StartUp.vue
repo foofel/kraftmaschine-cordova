@@ -1,56 +1,55 @@
 <template>
-    <div class="h-screen w-screen flex justify-center" id="startup">
-        <!--div>facebook</div>
-		<div>instagram</div>
-		<div>
-			<div class="text-teal-200">username</div>
-			<div>password</div>
-		</div>
-		<div>name: "{{userName}}"</div-->
-        <div id="header" class="">
-            kraft maschine
+<div class="h-screen w-screen" id="startup">
+    <div class="h-screen w-screen flex justify-center ">
+        <div class="w-5/6 mt-24">
+            <div class="flex justify-center items-center h-12 kraftmaschine">
+                KRAFTMASCHINE
+            </div>
+            <router-view />
         </div>
-        <div id="logins" class="">
-            logins
-        </div>
-        <div class=""></div>
-        <!--div class="grid grid-cols-1 gap-4">
-            <div class="bg-red-200 text-center">
-                <div class="text-3xl font-light inline-block">kraft</div>
-                <div class="text-2xl font-light inline-block">maschine</div>
-            </div>
-            <div class="bg-red-300 text-center gap-4">
-                <div>2</div>
-            </div>
-            <div class="bg-red-400 text-center">
-                <div>3</div>
-            </div>
-        </div-->
-        test4
     </div>
+    <div class="highlight"></div>
+</div>
 </template>
 
 <script>
 import "@/assets/styles/tailwind.css"
 export default {
-    name: "Startup",
+    name: "StartUp",
     components: {},
     data: function() {
-        return {
-            stack: []
-        };
+        return {};
     },
     mounted: function() {},
-    methods: {},
+    methods: {
+    },
 	computed: {
-		userName() {
-			return this.$store.user.displayName;
-		}
 	}
 };
 </script>
 
 <style lang="scss">
-.startup {
+.kraftmaschine {
+    font-family: Boldini;
+    font-size: 2.7em;
+}
+
+.highlight {
+    $angle: 27.5deg;
+    $offset: 20%;
+    position: fixed;
+    width: 150px;
+    height: 1340px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    transform: 
+        rotate($angle) 
+        translate(0%, -$offset) 
+        rotate(-$angle) 
+        translate(-50%, -50%) 
+        rotate($angle);
+    background: linear-gradient(180deg, #FF0000 0%, rgba(255, 255, 255, 0) 100%);
+    z-index: -1;
 }
 </style>

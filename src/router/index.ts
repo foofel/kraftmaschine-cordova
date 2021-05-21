@@ -3,7 +3,11 @@ import VueRouter from 'vue-router'
 //import SwipeView from '@/views/SwipeView.vue'
 import SimpleWeight from '@/views/SimpleWeight.vue'
 import StartupView from '@/views/StartupView.vue'
-import Startup from '@/components/startup/StartUp.vue'
+import StartUp from '@/components/startup/StartUp.vue'
+import SelectLogin from '@/components/startup/SelectLogin.vue'
+import Register from '@/components/startup/Register.vue'
+import AuthResult from '@/components/startup/AuthResult.vue'
+import Login from '@/components/startup/Login.vue'
 import DebugView from '@/views/DebugView.vue'
 import DrawerView from '@/views/DrawerView.vue'
 import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
@@ -31,17 +35,28 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'startup',
-    component: Startup //StartupView
+    name: 'selectLogin',
+    component: StartUp,
+    children: [
+      {
+        path: 'login/select',
+        name: 'selectLogin',
+        component: SelectLogin,
+      },{
+        path: 'login/register',
+        name: 'register',
+        component: Register,
+      },{
+        path: 'login/login',
+        name: 'login',
+        component: Login,
+      },{
+        path: 'login/auth/:provider/callback',
+        name: 'authCallback',
+        component: AuthResult,
+      }
+    ]
   },
-  /*{
-    path: '/swipe',
-    name: 'swipe',
-    component: SwipeView,
-    meta: {
-      needAuth: true
-    }
-  },*/
   {
     path: '/simple',
     name: 'simple_weight',

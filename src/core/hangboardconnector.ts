@@ -1,6 +1,6 @@
 import { MessageTransformerIntrerface, pipe, sum } from "./messagetransformer";
 import { SensorReaderInterface,  WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, DeviceInfoCallback, BluetoothSensorReader } from "./sensorreader";
-import { BackendServers } from '../config';
+import { BackendConfig } from '../config';
 import { BLEConnectionResult, ScanCallbackInterface } from './bluetoothle';
 
 export type WeightCallbackEntry = { cb: WeightMessageCallback; transformer: MessageTransformerIntrerface };

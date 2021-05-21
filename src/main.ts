@@ -1,5 +1,4 @@
 import Vue from 'vue'
-//import Vuex from 'vuex'
 import App from './App.vue'
 import router from './router'
 import { HangboardConnector } from './core/hangboardconnector'
@@ -8,10 +7,8 @@ import { ConfigFile, StorageInterface } from '@/core/storageinterface';
 import { proxylize, ApplicationStoreInterface } from '@/core/applicationstore'
 import { IndexedDBStorageImpl, writeConfigObject } from './core/persistentstore'
 import { RUNNING_WITH_CORDOVA } from './config'
-//import './assets/tailwind.css'
 
 Vue.config.productionTip = false
-//Vue.use(Vuex)
 
 console.log("kraftmaschine main file loaded!")
 
