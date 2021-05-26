@@ -1,8 +1,10 @@
 <template>
 <div>
     <div class="register mt-28 flex flex-col gap-4">
-        <input class="h-14 rounded-xl w-full" type="text" placeholder="Email" />
+        <input class="h-14 rounded-xl w-full" type="text" placeholder="Username" />
+        <input class="h-14 rounded-xl w-full gap-4" type="text" placeholder="Email" />
         <input class="h-14 rounded-xl w-full gap-4" type="text" placeholder="Password" />
+        <input class="h-14 rounded-xl w-full gap-4" type="text" placeholder="Repeat Password" />
     </div>
     <div class="flex justify-between mt-16 km-btns select-none">
         <div @click="show('select')" class="flex justify-left items-center h-14 km-default">
@@ -15,7 +17,7 @@
         </div>
         <div @click="login()" class="flex justify-left items-center h-14 km-default">
             <div class="flex-1 ml-4">
-                <div class="flex justify-center items-center">Login</div>
+                <div class="flex justify-center items-center">Register</div>
             </div>
             <div class="mr-4 image">&raquo;</div>
         </div>                    
@@ -25,6 +27,7 @@
 
 <script>
 import "@/assets/styles/tailwind.css"
+
 export default {
     name: "Register",
     components: {},
@@ -34,8 +37,10 @@ export default {
     mounted: function() {},
     methods: {
         login: function(type) {
-            // to login stuff
+            // do register stuf
             // e.g. show invalid 'toast'
+            // add live name checking
+            // add email validation while typeing
         },
         show: function(page) {
             this.$router.replace(page)
@@ -46,7 +51,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .register {
     input {
         border: 1px solid lightgray;

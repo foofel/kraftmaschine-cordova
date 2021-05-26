@@ -82,10 +82,10 @@ export function LinearRegressionFromHistoryData<T, K extends keyof T>(data: Read
     return linearRegression(xData, yData);
 }*/
 
-type NonMethodKeys<T> = { [P in keyof T]: T[P] extends Function ? never : P }[keyof T];
+/*type NonMethodKeys<T> = { [P in keyof T]: T[P] extends Function ? never : P }[keyof T];
 function getFields<T>(fields: { [P in NonMethodKeys<T>]: true }) {
     return Object.keys(fields)
-}
+}*/
 
 export type MinMaxResult = { min: number; max: number };
 export function getMinMax<T, K extends keyof T>(data: DataHistory<T>, key: K): MinMaxResult {

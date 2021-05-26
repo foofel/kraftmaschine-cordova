@@ -1,3 +1,91 @@
+[general]
+- eichen/linearität: wir brauchen eine methode wie wir die wagen eichen können und wie wir die linearität der wage überprüfen können, vorallem im kompletten system nicht nur in der einzelnen wagezelle weil sich die linearität durch die verformung verschieben kann (e.g. mit einer waage selber gewichte herstellen: https://www.esska.de/shop/Waage-max-Waegebereich-3-bis-30-kg-Ablesbarkeit-d-0-1-bis-2-g-Tischwaage--3624FCB12K1x-22570)
+- firma: wir müßen eine firma (warscheinlich eine ug wie chs) gründen damit wir sinnvoll steuern rechnungen machen können
+- steuerberater: wir brauchen einen steuerberater weil wir mit einer firma keinen schimmer mehr haben wie das mit dem ganzen steuerrecht geht, trotzdem sollten wir uns einmal einlesen was man steuerrechtlich bei einer ug beachten sollte (den gleichen wie chs?)
+- versicherung: wir brauchen eine produkthaftpflicht oder so falls es verletzungen mit einem der boards geben sollte und wir verklagt werden
+- stabilität: wir müßen in mehreren tests die stabilität der flexoren beweisen damit wir damit im nachhinein keinen arschtritt bekommen, falls die dinger mal reißen. ausserdem müßen wir die maximalbelastung checken die die flexoren abkönnen bevor sie reißen. dies sollte auch in einem kompletten systemaufbau getestet werden
+- wagezellen vergleich: wir sollten die china zellen gegen bosche testen
+- kurs firmengründung oder sowas/webinar machen: was muss man alles beachten/was vergisst man schnell wenn man eine firma gründet
+
+
+[teschnisch]
+- hangboard: wie stellen wir das hangboard her/was muss noch drann gemacht werden. man könnte es selber herstellen/vertreiben oder man giebt es irgendwo in auftragsfertigung. die dicke muss noch angepasst werden und dir mittleren löcher vielleicht auch einfach gerade, die 5° abschüßig ist glaube komisch wenn alle anderen gleich sind. man könnte noch verschiedene versionen machen for anfänger/fortgeschritten/profi oder man fängt einfach mit 30 statt 25mm an dann wird das auch einfacher.
+- wir bauchen ein konzept um die leds sinnvoll auch einzeln ansteuern zu können, oft müßen sich gar nicht alle verändern e.g. "progress" bar beim hangtimer auf der unterseite
+- beschriftung vom hangboard: mindestens die holds müßen die tiefe angegeben haben damit man weiß welche zusammen gehören und an welche man greifen muß
+- middel holds: sind die cool/ok oder sollte man die sogar wegnehmen und das ganze board noch einen tick kleiner machen? oder sind die cool in der mitte?
+- schraublöcher am hangboard anpassen
+- versandsicherung: wie wird das board am besten gesichert wenn es versendet wird, die flexoren brechen schnell und müßen gegen "werfen" geschützt werden ohne das man häßliche borhlöcher oder so an der seite sieht. das gleiche für die flexiglas umrahmung
+
+[app]
+- app muss weiter kommen/fertig werden
+
+[shop]
+- logo/design muss gemacht werden
+- webshop muss gemacht werden (webshop ist auch website?)
+- website muss gemacht werden (website ist auch webshop?)
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -/was.preloaded.using.link/ -/Download.the.Vue.Devtools/
 
 

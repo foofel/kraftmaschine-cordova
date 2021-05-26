@@ -1,15 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-//import SwipeView from '@/views/SwipeView.vue'
-import SimpleWeight from '@/views/SimpleWeight.vue'
-import StartupView from '@/views/StartupView.vue'
-import StartUp from '@/components/startup/StartUp.vue'
-import SelectLogin from '@/components/startup/SelectLogin.vue'
-import Register from '@/components/startup/Register.vue'
-import AuthResult from '@/components/startup/AuthResult.vue'
-import Login from '@/components/startup/Login.vue'
+import StartUp from '@/views/startup/StartUp.vue'
+import SelectLogin from '@/views/startup/SelectLogin.vue'
+import Register from '@/views/startup/Register.vue'
+import AuthResult from '@/views/startup/AuthResult.vue'
+import Login from '@/views/startup/Login.vue'
+import Scale from '@/views/scale/Scale.vue'
 import DebugView from '@/views/DebugView.vue'
-import DrawerView from '@/views/DrawerView.vue'
+import DrawerView from '@/views/drawer/DrawerView.vue'
 import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
 import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
 import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
@@ -35,58 +33,30 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'selectLogin',
     component: StartUp,
     children: [
-      {
+     {
         path: 'login/select',
-        name: 'selectLogin',
         component: SelectLogin,
       },{
         path: 'login/register',
-        name: 'register',
         component: Register,
       },{
         path: 'login/login',
-        name: 'login',
         component: Login,
-      },{
-        path: 'login/auth/:provider/callback',
-        name: 'authCallback',
-        component: AuthResult,
-      }
+      }     
     ]
   },
   {
-    path: '/simple',
-    name: 'simple_weight',
-    component: SimpleWeight
-  },
-  {
-    path: '/debug',
-    name: 'debug',
-    component: DebugView
-  },
-  {
-    path: '/view',
-    name: 'view',
+    path: '/drawer',
     component: DrawerView,
     meta: {
       needAuth: true
     },
     children: [
       {
-        name: 'scale',
         path: 'scale',
-        component: SimpleWeightDisplay
-      },{
-        name: 'scale.properties',
-        path: 'scale/properties',
-        props: true,
-        components: {
-          //default: SimpleWeightDisplay,
-          overlay: DataEditorComponent
-        }
+        component: Scale
       },{
         path: 'timer',
         component: TimerMain
@@ -131,6 +101,14 @@ const routes = [
         component: BluetoothConnectionSelector
       }
     ]
+  },
+  {
+    path: '/scale',
+    component: Scale
+  },
+  {
+    path: '/debug',
+    component: DebugView
   }
 ]
 

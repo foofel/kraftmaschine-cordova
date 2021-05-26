@@ -85,7 +85,8 @@ export default {
             }
         },
         show: function(page) {
-            this.$router.replace(page)
+            this.$notify({ title: 'my titla', text: 'Hello user!', type: "warn"})
+            //this.$router.replace(page)
         }      
     },
 	computed: {
@@ -93,7 +94,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .buttons {
     font-family: Arial;
     font-weight: 600;
