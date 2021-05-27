@@ -1,0 +1,6 @@
+{
+	"appId": "org.kraftmaschine",
+	"appName": "kraftmaschine",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}

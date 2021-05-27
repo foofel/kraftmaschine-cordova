@@ -22,10 +22,41 @@ export interface AppContextInterface {
 }
 export const AppContext = ({}) as AppContextInterface
 
+function detectNotchs() {
+	const notch = (window as any).AndroidNotch;
+    if (notch) {
+        const style = document.documentElement.style;
+ 
+        // Apply insets as css variables
+ 
+        notch.getInsetTop((px:any) => {
+            style.setProperty("--notch-inset-top", px + "px");
+        }, (err:any) => console.error("Failed to get insets top:", err));
+        
+        notch.getInsetRight((px:any) => {
+            style.setProperty("--notch-inset-right", px + "px");
+        }, (err:any) => console.error("Failed to get insets right:", err));
+        
+        notch.getInsetBottom((px:any) => {
+            style.setProperty("--notch-inset-bottom", px + "px");
+        }, (err:any) => console.error("Failed to get insets bottom:", err));
+        
+        notch.getInsetLeft((px:any) => {
+            style.setProperty("--notch-inset-left", px + "px");
+        }, (err:any) => console.error("Failed to get insets left:", err));
+    }
+}
+
+function setupWindow() {
+	const notch = (window as any).AndroidNotch;
+}
+
 async function startupApp() {
 	console.log("startApp()");
 	// this "fixes" missing keys when we add new properties to the specified default values, 
 	// oterweise those new keys are missing on exsiting configs
+	detectNotchs();
+	setupWindow();
 	const storage = new IndexedDBStorageImpl();
 	AppContext.storage = storage;
 	const store = await storage.getApplicationStore();

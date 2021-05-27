@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">kraftmaschine</string>
+    <string name="title_activity_main">kraftmaschine</string>
+    <string name="package_name">org.kraftmaschine</string>
+    <string name="custom_url_scheme">org.kraftmaschine</string>
+</resources>

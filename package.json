@@ -24,11 +24,18 @@
     "cordova-serve-osx": "cross-env CORDOVA_PLATFORM=osx vue-cli-service cordova-serve-osx"
   },
   "dependencies": {
+    "@capacitor/android": "^3.0.0",
+    "@capacitor/cli": "^3.0.0",
+    "@capacitor/core": "^3.0.0",
+    "@capacitor/ios": "^3.0.0",
     "@tailwindcss/postcss7-compat": "^2.0.2",
     "autoprefixer": "^9",
+    "cordova-plugin-android-notch": "^1.0.3",
+    "cordova-plugin-bluetoothle": "^6.3.1",
     "core-js": "^3.6.5",
     "dexie": "^3.0.3",
     "file-saver": "^2.0.2",
+    "jetifier": "^2.0.0",
     "lodash": "^4.17.21",
     "lz-string": "^1.4.4",
     "moment": "^2.26.0",

@@ -1,5 +1,5 @@
 <template>
-	<div id="app" class="">
+	<div id="app">
 		<router-view/>
 		<notifications classes="my-notification" position="bottom center"/>
 	</div>
@@ -11,6 +11,30 @@ import VueAxios from 'vue-axios'
 import VueAuthenticate from 'vue-authenticate'
 import Notifications from 'vue-notification'
 import axios from 'axios';
+
+function detectInsets() {
+    if (window.AndroidNotch) {
+        const style = document.documentElement.style;
+ 
+        // Apply insets as css variables
+ 
+        window.AndroidNotch.getInsetTop(px => {
+            style.setProperty("--notch-inset-top", px + "px");
+        }, (err) => console.error("Failed to get insets top:", err));
+        
+        window.AndroidNotch.getInsetRight(px => {
+            style.setProperty("--notch-inset-right", px + "px");
+        }, (err) => console.error("Failed to get insets right:", err));
+        
+        window.AndroidNotch.getInsetBottom(px => {
+            style.setProperty("--notch-inset-bottom", px + "px");
+        }, (err) => console.error("Failed to get insets bottom:", err));
+        
+        window.AndroidNotch.getInsetLeft(px => {
+            style.setProperty("--notch-inset-left", px + "px");
+        }, (err) => console.error("Failed to get insets left:", err));
+    }
+}
 
 Vue.use(VueAxios, axios)
 Vue.use(VueAuthenticate, {

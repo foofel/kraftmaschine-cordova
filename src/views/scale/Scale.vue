@@ -36,7 +36,6 @@ export default {
     components: {},
     created() {
         console.log("scale created");
-        debugger;
     },
     data: function() {
         return {
@@ -74,8 +73,8 @@ export default {
 
 <style lang="scss" scoped>
 .root {
-	width: 100vw;
-	height: 100vh;
+    width: 100%;
+    height: 100%;
 	user-select: none;
     display: flex;
     align-items: center;
@@ -87,7 +86,7 @@ export default {
         font-weight: 100;
         position:relative;
         font-size: 20vw;
-        z-index: 1;
+        //z-index: 1;
         -webkit-tap-highlight-color: rgba(0,0,0,0);
         -webkit-tap-highlight-color: transparent;
 
@@ -139,7 +138,7 @@ export default {
         width: 100%;
         font-size: 4vw;
         font-weight: 300;
-        bottom: 10px;
+        bottom: 20px;
         .temp {}
         .hum {
             margin-left: 4vw;
