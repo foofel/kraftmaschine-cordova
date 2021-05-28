@@ -34,11 +34,14 @@ export interface ApplicationStoreInterface {
         beepTimeOffset: number;
         forceMaxVolumeBeep: boolean;
         enableVibrate: boolean;
-        deviceId: string;
-        deviceAddress: string;
         gbDrawTimeMarkers: boolean;
         gbDrawPercentileMarkers: boolean;        
     },
+    connection: {
+        lastDeviceAddress: string;
+        autoReconnect: boolean;
+        knownDevices: Array<{ address: string, name: string, lastConnection: Date }>;
+    }
     trainings: {
         list: Array<number>
     },
@@ -68,11 +71,14 @@ export function defaultApplicationStoreObject(): ApplicationStoreInterface {
             beepTimeOffset: 0.3,
             forceMaxVolumeBeep: true,
             enableVibrate: true,
-            deviceId: "",
-            deviceAddress: "",
             gbDrawTimeMarkers: true,
             gbDrawPercentileMarkers: true,
         },
+        connection: {
+            lastDeviceAddress: "",
+            autoReconnect: false,
+            knownDevices: []
+        },        
         trainings: {
             list: []
         },

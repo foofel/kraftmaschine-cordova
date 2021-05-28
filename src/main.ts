@@ -6,11 +6,13 @@ import { RemoteAPI, reauth, clearAllCookies } from './core/util'
 import { ConfigFile, StorageInterface } from '@/core/storageinterface';
 import { proxylize, ApplicationStoreInterface } from '@/core/applicationstore'
 import { IndexedDBStorageImpl, writeConfigObject } from './core/persistentstore'
-import { RUNNING_WITH_CORDOVA } from './config'
+import { RUNNING_NATIVE } from './config'
+import { SplashScreen } from '@capacitor/splash-screen';
 
 Vue.config.productionTip = false
 
 console.log("kraftmaschine main file loaded!")
+console.log(`hasble: ${window.bluetoothle}`)
 
 export interface AppContextInterface {
 	hangboardConnector: HangboardConnector,
@@ -74,7 +76,10 @@ async function startupApp() {
 	const _ = new Vue({
 		router,
 		data: AppContext,
-		render: h => h(App)
+		render: h => h(App),
+		mounted() {
+			SplashScreen.hide();
+		}
 	}).$mount('#app');
 	document.addEventListener("pause", () => {
 		AppContext.hangboardConnector.onGlobalMessage("appPause");
@@ -88,7 +93,7 @@ async function startupApp() {
 	}, false);
 }
 
-if (!RUNNING_WITH_CORDOVA()) {
+if (!RUNNING_NATIVE()) {
 	startupApp();
 } else {
 	document.addEventListener("deviceready", () => {

@@ -2,7 +2,8 @@ import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexp
 import { BLEServiceInfo } from '@/config';
 import { WeightMessage } from './sensorreader';
 import { asyncBarrier } from './util';
-
+import Vue from 'vue'
+import Notifications from 'vue-notification'
 
 export interface ScanCallbackInterface {
     name:string;
@@ -352,13 +353,51 @@ class BluetoothLEHelpers {
         return timeout;
     }
 
-    static easyScanStopp = (timoeutId:any) => {
+    static easyScanStop = (timoeutId:any) => {
         if(timoeutId) {
             clearTimeout(timoeutId);
             timoeutId = null;
         }
         return BluetoothLEHelpers.stopScanp();
-    }
+    }    
+
+    static hasPermissionP = () => new Promise<{ hasPermission: boolean }>((resolve, reject) => {
+        bluetoothle.hasPermission(
+            (result: { hasPermission: boolean }) => {
+                resolve(result);
+            }
+        );
+    });
+
+    static isLocationEnabledP = () => new Promise<{ isLocationEnabled: boolean }>((resolve, reject) => {
+        bluetoothle.isLocationEnabled(
+            (result: { isLocationEnabled: boolean }) => {
+                resolve(result);
+            },
+            (error: BluetoothlePlugin.Error) => {
+                reject(error)
+            }
+        );
+    });
+
+    static requestPermissionP = () => new Promise<{ requestPermission: boolean }>((resolve, reject) => {
+        bluetoothle.requestPermission(
+            (result: { requestPermission: boolean }) => {
+                resolve(result);
+            }
+        );
+    });
+
+    static requestLocationP = () => new Promise<{ requestLocation: boolean }>((resolve, reject) => {
+        bluetoothle.requestLocation(
+            (result: { requestLocation: boolean }) => {
+                resolve(result);
+            },
+            (error: BluetoothlePlugin.Error) => {
+                reject(error)
+            }
+        );
+    });    
 }
 
 const Base64Binary = {
@@ -629,8 +668,20 @@ export class CordovaBluetoothLE implements BluetoothLE {
             console.log("[ble] trying to subscribe");
             const subscriber = await BluetoothLEHelpers.subscribep(this.connectedAddress, BLEServiceInfo.servidceId, characteristic, (data:string) => {
                 if(data) {
-                    const ab = Base64Binary.decodeArrayBuffer(data);
-                    cb(ab);
+                    //const ab = Base64Binary.decodeArrayBuffer(data);
+                    const decoded = atob("xtkwegMAAKkJAAA=")
+                    const buf = new ArrayBuffer(decoded.length);
+                    const bufView = new Uint8Array(buf);
+                    for (let i = 0, strLen = decoded.length; i < strLen; i++) {
+                        const code = decoded.charCodeAt(i);
+                        if (code > 255) {
+                            console.log(`char '${decoded[i]}'='${code}' outside range [0, 255]`)
+                            continue;
+                        }
+                        bufView[i] = code;
+                    }
+                    return buf;
+                    cb(buf);
                 }
             });
             console.log(`[ble] (subscribep)`, subscriber);
@@ -663,17 +714,44 @@ export class CordovaBluetoothLE implements BluetoothLE {
             const initr = await this.init();
             if(!initr) {
                 console.log("[ble] could not start ble");
+                Vue.notify({ title: 'BLE Error', text: 'Unable to start bluetooth', type: "error"});
                 return { id: "", address: "", success: false };
             }
         }
         try {
-            await BluetoothLEHelpers.easyScanStopp(0);
+            await BluetoothLEHelpers.easyScanStop(0);
         } catch(e) {}
+        console.log("[ble] checking location enabled");
+        const isLocationEnabledR = await BluetoothLEHelpers.isLocationEnabledP();
+        console.log(`[ble] location enabled: ${isLocationEnabledR.isLocationEnabled}`);
+        if(!isLocationEnabledR.isLocationEnabled) {
+            console.log(`[ble] trying to enable location: ${isLocationEnabledR.isLocationEnabled}`);
+            const requestLocationR = await BluetoothLEHelpers.requestLocationP();
+            console.log(`[ble] enable location result: ${requestLocationR.requestLocation}`);
+            if(!requestLocationR.requestLocation) {
+                console.log(`[ble] unable to enable location`);
+                Vue.notify({ title: 'BLE Error', text: 'Missing location permission', type: "error"});
+                return { id: "", address: "", success: false };
+            }
+        }
+        console.log("[ble] checking ble permission");
+        const hasBlePermissionR = await BluetoothLEHelpers.hasPermissionP();
+        console.log(`[ble] ble permission: ${hasBlePermissionR.hasPermission}`);
+        if(!hasBlePermissionR.hasPermission) {
+            console.log(`[ble] trying to get ble permission: ${isLocationEnabledR.isLocationEnabled}`);
+            const requestBlePermissionR = await BluetoothLEHelpers.requestPermissionP()
+            console.log(`[ble] request ble permission result: ${requestBlePermissionR.requestPermission}`);
+            if(!requestBlePermissionR.requestPermission) {
+                console.log(`[ble] unable to get ble permission`);
+                Vue.notify({ title: 'BLE Error', text: 'Missing BLE permission', type: "error"});
+                return { id: "", address: "", success: false };
+            }
+        }        
         return BluetoothLEHelpers.easyScanStart(cb, duration);
     }
 
     async stopScan(timerId:any) {
-        await BluetoothLEHelpers.easyScanStopp(timerId);
+        await BluetoothLEHelpers.easyScanStop(timerId);
     }
 
     async read(characteristic:string): Promise<string> {
@@ -769,30 +847,34 @@ export class WebBluetoothLE implements BluetoothLE {
                 console.log("connection done, result: ");
                 console.log(server);
                 console.log('Getting Service...');
-                const service = await server.getPrimaryService(BLEServiceInfo.servidceId);
-                console.log('Getting Characteristic...');
-                const testAllChars = await service.getCharacteristics();
-                const weightCharacteristic = await service.getCharacteristic(BLEServiceInfo.weightCharacteristicId);
-                const envCharacteristic = await service.getCharacteristic(BLEServiceInfo.envCharacteristicId);
-                const lightCharacteristic = await service.getCharacteristic(BLEServiceInfo.lightCharacteristicId);
-                const requestedCharacteristics = {
-                    [BLEServiceInfo.weightCharacteristicId]: weightCharacteristic,
-                    [BLEServiceInfo.envCharacteristicId]: envCharacteristic,
-                    [BLEServiceInfo.lightCharacteristicId]: lightCharacteristic
+                //const service = await server.getPrimaryService(BLEServiceInfo.servidceId);
+                const services = await server.getPrimaryServices();
+                for(const service of services) {
+                    console.log(service);
+                    if (service.uuid == BLEServiceInfo.servidceId) {
+                        const weightCharacteristic = await service.getCharacteristic(BLEServiceInfo.weightCharacteristicId);
+                        const envCharacteristic = await service.getCharacteristic(BLEServiceInfo.envCharacteristicId);
+                        const lightCharacteristic = await service.getCharacteristic(BLEServiceInfo.lightCharacteristicId);
+                        const requestedCharacteristics = {
+                            [BLEServiceInfo.weightCharacteristicId]: weightCharacteristic,
+                            [BLEServiceInfo.envCharacteristicId]: envCharacteristic,
+                            [BLEServiceInfo.lightCharacteristicId]: lightCharacteristic
+                        }
+                        const devIdC = await service.getCharacteristic(BLEServiceInfo.deviceIdCharacteristicId);
+                        const devIdBuffer = await devIdC.readValue();
+                        const devId = new TextDecoder().decode(devIdBuffer.buffer);
+                        console.log("connected to device", devId);
+                        this.connectionData = {
+                            device: device,
+                            server: server,
+                            service: service,
+                            characteristics: requestedCharacteristics,
+                            deviceId: devId
+                        }
+                        console.log('Connected!');
+                        return { id: devId, address: "", success: true };
+                    }
                 }
-                const devIdC = await service.getCharacteristic(BLEServiceInfo.deviceIdCharacteristicId);
-                const devIdBuffer = await devIdC.readValue();
-                const devId = new TextDecoder().decode(devIdBuffer.buffer);
-                console.log("connected to device", devId);
-                this.connectionData = {
-                    device: device,
-                    server: server,
-                    service: service,
-                    characteristics: requestedCharacteristics,
-                    deviceId: devId
-                }
-                console.log('Connected!');
-                return { id: devId, address: "", success: true };
             }
         } else {
             return { id: "", address: "", success: false };

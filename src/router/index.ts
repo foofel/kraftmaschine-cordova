@@ -33,19 +33,21 @@ Vue.use(VueRouter)
 
 const routes = [
 	{
-		path: '/',
+		path: '/login',
 		component: StartUp,
 		children: [
 			{
-				path: 'login/select',
+				path: 'select',
 				component: SelectLogin,
 			},{
-				path: 'login/register',
+				path: 'register',
 				component: Register,
 			},{
-				path: 'login/login',
+				path: 'login',
 				component: Login,
-			}     
+			},{
+				path: '*', redirect: 'select'
+			} 			
 		]
 	},
 	{
@@ -62,16 +64,16 @@ const routes = [
 				path: 'timer',
 				component: TimerMain
 			},{
-				path: 'history',
+				path: 'logbook',
 				component: SessionHistory
 			},{
 				path: 'benchmark',
 				component: BenchmarkMain
 			},{
-				path: 'highscore',
+				path: 'results',
 				component: Highscore
 			},{
-				path: 'account',
+				path: 'profile',
 				component: AccountOptions
 			},{
 				path: 'profile/:id',
@@ -86,9 +88,6 @@ const routes = [
 				path: 'perks',
 				component: PerksView
 			},{
-				path: 'board/:id',
-				component: PerksView
-			},{
 				path: 'options',
 				component: ConfigEditorComponent
 			},{
@@ -96,21 +95,17 @@ const routes = [
 				component: TrainPlanView
 			},{
 				path: 'debug',
-				component: DebugViewComponent
+				component: DebugView
 			}, {
-				path: 'device-selector',
+				path: 'boards',
 				component: BluetoothConnectionSelector
-			}
+			},{
+				path: '*', redirect: 'scale'
+			} 
 		]
-	},
-	{
-		path: '/scale',
-		component: Scale
-	},
-	{
-		path: '/debug',
-		component: DebugView
-	}
+	},{
+		path: '*', redirect: '/view/boards'
+	} 
 ]
 
 const router = new VueRouter({

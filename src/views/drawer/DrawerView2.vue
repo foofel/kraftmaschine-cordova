@@ -15,40 +15,42 @@
         <div class="drawer flex flex-col" :class="{'visible': visible}" @click="hideDrawer()">
             <div class="h-14"></div>
             <div class="overflow-y-scroll flex-1">
-                <div class="ml-5 flex flex-col text-4xl font-light p-0 w-9/12">
-                    <div class="">Scale</div>
+                <div class="ml-5 mr-5 flex flex-col text-4xl font-light p-0 whitespace-nowrap">
+                    <div @click="selectPage('scale')">Scale</div>
                     <div class="h-2"></div>
                     <div class="h-px divider"></div>
                     <div class="h-2"></div>
-                    <div>Timer</div>
+                    <div class="text-gray-200 pointer-events-none" @click="selectPage('timer')">Guided Training</div>
+                    <div class="h-2"></div>                    
+                    <div @click="selectPage('timer')">Timer</div>
                     <div class="h-2"></div>
-                    <div>Logbook</div>
-                    <div class="h-2"></div>
-                    <div class="h-px divider"></div>
-                    <div class="h-2"></div>
-                    <div>Benchmark</div>
-                    <div class="h-2"></div>
-                    <div>Results</div>
-                    <div class="h-2"></div>
-                    <div>Rankings</div>
+                    <div @click="selectPage('logbook')">Logbook</div>
                     <div class="h-2"></div>
                     <div class="h-px divider"></div>
                     <div class="h-2"></div>
-                    <div>Friends</div>
+                    <div @click="selectPage('benchmark')">Benchmark</div>
                     <div class="h-2"></div>
-                    <div>Profile</div>
+                    <div class="text-gray-200 pointer-events-none" @click="selectPage('results')">Results</div>
                     <div class="h-2"></div>
-                    <div>Users</div>
-                    <div class="h-2"></div>
-                    <div class="h-px divider"></div>
-                    <div class="h-2"></div>
-                    <div>Options</div>
-                    <div class="h-2"></div>
-                    <div>Boards</div>
+                    <div class="text-gray-200 pointer-events-none" @click="selectPage('rankings')">Rankings</div>
                     <div class="h-2"></div>
                     <div class="h-px divider"></div>
                     <div class="h-2"></div>
-                    <div>Debug</div>
+                    <div class="text-gray-200 pointer-events-none" @click="selectPage('friends')">Friends</div>
+                    <div class="h-2"></div>
+                    <div class="text-gray-200 pointer-events-none" @click="selectPage('profile')">Profile</div>
+                    <div class="h-2"></div>
+                    <div class="text-gray-200 pointer-events-none" @click="selectPage('users')">Users</div>
+                    <div class="h-2"></div>
+                    <div class="h-px divider"></div>
+                    <div class="h-2"></div>
+                    <div class="text-gray-200" @click="selectPage('options')">Options</div>
+                    <div class="h-2"></div>
+                    <div @click="selectPage('boards')">Boards</div>
+                    <div class="h-2"></div>
+                    <div class="h-px divider"></div>
+                    <div class="h-2"></div>
+                    <div @click="selectPage('debug')">Debug</div>
                 </div>
             </div>
         </div>
@@ -80,7 +82,7 @@ export default {
     data: function() {
         return {
             isConnected: true,
-            visible: true
+            visible: false
         };
     },
     created() {},
@@ -114,7 +116,7 @@ export default {
             }
             return false;
         },
-        itemClicked(item) {
+        selectPage(item) {
             const target = `/view/${item}`
             const sameTarget = this.$router.currentRoute.path.startsWith(target);
             if(this.canChange()) {
@@ -142,8 +144,6 @@ export default {
     left: 0;
     top: 0;        
     height: 100vh;
-    width: 75vw;
-    max-width: 250px;
     box-sizing: border-box;
     //border: 1px solid lime;
     background: rgba(255, 255, 255, 0.81);

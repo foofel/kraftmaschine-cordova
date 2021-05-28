@@ -1,9 +1,15 @@
 package org.kraftmaschine;
 
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
+import com.capacitorjs.plugins.splashscreen.SplashScreenPlugin;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebViewClient;
 import com.getcapacitor.Plugin;
 
 import java.util.ArrayList;
@@ -13,16 +19,19 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         hideSystemUI();
-
-        /**
-         * Initialize capacitor bridge
-         */
         this.init(savedInstanceState, new ArrayList<Class<? extends Plugin>>() {{
-            // Additional plugins you've installed go here
-            // Ex: add(TotallyAwesomePlugin.class);
-            //add(GoogleAuth.class);
-            //add(SafeArea.class);
+            add(SplashScreenPlugin.class);
+            add(com.getcapacitor.community.facebooklogin.FacebookLogin.class);
         }});
+        //registerPlugin(com.getcapacitor.community.facebooklogin.FacebookLogin.class);
+        this.bridge.getWebView().setWebViewClient(new BridgeWebViewClient(this.bridge) {
+            @Override
+            //public void onReceivedSslError(android.webkit.WebView view, SslErrorHandler handler, SslError error) {}
+            public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+                handler.proceed();
+            }
+        });
+        this.bridge.getWebView().getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
     }
 
     @Override

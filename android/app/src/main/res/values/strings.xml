@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">kraftmaschine</string>
-    <string name="title_activity_main">kraftmaschine</string>
+    <string name="app_name">Kraftmaschine</string>
+    <string name="title_activity_main">Kraftmaschine</string>
     <string name="package_name">org.kraftmaschine</string>
     <string name="custom_url_scheme">org.kraftmaschine</string>
+    <string name="facebook_app_id">311272643683412</string>
+    <string name="fb_login_protocol_scheme">fb311272643683412</string>
 </resources>

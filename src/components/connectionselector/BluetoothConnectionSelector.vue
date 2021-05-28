@@ -41,6 +41,7 @@
                 <div v-if="state == 'done'" class="expand-item center-only">
                     connected :)
                 </div>
+                <img src="@/assets/sounds/beep-wav.mp3" />
             </div>
         </div>
     </HeadlineView>
@@ -70,15 +71,12 @@ export default class BluetoothConnectionSelector extends VueNavigation {
     hangboardConnector:HangboardConnector = {} as HangboardConnector;
     isScanning = false;
     isConnecting = false;
-    cfg!:ConfigFile;
     selectedDevice!: { name: string, address: string };
     constructor() {
         super();
     }
     created() {
         this.hangboardConnector = this.$root.$data.hangboardConnector as HangboardConnector;
-        this.cfg = this.$root.$data.cfg;
-        console.log(this.cfg);
     }
 
 	activated() {
@@ -138,9 +136,13 @@ export default class BluetoothConnectionSelector extends VueNavigation {
         const res = await this.hangboardConnector.connect(dev.address, window);
         this.isConnecting = false;
         if(res.success){
-            this.cfg.options.deviceId = res.id;
-            this.cfg.options.deviceAddress = res.address;
-            const board = this.cfg.options.deviceBoardMapping[res.address];
+            const store = (this as any).$store;
+            store.connection.lastDeviceAddress = res.address;
+            store.connection.knownDevices.push({
+                address: res.address,
+                name: res.id,
+                lastConnection: new Date()
+            });
             this.selectedDevice = dev;
             this.isScanning = false;
             this.state = "board";
@@ -150,11 +152,11 @@ export default class BluetoothConnectionSelector extends VueNavigation {
         }
     }
     boardSelected(board: Hangboard) {
-        this.cfg.options.deviceBoardMapping[this.selectedDevice.address] = board.id;
+        /*this.cfg.options.deviceBoardMapping[this.selectedDevice.address] = board.id;
         this.state = "done";
         if(this.cfg.options.firstRun) {
             this.$router.replace("scale");
-        }
+        }*/
     }
 
     getBoards() {

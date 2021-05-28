@@ -1,11 +1,23 @@
 const webpack = require('webpack');
 const fs = require('fs');
 
+function httpMode() {
+  if (process.env.FORCE_HTTP) {
+    return { port: 8880 }
+  } else {
+    return {
+      https: {
+        key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
+        cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
+      },
+      port: 8880
+    }  
+  }
+}
+
 module.exports = {
   publicPath: '',
-  pluginOptions: {
-    cordovaPath: 'src-cordova'
-  },
+  outputDir: './dist',
   configureWebpack: (config, ctx) => {
     if (process.env.NODE_ENV === 'development') {
       config.devtool = 'eval-source-map';
@@ -27,21 +39,15 @@ module.exports = {
             if (/\.css$/.test(entry)) return 'style';
             if (/\.woff2$/.test(entry)) return 'font';
             if (/\.png$/.test(entry)) return 'image';
+            //if (/\.wav$/.test(entry)) return 'sound';
             return 'script';
           }
-        options[0].include = 'allAssets'
+        //options[0].include = 'allAssets'
         // options[0].fileWhitelist = [/\.wav/, /\.to/, /\.include/]
         // options[0].fileBlacklist = [/\.files/, /\.to/, /\.exclude/]
         return options
-    })
+    }),
+    config.optimization.minimize(false)
   },
-  devServer: {
-    https: {
-      //key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
-      //cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
-      key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
-      cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
-    },
-    port: 8880
-  }  
+  devServer: httpMode()
 }

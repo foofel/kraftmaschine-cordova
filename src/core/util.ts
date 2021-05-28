@@ -609,7 +609,6 @@ export function asyncBarrier(seconds: number): { promise: Promise<void>, resolve
     const p = new Promise<void>((resolve, _) => {
         r = resolve;
         setTimeout(() => {
-            console.log("barrier resolved");
             resolve();
         }, seconds * 1000)
     });

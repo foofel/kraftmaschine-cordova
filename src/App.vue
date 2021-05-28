@@ -48,7 +48,8 @@ Vue.use(VueAuthenticate, {
 	}
 })
 Vue.use(Notifications)
-export default {}
+export default {
+}
 </script>
 
 <style lang="scss">

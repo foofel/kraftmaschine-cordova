@@ -82,7 +82,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { pipe, sum, round, guard, movingAverage, passTrough, taredByObject, clampPositive, virtualMidpoint } from '../../core/messagetransformer';
 import { HangboardConnector } from '../../core/hangboardconnector';
 import { WeightMessage, ScaleOptions, TempSensorInterface } from '@/core/sensorreader';
-import { CORDOVA_BASE_PATH, GlobalConfig } from '../../config'
+import { GlobalConfig } from '../../config'
 import { HangTimerData, HangTimerSetupData, HangTimerGraphData, TimerBarChartData, LocalTrainingSaveData, Hangboards, TareWeights, SelectedHolds, Hold } from '@/components/typeexports'
 import { TimerEntryPointInTime, TimerWithActiveTracking, TimerState, CalculateTimerLength, GetOverallReps, BeepType } from './ts/timerrunner'
 import { ConfigFile } from '../../core/storageinterface'
@@ -258,12 +258,12 @@ export default class HangTimer extends Vue {
     buildBeepSound() {
         if(this.normalBeepSound === null) {
             const ctx = new AudioContext();
-            makeSound(`${CORDOVA_BASE_PATH()}/sounds/beep-wav.mp3`, ctx, (o: any) => {
+            /*makeSound(`${CORDOVA_BASE_PATH()}/sounds/beep-wav.mp3`, ctx, (o: any) => {
                 console.log(o);
                 console.log("beep loaded");
                 this.normalBeepSound = o;
                 this.lastBeepSound = this.normalBeepSound;
-            });
+            });*/
         }
     }
     /*buildSaveData(stars: number): LocalUploadSave {

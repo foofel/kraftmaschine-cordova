@@ -1,21 +1,11 @@
-import { HANGTIMER_FINISHED } from './messages';
-
-let CORDOVA_BASE_PATH_VAL = ""
-const isCordovaApp = window.hasOwnProperty("cordova");
-if(isCordovaApp) {
-    CORDOVA_BASE_PATH_VAL = "file:///android_asset/www";
-}
-
-export function CORDOVA_BASE_PATH(): string {
-    return CORDOVA_BASE_PATH_VAL;
-}
-
-export function RUNNING_WITH_CORDOVA(): boolean {
-    return isCordovaApp;
-}
+import { Capacitor } from "@capacitor/core";
 
 export function RUNNING_ON_DEV_MACHINE(): boolean {
-    return navigator.platform === "Win32";
+    return Capacitor.getPlatform() == "web";
+}
+
+export function RUNNING_NATIVE(): boolean {
+    return Capacitor.isNativePlatform()
 }
 
 export function IS_PRODUCTION(): boolean {

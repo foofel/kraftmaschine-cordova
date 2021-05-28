@@ -128,7 +128,8 @@ export class BluetoothSensorReader implements SensorReaderInterface
         if(this.receivedPackagesInLastSecond > 100) {
             console.log("too many messages/s, ignoring");
             return;
-        }        
+        }
+        return;
         if( !( (messageType == "weight" && data.byteLength) == 11 || (messageType == "env" && data.byteLength) == 6) ) {
             console.log(`invalid sensor msg, length: ${data.byteLength}, type: '${messageType}'`);
             return;

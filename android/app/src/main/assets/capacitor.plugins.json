@@ -1,1 +1,10 @@
-[]
+[
+	{
+		"pkg": "@capacitor-community/facebook-login",
+		"classpath": "com.getcapacitor.community.facebooklogin.FacebookLogin"
+	},
+	{
+		"pkg": "@capacitor/splash-screen",
+		"classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin"
+	}
+]

@@ -43,7 +43,8 @@
 <script>
 /* eslint-disable */
 import "@/assets/styles/tailwind.css"
-import { BackendConfig, RUNNING_WITH_CORDOVA } from '@/config'
+import { BackendConfig, RUNNING_NATIVE } from '@/config'
+import { FacebookLogin, FacebookLoginResponse } from '@capacitor-community/facebook-login';
 export default {
     name: "SelectLogin",
     components: {},
@@ -52,21 +53,29 @@ export default {
     },
     mounted: function() {},
     methods: {
-        login: function(type) {
-            if(RUNNING_WITH_CORDOVA()) {
-                facebookConnectPlugin.login(['public_profile', 'email'], async (data) => {
+        async login() {
+            if(RUNNING_NATIVE()) {
+                const FACEBOOK_PERMISSIONS = ['email', 'user_birthday', 'user_photos', 'user_gender'];
+                const fbResult = JSON.parse(JSON.stringify(await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })));
+                if (fbResult.accessToken) {
                     try {
                         const result = await this.$http.post(BackendConfig.backendUrl() + "/auth/facebook", {
-                            access_token: data.authResponse.accessToken
+                            access_token: fbResult.accessToken.token
                         });
                         const json = result.data;
                         console.log(json);
+                        if(json.status == "success"){
+                            this.$store.user.id = json.user_id;
+                            this.$router.replace("/view/scale");
+                        } else {
+                            this.$notify({ title: 'Unable to Login', text: 'Backend eror, please try again later.', type: "error"});
+                        }
                     } catch(e) {
                         console.log(e)
-                    }
-                }, (data)=> {
-                    console.log("fail", data);
-                })
+                    }                    
+                } else {
+                    this.$notify({ title: 'Unable to Login', text: 'Could not connect to Account, please try again.', type: "error"});
+                }              
             }
             // login via browser, for normal debugging purposes
             else {
