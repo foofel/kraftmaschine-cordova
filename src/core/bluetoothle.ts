@@ -669,7 +669,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             const subscriber = await BluetoothLEHelpers.subscribep(this.connectedAddress, BLEServiceInfo.servidceId, characteristic, (data:string) => {
                 if(data) {
                     //const ab = Base64Binary.decodeArrayBuffer(data);
-                    const decoded = atob("xtkwegMAAKkJAAA=")
+                    const decoded = atob(data)
                     const buf = new ArrayBuffer(decoded.length);
                     const bufView = new Uint8Array(buf);
                     for (let i = 0, strLen = decoded.length; i < strLen; i++) {
@@ -680,7 +680,6 @@ export class CordovaBluetoothLE implements BluetoothLE {
                         }
                         bufView[i] = code;
                     }
-                    return buf;
                     cb(buf);
                 }
             });

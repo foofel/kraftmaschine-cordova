@@ -18,7 +18,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        hideSystemUI();
+        //hideSystemUI();
         this.init(savedInstanceState, new ArrayList<Class<? extends Plugin>>() {{
             add(SplashScreenPlugin.class);
             add(com.getcapacitor.community.facebooklogin.FacebookLogin.class);
@@ -38,7 +38,7 @@ public class MainActivity extends BridgeActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            hideSystemUI();
+            //hideSystemUI();
         }
     }
 

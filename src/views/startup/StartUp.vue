@@ -20,7 +20,9 @@ export default {
     data: function() {
         return {};
     },
-    mounted: function() {},
+    mounted: function() {
+        // set initial page stack route
+    },
     methods: {
     },
 	computed: {

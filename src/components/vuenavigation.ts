@@ -10,3 +10,12 @@ export class VueNavigation extends Vue implements NavigationComponent {
     }
     onBeforeShowDialog(): void {}
 }
+
+export const VueNavigationMixin = {
+    methods: {
+        canLeaveComponent(): NavigationLeaveResponse {
+            return "ok";
+        },
+        onBeforeShowDialog(): void {}
+    }
+}

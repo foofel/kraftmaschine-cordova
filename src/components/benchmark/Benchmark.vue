@@ -98,7 +98,7 @@ import ProgressBar from '@/components/ProgressBar.vue'
 //import UserTimeline from '@/components/benchmark/UserTimeline.vue'
 //import MaxWeightGoals from '@/components/benchmark/MaxWeightGoals.vue'
 import WeightDisplay from '@/components/benchmark/WeightDisplay.vue'
-import BenchmarkGraph from '@/components/benchmark/BenchmarkGraph.vue'
+import GraphComponent from '@/components/debug/GraphComponent.vue'
 import Button from '@/components/Button.vue'
 import moment from 'moment';
 import { HangboardConnector } from '@/core/hangboardconnector';
@@ -154,7 +154,7 @@ import { avg } from '../../core/math'
         //UserTimeline,
         //MaxWeightGoals,
         WeightDisplay,
-        BenchmarkGraph,
+        GraphComponent,
         Button,
         GoalBar,
         GoalClock
@@ -165,7 +165,7 @@ export default class Benchmark extends Vue {
     @Prop({default: () => {}}) highscoreData!: Array<HighscoreEntry>;
     hangboardConnector: HangboardConnector;
     bc!: SimpleBenchmarkController;
-    benchmarkGraph: BenchmarkGraph|null = null;
+    benchmarkGraph: GraphComponent|null = null;
     //weightGoals:MaxWeightGoals|null = null;
     //timeline:UserTimeline|null = null;
     updateTimeout: any = null;
@@ -200,7 +200,7 @@ export default class Benchmark extends Vue {
     mounted() {
         //console.log(JSON.stringify(this.setupData));
         this.hangboardConnector.registerWeightCallback(this.onWeightMessage, pipe(tared(this.setupData.tareWeights.left, this.setupData.tareWeights.right), round(0.1)));
-        this.benchmarkGraph = this.$refs.graph as BenchmarkGraph;
+        this.benchmarkGraph = this.$refs.graph as GraphComponent;
         //this.weightGoals = this.$refs.weightGoals as MaxWeightGoals;
         //this.timeline = this.$refs.timeline as UserTimeline;
         this.bc = new SimpleBenchmarkController(

@@ -86,6 +86,12 @@ export default {
                         });
                         const json = result.data;
                         console.log(json);
+                        if(json.status == "success"){
+                            this.$store.user.id = json.user_id;
+                            this.$router.push("/view/scale");
+                        } else {
+                            this.$notify({ title: 'Unable to Login', text: 'Backend eror, please try again later.', type: "error"});
+                        }                        
                     } catch(e) {
                         console.log(e)
                     }

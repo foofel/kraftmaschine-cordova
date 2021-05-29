@@ -18,49 +18,65 @@
 </template>
 
 <script>
-
-const myNav = {
-    methods: {
-        canLeaveComponent() {
-            return "ok";
-        },
-        onBeforeShowDialog(){}
-    }
-}
-
 import "@/assets/styles/tailwind.css"
-import { VueNavigation } from '@/components/vuenavigation'
+import { VueNavigationMixin } from '@/components/vuenavigation'
+import { pipe, sum, guard, movingAverage, tared, taredByObject, clampPositive } from '../../core/messagetransformer';
+import { round } from '../../core/math';
+
 export default {
     name: "Scale",
-    mixins: [VueNavigation],
+    mixins: [VueNavigationMixin],
     components: {},
     created() {
         console.log("scale created");
     },
     data: function() {
         return {
-            showSeperate: false
+            showSeperate: false,
+            tempInfo: { temp: 0, humidity: 0, pressure: 0 },
+            weightInfo: { left: 0, right: 0 },
+            tareWeights: { left: 0, right: 0 }
         };
     },
-    mounted: function() {},
+    mounted: function() {
+		console.log("MOUNTED SimpleWeightDisplay")
+        const self = this;
+		this.$root.hangboardConnector.registerWeightCallback(self.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
+		this.$root.hangboardConnector.registerTempSensorCallback(self.onTempSensorMessage);
+		/*this.onTare();
+		this.intervallId = setInterval(() => {
+			this.onTare();
+		}, 300 * 1000);*/
+    },
+    beforeDestroy() {
+        console.log("DESTROYED SimpleWeightDisplay")
+		this.$root.hangboardConnector.removeWeightCallback(this.onWeightMessage);
+		this.$root.hangboardConnector.removeTempSensorCallback(this.onTempSensorMessage)
+    }, 
     methods: {
+        onWeightMessage(msg) {
+            this.weightInfo = msg;
+        },
+        onTempSensorMessage(msg) {
+            this.tempInfo = msg;
+        },           
         getTemp() {
-            return (0).toFixed(2);
+            return this.tempInfo.temp.toFixed(0); 
         },
         getHum() {
-            return (0).toFixed(2);
+            return this.tempInfo.humidity.toFixed(0); 
         },
         hetHpa() {
-            return (0).toFixed(2);
+            return this.tempInfo.pressure.toFixed(0); 
         },
         getCombined() {
-            return (0).toFixed(2);
+            return (round(this.weightInfo.left, 0.1) + round(this.weightInfo.right, 0.1)).toFixed(2);
         },
         getLeft() {
-            return (0).toFixed(2);
+            return round(this.weightInfo.left, 0.1).toFixed(2);
         },
         getRight() {
-            return (0).toFixed(2);
+            return round(this.weightInfo.right, 0.1).toFixed(2);
         },
         toggleLeftRightView() {
             this.showSeperate = !this.showSeperate

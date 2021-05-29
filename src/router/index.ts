@@ -6,13 +6,13 @@ import Register from '@/views/startup/Register.vue'
 import AuthResult from '@/views/startup/AuthResult.vue'
 import Login from '@/views/startup/Login.vue'
 import Scale from '@/views/scale/Scale.vue'
-import DebugView from '@/views/DebugView.vue'
+import DebugView from '@/views/debug/DebugView.vue'
 //import DrawerView from '@/views/drawer/DrawerView.vue'
-import DrawerView2 from '@/views/drawer/DrawerView2.vue'
+import DrawerView from '@/views/drawer/DrawerView.vue'
 import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
 import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
 import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
-import DebugViewComponent from '@/components/debug/DebugViewComponent.vue'
+//import DebugViewComponent from '@/components/debug/DebugViewComponent.vue'
 import Highscore from '@/components/highscore/Highscore.vue'
 import AccountOptions from '@/components/account/AccountOptions.vue'
 import FriendsView from '@/components/friends/FriendsView.vue'
@@ -24,7 +24,7 @@ import OptionsView from '@/components/options/OptionsView.vue'
 import TrainPlanView from '@/components/plan/TrainPlanView.vue'
 import DataEditorComponent from '@/components/DataEditorComponent.vue'
 import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
-import BluetoothConnectionSelector from '@/components/connectionselector/BluetoothConnectionSelector.vue'
+import BluetoothConnectionSelector from '@/views/boardselector/BluetoothConnectionSelector.vue'
 import { AppContext } from '@/main'
 import VuePageStack from 'vue-page-stack'
 
@@ -52,7 +52,7 @@ const routes = [
 	},
 	{
 		path: '/view',
-		component: DrawerView2,
+		component: DrawerView,
 		meta: {
 			needAuth: true
 		},
@@ -97,14 +97,14 @@ const routes = [
 				path: 'debug',
 				component: DebugView
 			}, {
-				path: 'boards',
+				path: 'boardselector',
 				component: BluetoothConnectionSelector
 			},{
 				path: '*', redirect: 'scale'
 			} 
 		]
 	},{
-		path: '*', redirect: '/view/boards'
+		path: '*', redirect: '/view/boardselector'
 	} 
 ]
 
