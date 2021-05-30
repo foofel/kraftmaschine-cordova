@@ -24,9 +24,9 @@ export default {
         HeadlineView
     },
     nonReactiveData: {
-        timeBuffer: [0],
-        weightBuffer: [0],
-        gradientBuffer: [0],
+        timeBuffer: [0, 1, 2, 3, 4, 5],
+        weightBuffer: [0, 1, 2, 3, 4, 5],
+        gradientBuffer: [5, 4, 3, 2, 1, 0],
         bufferLengthSeconds: 10,
     },
     data() { return {
@@ -67,12 +67,29 @@ export default {
                 { scale: "weight", label: "kg", labelSize: 20, values: (u, vals, space) => vals.map(v => sprintf("%.2f", v)) },
                 { side: 1, scale: "gradient", grid: { show: false }, label: "kg/s", labelSize: 20, values: (u, vals, space) => vals.map(v => sprintf("%.2f", v)) }
             ]
-        };    
-        const data = [ 
-            [0], // time 
-            [0], // weight
-            [0], // gradient
-        ];
+        };
+        /*const opts = {
+            series: [
+                {
+                    label: "Time",
+                }, {
+                    label: "Weig.",
+                    stroke: ChartColors.red,
+                }, {
+                    label: "Grad.",
+                    stroke: ChartColors.blue,
+                }
+            ],
+            axes: [
+                { show: false },
+                { show: false },
+            ],
+            legend: {
+                show: false
+            }
+        };*/
+        const nr = this.$options.nonReactiveData;
+        const data = [ [0], [0], [0] ];
         this.$refs.graph.init(opts, data);
         this.$options.startRedraw(this);
     },
@@ -87,7 +104,7 @@ export default {
         const doRedraw = () => {
             if(self.$refs.graph) {
                 const data = self.$options.nonReactiveData;
-                self.$refs.graph.setData([ data.timeBuffer, data.weightBuffer, [] ]);
+                self.$refs.graph.setData([ data.timeBuffer, data.weightBuffer, data.gradientBuffer ]);
                 self.$refs.graph.setLines([]);
             }
             if(self.stopUpdate) {

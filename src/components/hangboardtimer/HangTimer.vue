@@ -155,11 +155,11 @@ export default class HangTimer extends Vue {
     calib: Calibration|null;
     enableBeep: boolean;
     enableVibrate: boolean;
-    cfg: ConfigFile;
+    //cfg: ConfigFile;
 
     constructor() {
         super();
-        this.cfg = this.$root.$data.cfg;
+        //this.cfg = this.$root.$data.cfg;
         this.hangboardConnector = this.$root.$data.hangboardConnector;
         this.activationWeightFactor = 0.95;
         this.hangTimerData = { 
@@ -217,8 +217,8 @@ export default class HangTimer extends Vue {
         this.canTare = true;
         this.tareWeights = this.setupData.tareWeights;
         this.calib = null;
-        this.enableBeep = this.cfg.options.enableBeep;
-        this.enableVibrate = this.cfg.options.enableVibrate;
+        this.enableBeep = true; //this.cfg.options.enableBeep;
+        this.enableVibrate = true; //this.cfg.options.enableVibrate;
         this.normalBeepSound = null;
         this.lastBeepSound = null;
     } 

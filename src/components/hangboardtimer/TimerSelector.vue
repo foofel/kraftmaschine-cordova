@@ -122,9 +122,13 @@ export default class TimerSelector extends Vue {
     lastSelectedTimerEntry: TimerSelectorEntry | null = null;
     lastTimerSelectionId = "";
     cfg: ConfigFile = this.$root.$data.cfg;
+    @Prop({}) model!:any;
     constructor() {
         super();
-        this.customTimers = this.cfg.options.savedTimers;
+        this.customTimers = [];
+    }
+    mounted() {
+        console.log(this.model);
     }
     getDefaultCustomTimerData() {
         return {

@@ -8,15 +8,26 @@ export interface SimpleTimer {
     cooldown:number;
 }
 
-export type TimerSlotState = "warmup"|"active"|"passive"|"cooldown";
 
+export type TimerSlotState = "warmup"|"active"|"passive"|"break"|"cooldown";
 export interface TimerSlot {
     state: TimerSlotState;
+    duration: number;
     holdLeft: number|null;
     holdRight: number|null;
 }
-
 export type CustomTimer = Array<TimerSlot>;
+
+
+export type TypedTimer = {
+    type: "simple"|"custom";
+    timer:SimpleTimer|CustomTimer;
+}
+export type TimerSetup = {
+    name: string;
+    board: number;
+    timer: TypedTimer;
+}
 
 export interface ApplicationStoreInterface {
     user: {
@@ -49,8 +60,7 @@ export interface ApplicationStoreInterface {
         list: Array<number>
     }    
     timers: {
-        simple: Array<SimpleTimer>;
-        custom: Array<CustomTimer>;
+        timer: Array<TimerSetup>;
     }
 }
 
@@ -86,8 +96,19 @@ export function defaultApplicationStoreObject(): ApplicationStoreInterface {
             list: []
         },
         timers:  {
-            simple: [],
-            custom: []
+            timer: [
+                { name: "Basic 7s/5s", board: 0, timer: { type: "simple", timer: { active:7, passive:5, pause: 180, repeats:5, sets: 6, cooldown:10, warmup: 10 } } },
+                { name: "Basic 6s/4s", board: 0, timer: { type: "simple", timer: { active:6, passive:4, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 } } },
+                { name: "Basic 7s/3s", board: 0, timer: { type: "simple", timer: { active:7, passive:3, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 } } },
+                { name: "Max 10s", board: 0, timer: { type: "simple", timer: { active:7, passive:5, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 } } },
+                { name: "Max 3s Alt", board: 0, timer: { type: "custom", timer: [
+                    { state: "warmup", duration: 10, holdLeft: 9, holdRight: 12 },
+                    { state: "active", duration: 3, holdLeft: 9, holdRight: 12 },
+                    { state: "break", duration: 180, holdLeft: null, holdRight: null },
+                    { state: "cooldown", duration: 10, holdLeft: null, holdRight: null },
+                ]}},
+                { name: "Max 5s Alt", board: 0, timer: { type: "custom", timer: { active:7, passive:5, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 } } },
+            ],
         }
     }
 }
@@ -108,33 +129,6 @@ function createOnChangeProxy(onChange:(path:string, value:any) => void, target:a
         },
     })
 }
-
-/*export class ApplicationStore implements ApplicationStoreInterface {
-    user = {
-		id: 0,
-		userName: "",
-		email: "",
-		displayName: "",
-		password: "",
-	};
-	appOptions = {
-		runCount: 0,
-		firstRun: true,
-		skipSplash: false,
-		enableBeep: true,
-		beepTimeOffset: 0.3,
-		forceMaxVolumeBeep: true,
-		enableVibrate: true,
-		deviceId: "",
-		deviceAddress: "",
-		gbDrawTimeMarkers: true,
-		gbDrawPercentileMarkers: true,
-	};
-	timers = {
-        simple: Array<SimpleTimer>(),
-        custom: Array<CustomTimer>()
-    }
-}*/
 
 export function proxylize(store:ApplicationStoreInterface) : ApplicationStoreInterface {
     const proxy = createOnChangeProxy((path:string, value:any) => {

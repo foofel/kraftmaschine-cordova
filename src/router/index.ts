@@ -10,6 +10,10 @@ import DebugView from '@/views/debug/DebugView.vue'
 //import DrawerView from '@/views/drawer/DrawerView.vue'
 import DrawerView from '@/views/drawer/DrawerView.vue'
 import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
+import TimerView from '@/views/timer/TimerView.vue'
+import TimerSelector from '@/components/hangboardtimer/TimerSelector.vue'
+import SelectorView from '@/views/timer/SelectorView.vue'
+import CalibrateView from '@/views/timer/CalibrateView.vue'
 import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
 import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
 //import DebugViewComponent from '@/components/debug/DebugViewComponent.vue'
@@ -33,21 +37,12 @@ Vue.use(VueRouter)
 
 const routes = [
 	{
-		path: '/login',
-		component: StartUp,
+		path: '/login', component: StartUp,
 		children: [
-			{
-				path: 'select',
-				component: SelectLogin,
-			},{
-				path: 'register',
-				component: Register,
-			},{
-				path: 'login',
-				component: Login,
-			},{
-				path: '*', redirect: 'select'
-			} 			
+			{ path: 'select', component: SelectLogin,},
+			{ path: 'register', component: Register,},
+			{ path: 'login', component: Login,},
+			{ path: '*', redirect: 'select' } 			
 		]
 	},
 	{
@@ -57,51 +52,29 @@ const routes = [
 			needAuth: true
 		},
 		children: [
+			{ path: 'scale', component: Scale },
+			{ path: 'timer', component: TimerMain },
 			{
-				path: 'scale',
-				component: Scale
-			},{
-				path: 'timer',
-				component: TimerMain
-			},{
-				path: 'logbook',
-				component: SessionHistory
-			},{
-				path: 'benchmark',
-				component: BenchmarkMain
-			},{
-				path: 'results',
-				component: Highscore
-			},{
-				path: 'profile',
-				component: AccountOptions
-			},{
-				path: 'profile/:id',
-				component: ProfileView
-			},{
-				path: 'users',
-				component: UsersView
-			},{
-				path: 'friends',
-				component: FriendsView
-			},{
-				path: 'perks',
-				component: PerksView
-			},{
-				path: 'options',
-				component: ConfigEditorComponent
-			},{
-				path: 'trainplan',
-				component: TrainPlanView
-			},{
-				path: 'debug',
-				component: DebugView
-			}, {
-				path: 'boardselector',
-				component: BluetoothConnectionSelector
-			},{
-				path: '*', redirect: 'scale'
-			} 
+				path: 'timer2', component: TimerView,
+				children: [
+					{ path: 'select', component: SelectorView },
+					{ path: 'calibrate', component: CalibrateView },
+					{ path: '*', redirect: 'select' }					
+				]
+			},
+			{ path: 'logbook', component: SessionHistory },
+			{ path: 'benchmark', component: BenchmarkMain},
+			{ path: 'results', component: Highscore},
+			{ path: 'profile', component: AccountOptions},
+			{ path: 'profile/:id', component: ProfileView},
+			{ path: 'users', component: UsersView},
+			{ path: 'friends', component: FriendsView},
+			{ path: 'perks', component: PerksView},
+			{path: 'options', component: ConfigEditorComponent },
+			{ path: 'trainplan', component: TrainPlanView},
+			{ path: 'debug', component: DebugView},
+			{ path: 'boardselector', component: BluetoothConnectionSelector},
+			{ path: '*', redirect: 'scale' } 
 		]
 	},{
 		path: '*', redirect: '/view/boardselector'

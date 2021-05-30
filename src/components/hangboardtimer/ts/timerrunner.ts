@@ -183,8 +183,7 @@ export class TimerWithActiveTracking {
         private timerDoneCallback: ActiveTrackingTimerCallback,
         private beepCallback: BeepCallback) 
     {
-        const cfg = AppContext.cfg
-        this.beepTimeOffset = cfg.options.beepTimeOffset;
+        this.beepTimeOffset = 0.3;
         this.updateIntervall = setInterval(() => {
             this.executeUpdateTick();
         }, 10);

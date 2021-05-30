@@ -140,7 +140,7 @@ export default {
 
 <style lang="scss" scoped>
 .drawer {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;        
     height: 100vh;
@@ -160,7 +160,7 @@ export default {
     }
 }
 .drawer-click-catcher {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;        
     height: 100vh;
@@ -181,6 +181,7 @@ export default {
     //height: var(--notch-inset-top);
 }
 .burger-helper {
+    position: fixed;
     //top: calc(20px + var(--notch-inset-top, 0px));
     top: 20px;
     left: 20px;

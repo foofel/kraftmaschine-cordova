@@ -93,7 +93,7 @@ export default class HoldSelector extends Vue {
         } else {
             this.canvas = elem;
         }
-        const board = this.cfg.options.deviceBoardMapping[this.cfg.options.deviceId];
+        const board = Hangboards.twinPeaksReference.id;
         if(!board){
             this.board = Hangboards.none;
         } else {
