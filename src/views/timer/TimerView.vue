@@ -1,17 +1,19 @@
 <template>
-    <HeadlineView headlineText="Timer">
-        <router-view :setupModel="setupModel"/>
-    </HeadlineView>
+    <div class="w-full h-full">
+        <!--router-view /> < !-- :setupModel="setupModel" -->
+        <MyRouter ref="myRouter" :myRouter="{ name: 'lol', router: $refs.myRouter }"></MyRouter>
+    </div>
 </template>
 
 <script>
-import HeadlineView from '@/components/HeadlineView2'
 import { VueNavigationMixin } from '@/components/vuenavigation'
+import MyRouter from '@/components/myrouter/MyRouter';
+
 export default {
     name: "TimerView",
     mixins: [VueNavigationMixin],
     components: {
-        HeadlineView
+        MyRouter
     },
     data: function() {
         return {
@@ -21,6 +23,7 @@ export default {
         };
     },
     mounted: function() {
+        debugger;
         // set initial page stack route
     },
     methods: {

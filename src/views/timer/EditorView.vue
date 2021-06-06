@@ -107,7 +107,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { ConfigFile } from '../../core/storageinterface';
 import { makeid } from '../../core/util';
 import Button from '@/components/Button.vue'
-import { TimerSelectorEntry, PredefinedTimers } from '../typeexports';
+import { TimerSelectorEntry, PredefinedTimers } from '../../components/typeexports';
 
 @Component({
     components: {

@@ -16,7 +16,8 @@ function httpMode() {
 }
 
 module.exports = {
-  publicPath: '',
+  //publicPath: '/', // history mode
+  publicPath: '', // hash mode
   outputDir: './dist',
   configureWebpack: (config, ctx) => {
     if (process.env.NODE_ENV === 'development') {

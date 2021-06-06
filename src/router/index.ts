@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import StartUp from '@/views/startup/StartUp.vue'
 import SelectLogin from '@/views/startup/SelectLogin.vue'
 import Register from '@/views/startup/Register.vue'
-import AuthResult from '@/views/startup/AuthResult.vue'
+//import AuthResult from '@/views/startup/AuthResult.vue'
 import Login from '@/views/startup/Login.vue'
 import Scale from '@/views/scale/Scale.vue'
 import DebugView from '@/views/debug/DebugView.vue'
@@ -11,9 +11,10 @@ import DebugView from '@/views/debug/DebugView.vue'
 import DrawerView from '@/views/drawer/DrawerView.vue'
 import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
 import TimerView from '@/views/timer/TimerView.vue'
-import TimerSelector from '@/components/hangboardtimer/TimerSelector.vue'
+import SetupView from '@/views/timer/SetupView.vue'
 import SelectorView from '@/views/timer/SelectorView.vue'
 import CalibrateView from '@/views/timer/CalibrateView.vue'
+import TimerSelector from '@/components/hangboardtimer/TimerSelector.vue'
 import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
 import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
 //import DebugViewComponent from '@/components/debug/DebugViewComponent.vue'
@@ -31,6 +32,7 @@ import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
 import BluetoothConnectionSelector from '@/views/boardselector/BluetoothConnectionSelector.vue'
 import { AppContext } from '@/main'
 import VuePageStack from 'vue-page-stack'
+import RouteHelper from '../js/routehelper'
 
 // vue-router is necessary
 Vue.use(VueRouter)
@@ -53,13 +55,20 @@ const routes = [
 		},
 		children: [
 			{ path: 'scale', component: Scale },
-			{ path: 'timer', component: TimerMain },
+			{ path: 'timer_old', component: TimerMain },
 			{
-				path: 'timer2', component: TimerView,
+				path: 'timer', component: TimerView,
 				children: [
-					{ path: 'select', component: SelectorView },
-					{ path: 'calibrate', component: CalibrateView },
-					{ path: '*', redirect: 'select' }					
+					{
+						path: 'setup', component: SetupView,
+						children: [
+							{ path: 'select', component: SelectorView },
+							{ path: 'calibrate', component: CalibrateView },
+							{ path: '', redirect: 'select' }
+						],
+					},
+					{ path: 'timer', component: TimerMain },
+					{ path: '', redirect: 'setup' }
 				]
 			},
 			{ path: 'logbook', component: SessionHistory },
@@ -70,29 +79,31 @@ const routes = [
 			{ path: 'users', component: UsersView},
 			{ path: 'friends', component: FriendsView},
 			{ path: 'perks', component: PerksView},
-			{path: 'options', component: ConfigEditorComponent },
+			{ path: 'options', component: ConfigEditorComponent },
 			{ path: 'trainplan', component: TrainPlanView},
 			{ path: 'debug', component: DebugView},
 			{ path: 'boardselector', component: BluetoothConnectionSelector},
 			{ path: '*', redirect: 'scale' } 
 		]
 	},{
-		path: '*', redirect: '/view/boardselector'
+		path: '', redirect: '/view/boardselector'
 	} 
 ]
 
 const router = new VueRouter({
 	mode: 'hash',
-	base: process.env.BASE_URL,
+	base: process.env.BASE_URL, // hash mode
 	routes
 })
 
-Vue.use(VuePageStack, { router });
+//Vue.use(VuePageStack, { router });
+Vue.use(RouteHelper, { router })
 
 router.beforeEach((to, from, next) => {
 	// "/" is our init/
 	const isRootNav = (from.path == "/" && to.path == "/");
 	if(!isRootNav && to.path === "/") {
+		console.log(`+++ BLOCKING NAVIGATION: ${from.fullPath} -> ${to.fullPath}`);
 		next(false);
 	} else {
 		console.log(`+++ nav event, from: ${from.fullPath} -> ${to.fullPath}`);
@@ -115,4 +126,4 @@ router.beforeEach((to, from, next) => {
 	}  
 });*/
 
-export default router
+export default router;

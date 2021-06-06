@@ -6,9 +6,9 @@
                 No device connection :(
             </div>
             <div class="flex-1">
-                <vue-page-stack>
-                    <router-view ref="routeView" />
-                </vue-page-stack>
+                <router-view ref="routeView" />
+                <!--vue-page-stack>
+                </vue-page-stack-->
             </div>
         </div>
         <div class="drawer-click-catcher" :class="{'active': visible}" @click="overlayClicked($event)"></div>
@@ -75,10 +75,11 @@ import "@/assets/styles/tailwind.css"
 import { VueNavigation } from '@/components/vuenavigation'
 import { AppContext } from '../../main';
 
+
 export default {
     name: "DrawerView",
     mixins: [],
-    components: {},
+    components: { },
     data: function() {
         return {
             isConnected: true,

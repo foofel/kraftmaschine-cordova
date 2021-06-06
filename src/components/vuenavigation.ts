@@ -17,5 +17,7 @@ export const VueNavigationMixin = {
             return "ok";
         },
         onBeforeShowDialog(): void {}
-    }
+    },
+    activated() {},
+    deactivated() {}
 }
