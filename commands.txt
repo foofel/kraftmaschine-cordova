@@ -1,0 +1,5 @@
+# list all packages
+adb shell "pm list packages | grep kraft
+
+# uninstall 
+adb uninstall de.kraftmaschine.cordova

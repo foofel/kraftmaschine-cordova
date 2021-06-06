@@ -1,0 +1,39 @@
+<svg width="354" height="85" viewBox="0 0 354 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="board">
+<g id="bg">
+<rect id="Rectangle 114" width="354" height="85" rx="3" fill="#BE986D"/>
+<rect id="Rectangle 113" width="354" height="66" rx="3" fill="#D2A87D"/>
+<rect id="Rectangle 112" width="354" height="44" rx="3" fill="#E8C9AB"/>
+</g>
+<g id="pockets">
+<rect id="hold-6" x="5" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-7" x="55.1001" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-8" x="105.2" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-9" x="155.3" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-10" x="205.4" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-11" x="255.5" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-12" x="305.601" y="30" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-13" x="5" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-14" x="55.1001" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-15" x="105.2" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-16" x="155.3" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-17" x="205.4" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-18" x="255.5" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-19" x="305.601" y="50" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-20" x="5" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-21" x="55.1001" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-22" x="105.2" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-23" x="155.3" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-24" x="205.4" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-25" x="255.5" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+<rect id="hold-26" x="305.601" y="70" width="43" height="11" rx="5.5" fill="#846342"/>
+</g>
+<g id="top">
+<path id="hold-1" d="M0 3C0 1.34315 1.34315 0 3 0H57V12H0V3Z" fill="#D2A87D"/>
+<path id="hold-5" d="M297 0H351C352.657 0 354 1.34315 354 3V12H297V0Z" fill="#D2A87D"/>
+<path id="hold-3" d="M118 0H236V20C236 21.6569 234.657 23 233 23H121C119.343 23 118 21.6569 118 20V0Z" fill="#A9845A"/>
+<path id="hold-2" d="M57 0H118V19H60C58.3431 19 57 17.6569 57 16V0Z" fill="#BE986D"/>
+<path id="hold-4" d="M236 0H297V16C297 17.6569 295.657 19 294 19H236V0Z" fill="#BE986D"/>
+</g>
+</g>
+</svg>
