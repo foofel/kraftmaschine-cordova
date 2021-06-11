@@ -61,21 +61,6 @@
 </template>
 
 <script>
-
-const myNav = {
-    methods: {
-        canLeaveComponent() {
-            return "ok";
-        },
-        onBeforeShowDialog(){}
-    }
-}
-
-import "@/assets/styles/tailwind.css"
-import { VueNavigation } from '@/components/vuenavigation'
-import { AppContext } from '../../main';
-
-
 export default {
     name: "DrawerView",
     mixins: [],

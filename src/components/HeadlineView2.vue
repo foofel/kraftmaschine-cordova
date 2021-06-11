@@ -9,22 +9,13 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
-@Component({
-    components: {
-    }
-})
-export default class HeadlineView extends Vue {
-    @Prop({default: "#FDD835"}) color!: string;
-    @Prop({default: "TÖÖÖÖXT"}) headlineText!: string;
-    constructor(){
-        super();
-    }
-
-    getStyle() {
-        return { backgroundColor: this.color };
+<script>
+export default {
+    props: ['color', 'headlineText'],
+    methods: {
+        getStyle() {
+            return { backgroundColor: this.color };
+        }
     }
 }
 </script>

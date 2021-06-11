@@ -11,15 +11,17 @@ export interface ScanCallbackInterface {
     error:string;
 }
 
-export interface BLEConnectionResult {
-    id: string;
+export interface ConnectionResult {
+    deviceId: string;
+    hwVersion: string;
     address: string;
     success: boolean;
+    mtu:number;
 }
 
 export interface BluetoothLE {
     init: (forced?:boolean) => Promise<boolean>;
-    connect: (address:string, domElement?:any) => Promise<BLEConnectionResult>;
+    connect: (address:string, domElement?:any) => Promise<ConnectionResult>;
     disconnect: (address:string) => Promise<boolean>;
     subscribe: (characteristic:string, cb:(data:ArrayBuffer) => void) => Promise<boolean>;
     unsubscribe: (characteristic:string) => Promise<boolean>;
@@ -400,66 +402,6 @@ class BluetoothLEHelpers {
     });    
 }
 
-const Base64Binary = {
-	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-	
-	/* will return a  Uint8Array type */
-	decodeArrayBuffer: function(input:string) {
-		const bytes = (input.length/4) * 3;
-		const ab = new ArrayBuffer(bytes);
-		this.decode(input, ab);
-		return ab;
-	},
-
-	removePaddingChars: function(input:string){
-		const lkey = this._keyStr.indexOf(input.charAt(input.length - 1));
-		if(lkey == 64){
-			return input.substring(0,input.length - 1);
-		}
-		return input;
-	},
-
-	decode: function (input:string, arrayBuffer:ArrayBuffer) {
-		//get last chars to see if are valid
-		input = this.removePaddingChars(input);
-		input = this.removePaddingChars(input);
-
-		const bytes = input.length / 4 * 3;
-		
-		let uarray;
-		let chr1, chr2, chr3;
-		let enc1, enc2, enc3, enc4;
-		let i = 0;
-		let j = 0;
-		
-		if (arrayBuffer) {
-			uarray = new Uint8Array(arrayBuffer);
-		} else {
-			uarray = new Uint8Array(bytes);
-        }
-        
-		input = input.replace(/[^A-Za-z0-9+/=]/g, "");
-		
-		for (i=0; i<bytes; i+=3) {	
-			//get the 3 octects in 4 ascii chars
-			enc1 = this._keyStr.indexOf(input.charAt(j++));
-			enc2 = this._keyStr.indexOf(input.charAt(j++));
-			enc3 = this._keyStr.indexOf(input.charAt(j++));
-			enc4 = this._keyStr.indexOf(input.charAt(j++));
-	
-			chr1 = (enc1 << 2) | (enc2 >> 4);
-			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-			chr3 = ((enc3 & 3) << 6) | enc4;
-	
-			uarray[i] = chr1;			
-			if (enc3 != 64) uarray[i+1] = chr2;
-			if (enc4 != 64) uarray[i+2] = chr3;
-		}
-	
-		return uarray;	
-	}
-}
-
 export class CordovaBluetoothLE implements BluetoothLE {
 
     connectedAddress:string = "";
@@ -515,11 +457,11 @@ export class CordovaBluetoothLE implements BluetoothLE {
         return true;
     }
 
-    async connect(address:string): Promise<BLEConnectionResult>
+    async connect(address:string): Promise<ConnectionResult>
     {
         if(this._isConnecting || this._isInitializing) {
             console.log(`[ble] invalid state for connect (c: ${this._isConnecting}, i:${this._isInitializing})`);
-            return { id: "", address: "", success: false };
+            return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
         }
         this._isConnecting = true;
         this._isConnected = false;
@@ -529,7 +471,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             if(!initr) {
                 console.log("[ble] could not start ble");
                 this._isConnecting = false;
-                return { id: "", address: "", success: false };
+                return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
             }
         }
         const prevConnected = this.connectedAddress
@@ -547,7 +489,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             console.log(`[ble] (initializep)`, initr);
             if(initr.status !== "enabled") {
                 this._isConnecting = false;
-                return { id: "", address: "", success: false };
+                return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
             }
         }
         console.log("[ble] getting enabled state");
@@ -559,7 +501,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             console.log(`[ble] (enablep)`, enabler);
             if(!enabler.status) {
                 this._isConnecting = false;
-                return { id: "", address: "", success: false };
+                return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
             }
         }
         // isConnected throws an error if we were never connected to this device...
@@ -584,7 +526,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             console.log(closer);
             if(closer.status !== "closed") {
                 this._isConnecting = false;
-                return { id: "", address: "", success: false };
+                return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
             }
         } catch(e) {}
         try {
@@ -593,7 +535,7 @@ export class CordovaBluetoothLE implements BluetoothLE {
             console.log(closer);
             if(closer.status !== "closed") {
                 this._isConnecting = false;
-                return { id: "", address: "", success: false };
+                return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
             }
         } catch(e) {}            
         //}
@@ -610,12 +552,12 @@ export class CordovaBluetoothLE implements BluetoothLE {
         await barrier.promise;
         if(!connectionEstablished) {
             this._isConnecting = false;
-            return { id: "", address: "", success: false };
+            return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
         }
         console.log(`[ble] (connectp)`, connectr);
         if(connectr.status !== "connected") {
             this._isConnecting = false;
-            return { id: "", address: "", success: false };
+            return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
         }
         console.log("[ble] getting bonding state");
         const isbondedr = await BluetoothLEHelpers.isBondedp(address);
@@ -636,23 +578,25 @@ export class CordovaBluetoothLE implements BluetoothLE {
             const discoverr = await BluetoothLEHelpers.discoverp(address);
             console.log(`[ble] (discoverp)`, discoverr);
         }
-        // we now use the binary format that uses 12/13 bytes only so no mtu chnage needed anymore
-        //console.log("[ble] trying to set mtu");
-        //const mtur = await BluetoothLEHelpers.mtup(address, 64);
-        //console.log(`[ble] (mtup)`, mtur);
-        //if(mtur.mtu !== 64) {
-        //    console.log("[ble] unable to set mtu");
-        //}
+        console.log("[ble] trying to set mtu");
+        const setMtu = 256;
+        const mtur = await BluetoothLEHelpers.mtup(address, setMtu);
+        console.log(`[ble] (mtup)`, mtur);
+        if(mtur.mtu !== setMtu) {
+            console.log(`[ble] unable to set mtu tu ${setMtu}, actual value is ${mtur.mtu}`);
+        }
         this.connectedAddress = address;
         console.log("[ble] getting device id");
         const devIdr = await BluetoothLEHelpers.readp(address, BLEServiceInfo.servidceId, BLEServiceInfo.deviceIdCharacteristicId);
         const devId = atob(devIdr.value);
+        const hwVersionr = await BluetoothLEHelpers.readp(address, BLEServiceInfo.servidceId, BLEServiceInfo.hwVersionCharacteristicId);
+        const hwVersion = atob(hwVersionr.value)
         console.log("[ble] (readp)", devId);
         this.connectedDeviceId = devId;
         console.log("[ble] connected");
         this._isConnecting = false;
         this._isConnected = true;
-        return { id: devId, address: address, success: true };
+        return { deviceId: devId, address: address, hwVersion: hwVersion, mtu: mtur.mtu, success: true };
     }
 
     async disconnect(address:string): Promise<boolean> {
@@ -668,7 +612,6 @@ export class CordovaBluetoothLE implements BluetoothLE {
             console.log("[ble] trying to subscribe");
             const subscriber = await BluetoothLEHelpers.subscribep(this.connectedAddress, BLEServiceInfo.servidceId, characteristic, (data:string) => {
                 if(data) {
-                    //const ab = Base64Binary.decodeArrayBuffer(data);
                     const decoded = atob(data)
                     const buf = new ArrayBuffer(decoded.length);
                     const bufView = new Uint8Array(buf);
@@ -801,7 +744,7 @@ export class WebBluetoothLE implements BluetoothLE {
         return true;
     }
 
-    async connect(_:string, domElement?:any): Promise<BLEConnectionResult>
+    async connect(_:string, domElement?:any): Promise<ConnectionResult>
     {
         const devices = await navigator.bluetooth.getDevices();
         let device:BluetoothDevice;
@@ -871,14 +814,14 @@ export class WebBluetoothLE implements BluetoothLE {
                             deviceId: devId
                         }
                         console.log('Connected!');
-                        return { id: devId, address: "", success: true };
+                        return { deviceId: devId, address: "", hwVersion: "", mtu: 0, success: true };
                     }
                 }
             }
         } else {
-            return { id: "", address: "", success: false };
+            return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
         }
-        return { id: "", address: "", success: false };
+        return { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false };
     }
 
     async disconnect(address:string): Promise<boolean> {

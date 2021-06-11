@@ -2,6 +2,7 @@
 	<div id="app">
 		<router-view/>
 		<notifications classes="my-notification" position="bottom center"/>
+    <debug-overlay />
 	</div>
 </template>
 
@@ -12,6 +13,7 @@ import VueAuthenticate from 'vue-authenticate'
 import Notifications from 'vue-notification'
 import axios from 'axios';
 import RouteHelper from './js/routehelper'
+import DebugOverlay from './components/debug/DebugOverlay.vue'
 
 function detectInsets() {
     if (window.AndroidNotch) {
@@ -52,6 +54,7 @@ Vue.use(Notifications);
 Vue.use(RouteHelper);
 
 export default {
+    components: { DebugOverlay },
 }
 </script>
 

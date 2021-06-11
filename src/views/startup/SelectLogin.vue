@@ -42,7 +42,6 @@
 
 <script>
 /* eslint-disable */
-import "@/assets/styles/tailwind.css"
 import { BackendConfig, RUNNING_NATIVE } from '@/config'
 import { FacebookLogin, FacebookLoginResponse } from '@capacitor-community/facebook-login';
 export default {

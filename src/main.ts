@@ -1,28 +1,21 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import { HangboardConnector } from './core/hangboardconnector'
+
 import { RemoteAPI, reauth, clearAllCookies } from './core/util'
-import { ConfigFile, StorageInterface } from '@/core/storageinterface';
-import { proxylize, ApplicationStoreInterface } from '@/core/applicationstore'
+//import { ConfigFile, StorageInterface } from '@/core/storageinterface';
+//import { ApplicationStoreInterface } from '@/core/applicationstore'
+import { HangboardConnector } from './core/hangboardconnector'
 import { IndexedDBStorageImpl, writeConfigObject } from './core/persistentstore'
 import { RUNNING_NATIVE } from './config'
 import { SplashScreen } from '@capacitor/splash-screen';
+import { Observable } from '@/js/object-observer'
+import { AppContext } from '@/appcontext'
 
 Vue.config.productionTip = false
 
 console.log("kraftmaschine main file loaded!")
-console.log(`hasble: ${window.bluetoothle}`)
-
-export interface AppContextInterface {
-	hangboardConnector: HangboardConnector,
-	backend: RemoteAPI,
-	storage: StorageInterface,
-	store: ApplicationStoreInterface
-	cfg: ConfigFile,
-	staticData: null
-}
-export const AppContext = ({}) as AppContextInterface
+console.log(`has ble: ${window.bluetoothle}`)
 
 function detectNotchs() {
 	const notch = (window as any).AndroidNotch;
@@ -49,33 +42,28 @@ function detectNotchs() {
     }
 }
 
-function setupWindow() {
-	const notch = (window as any).AndroidNotch;
-}
-
 async function startupApp() {
 	console.log("startApp()");
 	// this "fixes" missing keys when we add new properties to the specified default values, 
 	// oterweise those new keys are missing on exsiting configs
 	detectNotchs();
-	setupWindow();
 	const storage = new IndexedDBStorageImpl();
 	AppContext.storage = storage;
 	const store = await storage.getApplicationStore();
-	const storeProxy = proxylize(store);
+	const storeProxy = Observable.from(store);
+	//storeProxy.observe((e:any) => { console.log(e) })
 	console.log(store.user.id)
 	storeProxy.user.id = 15
 	console.log(store.user.id)
-	AppContext.store = storeProxy;
 	await writeConfigObject(storeProxy);
 	AppContext.hangboardConnector = new HangboardConnector();
 	AppContext.backend = new RemoteAPI();
 	//(window as any).StatusBar.backgroundColorByHexString('#99000000');
 	console.log("starting vue");
 	Vue.prototype.$store = storeProxy;
-	const _ = new Vue({
+	Vue.prototype.$ctx = AppContext;
+	(window as any).myVue = new Vue({
 		router,
-		data: AppContext,
 		render: h => h(App),
 		mounted() {
 			SplashScreen.hide();

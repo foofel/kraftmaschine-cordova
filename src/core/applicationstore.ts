@@ -1,3 +1,5 @@
+import { ConnectionResult } from '@/core/bluetoothle'
+
 export interface SimpleTimer {
     sets:number;
     pause: number;
@@ -51,7 +53,8 @@ export interface ApplicationStoreInterface {
     connection: {
         lastDeviceAddress: string;
         autoReconnect: boolean;
-        knownDevices: Array<{ address: string, name: string, lastConnection: Date }>;
+        knownDevices: Array<{ address: string, name: string, lastConnected: Date }>;
+        current: ConnectionResult
     }
     trainings: {
         list: Array<number>
@@ -87,7 +90,8 @@ export function defaultApplicationStoreObject(): ApplicationStoreInterface {
         connection: {
             lastDeviceAddress: "",
             autoReconnect: false,
-            knownDevices: []
+            knownDevices: [],
+            current: { deviceId: "", address: "", hwVersion: "", mtu: 0, success: false }
         },        
         trainings: {
             list: []
@@ -111,30 +115,6 @@ export function defaultApplicationStoreObject(): ApplicationStoreInterface {
             ],
         }
     }
-}
-
-function createOnChangeProxy(onChange:(path:string, value:any) => void, target:any, path:string = ""):any {
-    return new Proxy(target, {
-        get(target, property) {
-            const item = target[property]
-            if (item && typeof item === 'object') {
-                return createOnChangeProxy(onChange, item, `${path}/${String(property)}`)
-            }
-            return item
-        },
-        set(target, property, newValue) {
-            target[property] = newValue
-            onChange(`${path}/${String(property)}`, newValue)
-            return true
-        },
-    })
-}
-
-export function proxylize(store:ApplicationStoreInterface) : ApplicationStoreInterface {
-    const proxy = createOnChangeProxy((path:string, value:any) => {
-        console.log(`changed: ${path} to: ${value}`);
-    }, store, "");
-    return proxy;
 }
 
 export function updateFrom(dst:ApplicationStoreInterface, src:ApplicationStoreInterface) {

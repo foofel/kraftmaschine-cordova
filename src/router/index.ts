@@ -9,30 +9,27 @@ import Scale from '@/views/scale/Scale.vue'
 import DebugView from '@/views/debug/DebugView.vue'
 //import DrawerView from '@/views/drawer/DrawerView.vue'
 import DrawerView from '@/views/drawer/DrawerView.vue'
-import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
+//import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
 import TimerView from '@/views/timer/TimerView.vue'
 import SetupView from '@/views/timer/SetupView.vue'
 import SelectorView from '@/views/timer/SelectorView.vue'
 import CalibrateView from '@/views/timer/CalibrateView.vue'
-import TimerSelector from '@/components/hangboardtimer/TimerSelector.vue'
-import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
-import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
+//import TimerSelector from '@/components/hangboardtimer/TimerSelector.vue'
+//import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
+//import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
 //import DebugViewComponent from '@/components/debug/DebugViewComponent.vue'
-import Highscore from '@/components/highscore/Highscore.vue'
-import AccountOptions from '@/components/account/AccountOptions.vue'
-import FriendsView from '@/components/friends/FriendsView.vue'
-import ProfileView from '@/components/profile/ProfileView.vue'
-import UsersView from '@/components/users/UsersView.vue'
-import PerksView from '@/components/perks/PerksView.vue'
+//import Highscore from '@/components/highscore/Highscore.vue'
+//import AccountOptions from '@/components/account/AccountOptions.vue'
+//import FriendsView from '@/components/friends/FriendsView.vue'
+//import ProfileView from '@/components/profile/ProfileView.vue'
+//import UsersView from '@/components/users/UsersView.vue'
+//import PerksView from '@/components/perks/PerksView.vue'
 import SimpleWeightDisplay from '@/components/SimpleWeightDisplay.vue'
 import OptionsView from '@/components/options/OptionsView.vue'
-import TrainPlanView from '@/components/plan/TrainPlanView.vue'
+//import TrainPlanView from '@/components/plan/TrainPlanView.vue'
 import DataEditorComponent from '@/components/DataEditorComponent.vue'
-import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
+//import ConfigEditorComponent from '@/components/ConfigEditorComponent.vue'
 import BluetoothConnectionSelector from '@/views/boardselector/BluetoothConnectionSelector.vue'
-import { AppContext } from '@/main'
-import VuePageStack from 'vue-page-stack'
-import RouteHelper from '../js/routehelper'
 
 // vue-router is necessary
 Vue.use(VueRouter)
@@ -55,7 +52,7 @@ const routes = [
 		},
 		children: [
 			{ path: 'scale', component: Scale },
-			{ path: 'timer_old', component: TimerMain },
+			//{ path: 'timer_old', component: TimerMain },
 			{
 				path: 'timer', component: TimerView,
 				children: [
@@ -67,11 +64,11 @@ const routes = [
 							{ path: '', redirect: 'select' }
 						],
 					},
-					{ path: 'timer', component: TimerMain },
+					//{ path: 'timer', component: TimerMain },
 					{ path: '', redirect: 'setup' }
 				]
 			},
-			{ path: 'logbook', component: SessionHistory },
+			/*{ path: 'logbook', component: SessionHistory },
 			{ path: 'benchmark', component: BenchmarkMain},
 			{ path: 'results', component: Highscore},
 			{ path: 'profile', component: AccountOptions},
@@ -80,7 +77,7 @@ const routes = [
 			{ path: 'friends', component: FriendsView},
 			{ path: 'perks', component: PerksView},
 			{ path: 'options', component: ConfigEditorComponent },
-			{ path: 'trainplan', component: TrainPlanView},
+			{ path: 'trainplan', component: TrainPlanView},*/
 			{ path: 'debug', component: DebugView},
 			{ path: 'boardselector', component: BluetoothConnectionSelector},
 			{ path: '*', redirect: 'scale' } 
@@ -97,7 +94,7 @@ const router = new VueRouter({
 })
 
 //Vue.use(VuePageStack, { router });
-Vue.use(RouteHelper, { router })
+//Vue.use(RouteHelper, { router })
 
 router.beforeEach((to, from, next) => {
 	// "/" is our init/

@@ -1,7 +1,7 @@
 import { MessageTransformerIntrerface, pipe, sum } from "./messagetransformer";
 import { SensorReaderInterface,  WeightMessageCallback, TempSensorCallback, WeightMessageInterface, TempSensorInterface, DeviceInfoCallback, BluetoothSensorReader } from "./sensorreader";
 import { BackendConfig } from '../config';
-import { BLEConnectionResult, ScanCallbackInterface } from './bluetoothle';
+import { ConnectionResult, ScanCallbackInterface } from './bluetoothle';
 
 export type WeightCallbackEntry = { cb: WeightMessageCallback; transformer: MessageTransformerIntrerface };
 
@@ -38,7 +38,7 @@ export class HangboardConnector {
         console.log("[ble] disconnected, result:", res);
     }
 
-    public async connect(address: string, domElement?:any): Promise<BLEConnectionResult> {
+    public async connect(address: string, domElement?:any): Promise<ConnectionResult> {
         this.resetData();
         const result = await this.dataReader.connect(address, domElement);
         return result;
@@ -67,7 +67,7 @@ export class HangboardConnector {
             humidity: 0,
             pressure: 0            
         }
-        this.onWeightMessage({ left: 0, right: 0, combined: 0, ts: 0, passthrough: true });
+        this.onWeightMessage({ left: 0, right: 0, combined: 0, ts: 0, id: -1, passthrough: true });
         this.onTempMessage(this.lastTempMessage);
     }    
 

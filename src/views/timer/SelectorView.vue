@@ -31,12 +31,11 @@ export default {
         }
     },
     mounted() {
-        debugger;
+        //debugger;
         this.timers = this.$store.timers.timer;
     },
     methods: {
         onTimerSelected(selectedTimer) {
-            debugger;
             //this.$attrs.setupModel.timer = selectedTimer
             this.$router.push("calibrate")
             //this.$router.replace({name: 'lolcalb'})

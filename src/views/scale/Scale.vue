@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import "@/assets/styles/tailwind.css"
 import { VueNavigationMixin } from '@/components/vuenavigation'
 import { pipe, sum, guard, movingAverage, tared, taredByObject, clampPositive } from '../../core/messagetransformer';
 import { round } from '../../core/math';
@@ -40,9 +39,8 @@ export default {
     },
     mounted: function() {
 		console.log("MOUNTED SimpleWeightDisplay")
-        const self = this;
-		this.$root.hangboardConnector.registerWeightCallback(self.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
-		this.$root.hangboardConnector.registerTempSensorCallback(self.onTempSensorMessage);
+		this.$ctx.hangboardConnector.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
+		this.$ctx.hangboardConnector.registerTempSensorCallback(this.onTempSensorMessage);
 		/*this.onTare();
 		this.intervallId = setInterval(() => {
 			this.onTare();
@@ -50,8 +48,8 @@ export default {
     },
     beforeDestroy() {
         console.log("DESTROYED SimpleWeightDisplay")
-		this.$root.hangboardConnector.removeWeightCallback(this.onWeightMessage);
-		this.$root.hangboardConnector.removeTempSensorCallback(this.onTempSensorMessage)
+		this.$ctx.hangboardConnector.removeWeightCallback(this.onWeightMessage);
+		this.$ctx.hangboardConnector.removeTempSensorCallback(this.onTempSensorMessage)
     }, 
     methods: {
         onWeightMessage(msg) {

@@ -2,7 +2,7 @@ import { Hx711CalibrationData, Hx711CalibrationList } from '@/components/typeexp
 import { BLEServiceInfo, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
 import { AppContext } from '@/main';
 import { runInContext } from 'lodash';
-import { BLEConnectionResult, BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
+import { ConnectionResult, BluetoothLE, CordovaBluetoothLE, ScanCallbackInterface, WebBluetoothLE } from './bluetoothle';
 import { StopWatch } from './stopwatch';
 
 export const ScaleOptions = {
@@ -11,6 +11,7 @@ export const ScaleOptions = {
 
 export interface WeightMessageInterface extends WeightDataInterface {
     readonly ts: number;
+    readonly id: number;
     readonly passthrough: boolean;
 }
 
@@ -25,6 +26,7 @@ export class WeightMessage implements WeightMessageInterface {
         public readonly right: number, 
         public readonly combined: number, 
         public readonly ts: number,
+        public readonly id: number,
         public readonly passthrough: boolean) 
     {}
 }
@@ -46,7 +48,7 @@ export type DeviceInfoCallback = (channel: string, isActive: boolean) => void;
 
 export interface SensorReaderInterface {
     init(): Promise<boolean>;
-    connect(address:string, domElement?:any):Promise<BLEConnectionResult>;
+    connect(address:string, domElement?:any):Promise<ConnectionResult>;
     disconnect(): Promise<boolean>;
     isDeviceAlive(): boolean;
     registerWeightListener(cb: WeightMessageCallback): void;
@@ -66,12 +68,11 @@ export class BluetoothSensorReader implements SensorReaderInterface
     bleBackend:BluetoothLE;
     weightListener: Array<WeightMessageCallback> = [];
     tempListener: Array<TempSensorCallback> = [];
-    deviceInfoListener: Array<DeviceInfoCallback> = [];    
+    deviceInfoListener: Array<DeviceInfoCallback> = [];
     ppsLimitWatch: StopWatch = new StopWatch();
     activeResetWatch: StopWatch = new StopWatch(false);
     calibrationData:Hx711CalibrationData = Hx711CalibrationList.getIdentityCalibration();
     receivedPackagesInLastSecond = 0;
-    lastPackageId: number = -1;
     timeSinceConnected:number = 0;
     bleScanTimeout:number = 0;
     watchdogIntervall:number = 0;
@@ -103,22 +104,20 @@ export class BluetoothSensorReader implements SensorReaderInterface
         this.bleBackend.write(BLEServiceInfo.lightCharacteristicId, buffer);
     }
 
-    async connect(address:string, domElement?:any): Promise<BLEConnectionResult> {
+    async connect(address:string, domElement?:any): Promise<ConnectionResult> {
         this.stopWatchdog();
-        this.lastPackageId = -1;
         this.receivedPackagesInLastSecond = 0;
         this.timeSinceConnected = 0;
-        const connector = await this.bleBackend.connect(address, domElement);
-        if(!connector.success) {
+        const connectionResult = await this.bleBackend.connect(address, domElement);
+        if(!connectionResult.success) {
             console.log("unable to connect");
-            return connector;
+            return connectionResult;
         }
-        const devId = this.bleBackend.getDeviceId();
-        this.calibrationData = Hx711CalibrationList.getCalibrationValues(devId);
+        this.calibrationData = Hx711CalibrationList.getCalibrationValues(connectionResult.deviceId);
         await this.bleBackend.subscribe(BLEServiceInfo.weightCharacteristicId, (data:ArrayBuffer) => this.handleMsg(data, "weight") );
         await this.bleBackend.subscribe(BLEServiceInfo.envCharacteristicId, (data:ArrayBuffer) => this.handleMsg(data, "env") );
         this.startWatchdog();
-        return connector;
+        return connectionResult;
     }
 
     handleMsg(data:ArrayBuffer, messageType:string) {
@@ -136,7 +135,7 @@ export class BluetoothSensorReader implements SensorReaderInterface
         //console.log(data);
         const dataView = new DataView(data);
         if(messageType === 'weight') {
-            const pkg = dataView.getUint8(0);
+            const packetId = dataView.getUint8(0);
             const timed = dataView.getUint16(1, true) / 1000000;
             const left = dataView.getInt32(3, true) * this.calibrationData.left;
             const right = dataView.getInt32(7, true) * this.calibrationData.right;
@@ -146,18 +145,9 @@ export class BluetoothSensorReader implements SensorReaderInterface
                 right,
                 left + right,
                 this.timeSinceConnected,
+                packetId,
                 false
             );
-            if(this.lastPackageId == -1) {
-                this.lastPackageId = pkg;
-            }
-            if(pkg < this.lastPackageId) {
-                this.lastPackageId -= 255;
-            }
-            if(Math.abs(pkg - this.lastPackageId) > 1) {
-                console.log(`missed package(s): ${pkg - this.lastPackageId}`);
-            }
-            this.lastPackageId = pkg;
             for(const cb of this.weightListener) {
                 cb(msg);
             }

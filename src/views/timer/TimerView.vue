@@ -1,19 +1,16 @@
 <template>
     <div class="w-full h-full">
-        <!--router-view /> < !-- :setupModel="setupModel" -->
-        <MyRouter ref="myRouter" :myRouter="{ name: 'lol', router: $refs.myRouter }"></MyRouter>
+        <router-view :setupModel="setupModel"></router-view>
     </div>
 </template>
 
 <script>
 import { VueNavigationMixin } from '@/components/vuenavigation'
-import MyRouter from '@/components/myrouter/MyRouter';
 
 export default {
     name: "TimerView",
     mixins: [VueNavigationMixin],
     components: {
-        MyRouter
     },
     data: function() {
         return {
@@ -23,7 +20,6 @@ export default {
         };
     },
     mounted: function() {
-        debugger;
         // set initial page stack route
     },
     methods: {

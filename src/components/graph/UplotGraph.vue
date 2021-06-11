@@ -53,20 +53,6 @@ function verticalLinesPlugin(initData) {
         }
     };
 }
-function hideLegendPlugin() {
-    function init(uplot, opts, data) {
-        const legendEl = uplot.root.querySelector(".legend");
-        if(legendEl) {
-            legendEl.style.display = 'none';
-        }
-    }
-    return {
-        opts: (self, opts) => {},
-        hooks: {
-            init: [init]
-        }
-    };    
-}
 
 export default {
     name: "UplotGraph",
@@ -127,7 +113,8 @@ export default {
             if(this.$refs.uplot) {
                 return {
                     width: this.$refs.uplot.clientWidth,
-                    height: this.$refs.uplot.clientHeight - 35 // size of the legend, its not included in the size calculation
+                    // 35 is legend size size of the legend, its not included in the size calculation
+                    height: this.$refs.uplot.clientHeight
                 }
             }
             return { width: 300, height: 300 };

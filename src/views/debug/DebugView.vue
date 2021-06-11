@@ -32,12 +32,14 @@ export default {
     data() { return {
         interval: null,
         colorText: "0 0 0",
+        cb: null
     }},    
     created() {
         const self = this;
-        this.$root.hangboardConnector.registerWeightCallback((wm) => { 
+        this.cb = (wm) => { 
             self.$options.onNewData(self, wm);
-        }, passTrough);
+        }
+        this.$root.hangboardConnector.registerWeightCallback(this.cb, passTrough);
     },
     mounted() {
         const opts = {
@@ -94,7 +96,7 @@ export default {
         this.$options.startRedraw(this);
     },
     beforeDestroy() {
-        this.$root.hangboardConnector.removeWeightCallback(this.$options.onNewData);
+        this.$root.hangboardConnector.removeWeightCallback(this.cb);
         this.stopUpdate = true;
         if(this.interval) {
             clearInterval(this.interval);
