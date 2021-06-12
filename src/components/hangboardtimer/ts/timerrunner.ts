@@ -4,7 +4,7 @@ import { WeightMessage } from '@/core/sensorreader';
 import { HangTimerData, TimerEntry } from '../../typeexports';
 import { clamp, round, roundDown } from '@/core/math';
 import { nowSeconds } from '@/core/util';
-import { AppContext } from '@/main';
+import { AppContext } from '@/appcontext';
 
 export type TimerState = "INIT" | "WARMUP" | "ACTIVE" | "PASSIVE" | "PAUSE" | "COOLDOWN" | "DONE" | "INVALID";
 

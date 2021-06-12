@@ -1,4 +1,4 @@
-import { TempSensorInterface } from '@/core/sensorreader';
+//import { TempSensorInterface } from '@/core/sensorreader';
 
 export class Rectangle {
     constructor(readonly x: string, readonly y: string, readonly width: string, readonly height: string) {}
@@ -288,7 +288,7 @@ export interface Hx711CalibrationData {
 }
 
 export interface Hx711CalibrationListInterface {
-    [id: string]: { left: number, right: number } | { left: 1, right: 1 };
+    [id: string]: { left: number, right: number };
 }
 
 export class Hx711CalibrationList {

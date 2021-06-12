@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import HeadlineView from '@/components/HeadlineView2.vue'
 import { VueNavigationMixin } from '../../components/vuenavigation';
 import { RUNNING_ON_DEV_MACHINE } from '@/config';
@@ -63,7 +64,7 @@ export default {
     beforeDestroy() {
         console.log("DESTROYED BluetoothConnectionSelector");
         if(this.isScanning) {
-            this.$ctx.hangboardConnector.stopChannelSearch();
+            this.$ctx.device.stopScan();
         }
     },
     methods: { 
@@ -74,27 +75,32 @@ export default {
             console.log("start scan");
             this.devices = [];
             if(RUNNING_ON_DEV_MACHINE()) {
-                this.devices.push({ name: "webble", address: "webble" });
+                this.devices.push({ name: "websocket", address: "websocket" });
                 return;
             }        
             this.isScanning = true;
             if(this.selectedDevice) {
                 this.devices.push(this.selectedDevice);
             }
-            this.$ctx.hangboardConnector.startChannelSearch((result) => {
+            this.$ctx.device.scan(5, (result) => {
+                if(result.error) {
+                    Vue.notify({ title: 'BLE Error', text: 'Missing location permission', type: "error"});
+                }
                 const idx = this.devices.findIndex((e) => e.address === result.address);
                 if(idx !== -1) {
                     return;
                 }
                 console.log(result);
-                if(result.error !== "") {
+                if(result.error) {
                     this.isScanning = false;
                     if(this.devices.length == 0) {
                         this.$notify({ title: 'oh noez', text: "no bluetooth devices found :'(", type: "warn" })
                     }
                     return;
                 }
-                this.devices.push({ name: result.name, address: result.address });
+                if(!result.done) {
+                    this.devices.push({ name: result.name, address: result.address });
+                }
             });
         },
         async deviceSelected(dev) {
@@ -104,10 +110,10 @@ export default {
             console.log("selected", dev);
             this.isConnecting = true;
             if(this.isScanning) {
-                this.$ctx.hangboardConnector.stopChannelSearch();
+                this.$ctx.device.stopScan();
             }
             this.isScanning = false;
-            const res = await this.$ctx.hangboardConnector.connect(dev.address, window);
+            const res = await this.$ctx.device.connect(dev);
             this.isConnecting = false;
             if(res.success){
                 this.$store.connection.lastDeviceAddress = res.address;

@@ -1,29 +1,44 @@
-import { linearRegression, LinRegType } from './math'
+import { linearRegression, LinRegType } from '@/core/math'
+import { WeightData } from '@/core/connectivity/deviceconnector'
 
-export class DataHistory<T> {
-    data: Array<T> = [];
-    sizeLimit: number;
-    constructor(sizeLimit = -1) {
-        this.sizeLimit = sizeLimit;
-    }
+export type DataHistoryEntry = WeightData & { time: number }
 
-    push(value: T): void {
-        this.data.push(value);
-        if(this.sizeLimit !== -1 && this.data.length > this.sizeLimit) {
-            this.data.shift();
+export class DataHistory {
+    data: Array<DataHistoryEntry> = [];
+    maxAge:number = 60
+    constructor(maxAge?:number) {
+        if(maxAge){
+            this.maxAge = maxAge;
         }
     }
-
-    getData(itemCount = 0): ReadonlyArray<T> {
+    push(data: DataHistoryEntry): void {
+        this.data.push(data);
+        if(this.data.length >= 2) {
+            //const startTime = this.data[0].time
+            //const lastValidElement = this.data.findIndex((e) => e.time - this.maxAge > 0);
+            //if(lastValidElement != -1) {
+            const durationWithoutFirstItem = this.data[this.data.length - 1].time  - this.data[1].time;
+            if(durationWithoutFirstItem > this.maxAge) {
+                this.data.shift();
+            }
+        }
+    }
+    getDuration() {
         if(this.data.length === 0) {
-            return [];
+            return 0;
+        } else {
+            return this.data[this.data.length - 1].time  - this.data[0].time;
         }
-        if(itemCount === 0) {
+    }
+
+    get(itemCount = 0): Array<DataHistoryEntry> {
+        if(this.data.length === 0 || itemCount === 0) {
             return this.data;
-        } else if(itemCount > 0) {
+        }
+        if(itemCount > 0) {
             return this.data.slice(0, itemCount);
         } else {
-            return this.data.slice(Math.max(this.data.length - Math.abs(itemCount), 0));
+            return this.data.slice(Math.max(this.data.length - Math.abs(itemCount), 0))
         }
     }
 
@@ -31,7 +46,7 @@ export class DataHistory<T> {
         this.data = [];
     }
 
-    get length() {
+    sampleCount() {
         return this.data.length;
     }
 }

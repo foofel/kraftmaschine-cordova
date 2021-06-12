@@ -97,7 +97,7 @@ import ActiveTimeDisplay from './ActiveTimeDisplay.vue'
 import StartContinueAbortOverlay from './StartContinueAbortOverlay.vue'
 import TimerBarChart from './TimerBarChart.vue'
 import { UpdateScheduler } from './ts/updatescheduler'
-import { Calibration } from '../../core/calibration';
+import { Calibration } from '../../core/util/calibration';
 
 const SCHEDULER_GROUPS = {
     TIMERPROGRESS_GRAPH: "TIMERPROGRESS_GRAPH",

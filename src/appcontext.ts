@@ -1,9 +1,10 @@
-import { HangboardConnector } from './core/hangboardconnector'
+//import { HangboardConnector } from './core/hangboardconnector'
+import { DeviceConnector } from './core/connectivity/deviceconnector'
 import { RemoteAPI } from './core/util'
 import { StorageInterface } from '@/core/storageinterface';
 
 export interface AppContextInterface {
-	hangboardConnector: HangboardConnector,
+	device: DeviceConnector,
 	backend: RemoteAPI,
 	storage: StorageInterface,
 }

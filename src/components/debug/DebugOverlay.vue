@@ -4,7 +4,8 @@
             <div>device: {device}</div>
             <div>mps: {{mps}}</div>
             <div>loss: {{loss1s}} / {{loss10s}} / {{lossTotal}}</div>
-            <div>listeners: {{listeners}}</div>
+            <div>listeners: {{this.listeners}}</div>
+            <div>left: {{left.toFixed(2)}} right: {{right.toFixed(2)}}</div>
             <div class="w-full h-20">
                 <WeightCalibrateGraph />
             </div>
@@ -31,9 +32,11 @@ export default {
             loss10s: 0,
             lossTotal: 0,
             losses: [],
-            listeners: 0,
+            listeners: [],
             intervall: 0,
             packages: 0,
+            left: 0,
+            right: 0,
             lastPackageId: -1,
             stopwatchMps: new StopWatch(),
             stopwatchLoss: new StopWatch(),
@@ -45,10 +48,11 @@ export default {
         this.cb = (wm) => { 
             this.onNewData(self, wm);
         }
-        this.$ctx.hangboardConnector.registerWeightCallback(this.onNewData, passTrough);
+        this.$ctx.device.subscribe({ tag: "weight", cb: this.onNewData });
         this.intervall = setInterval(() => {
-            //this.device = this.$root.hangboardConnector.
-            this.listeners = this.$ctx.hangboardConnector.weightListener.length
+            this.listeners = [
+                this.$ctx.device.listener.weight.length
+            ]
             const now = new Date();
             this.losses = this.losses.filter((e) => (now - e.time) < 10000);
             const lastSecLosses = this.losses.filter((e) => (now - e.time) < 1000);
@@ -60,7 +64,7 @@ export default {
         }, 250);
     },
     beforeDestroy() {
-        this.$ctx.hangboardConnector.removeWeightCallback(this.onNewData);
+        this.$ctx.device.unsubscribe(this.onNewData);
         clearInterval(this.intervall);
     },
     methods: {
@@ -68,6 +72,7 @@ export default {
             this.minimized = !this.minimized;
         },
         onNewData(wm) {
+            wm = passTrough(wm);
             this.packages++;
             if (this.stopwatchMps.elapsed() > 1) {
                 this.mps = this.packages;
@@ -94,6 +99,8 @@ export default {
                 this.losses.push({ amount: loss, time: new Date()});
             }
             this.lastPackageId = packetId
+            this.left = wm.left;
+            this.right = wm.right;
         }
     },
 	computed: {}

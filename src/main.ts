@@ -5,9 +5,10 @@ import router from './router'
 import { RemoteAPI, reauth, clearAllCookies } from './core/util'
 //import { ConfigFile, StorageInterface } from '@/core/storageinterface';
 //import { ApplicationStoreInterface } from '@/core/applicationstore'
-import { HangboardConnector } from './core/hangboardconnector'
+//import { HangboardConnector } from './core/hangboardconnector'
+import { DeviceConnector } from './core/connectivity/deviceconnector'
 import { IndexedDBStorageImpl, writeConfigObject } from './core/persistentstore'
-import { RUNNING_NATIVE } from './config'
+import { RUNNING_ON_DEV_MACHINE } from './config'
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Observable } from '@/js/object-observer'
 import { AppContext } from '@/appcontext'
@@ -56,7 +57,7 @@ async function startupApp() {
 	storeProxy.user.id = 15
 	console.log(store.user.id)
 	await writeConfigObject(storeProxy);
-	AppContext.hangboardConnector = new HangboardConnector();
+	AppContext.device = new DeviceConnector();
 	AppContext.backend = new RemoteAPI();
 	//(window as any).StatusBar.backgroundColorByHexString('#99000000');
 	console.log("starting vue");
@@ -70,18 +71,18 @@ async function startupApp() {
 		}
 	}).$mount('#app');
 	document.addEventListener("pause", () => {
-		AppContext.hangboardConnector.onGlobalMessage("appPause");
+		//TODO: nitify vue
 	}, false);
 	document.addEventListener("resume", () => {
 		if (!reauth(AppContext.backend)) {
 			clearAllCookies();
 			window.location.reload(true);
 		}
-		AppContext.hangboardConnector.onGlobalMessage("appResume");
+		//TODO: nitify vue
 	}, false);
 }
 
-if (!RUNNING_NATIVE()) {
+if (RUNNING_ON_DEV_MACHINE()) {
 	startupApp();
 } else {
 	document.addEventListener("deviceready", () => {

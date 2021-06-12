@@ -24,14 +24,8 @@ export default {
         colorText: "0 0 0",
         cb: null
     }},    
-    created() {
-        const self = this;
-        this.cb = (wm) => { 
-            self.$options.onNewData(self, wm);
-        }
-        this.$ctx.hangboardConnector.registerWeightCallback(this.cb, passTrough);
-    },
-    mounted() {
+    created() {},
+    mounted() {       
         const opts = {
             series: [
                 {
@@ -64,9 +58,14 @@ export default {
         const data = [ [0], [0] ];
         this.$refs.graph.init(opts, data);
         this.$options.startRedraw(this);
+        const self = this;
+        this.cb = (wm) => { 
+            self.$options.onNewData(self, wm);
+        }
+        this.$ctx.device.subscribe({ tag: "weight", cb: this.cb });        
     },
     beforeDestroy() {
-        this.$root.hangboardConnector.removeWeightCallback(this.cb);
+        this.$ctx.device.unsubscribe(this.cb);
         this.stopUpdate = true;
     },    
     startRedraw(self) {
@@ -83,6 +82,7 @@ export default {
         doRedraw();
     },
     onNewData(self, wm) {
+        wm = passTrough(wm);
         const data = self.$options.nonReactiveData
         data.timeBuffer.push(wm.ts);
         data.weightBuffer.push(wm.combined);                    

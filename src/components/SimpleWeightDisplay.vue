@@ -23,7 +23,7 @@ import { HangboardConnector } from '../core/hangboardconnector';
 import { pipe, sum, guard, movingAverage, tared, taredByObject, clampPositive } from '../core/messagetransformer';
 import { WeightMessage, ScaleOptions, WeightDataInterface, WeightData, TempSensorInterface } from '@/core/sensorreader';
 import { TareWeights, DataModelComponentDataInterface, DataModelComponentModelInterface } from './typeexports';
-import { Calibration } from '@/core/calibration';
+import { Calibration } from '@/core/util/calibration';
 import { VueNavigation } from './vuenavigation';
 import { round } from '../core/math';
 import { ConfigFile } from '@/core/storageinterface';

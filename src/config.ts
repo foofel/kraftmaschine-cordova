@@ -41,12 +41,15 @@ export const BLEServiceInfo = {
     envCharacteristicId: "cccffd3c-04d9-4cfc-abfc-995fc7f5fdac",
     lightCharacteristicId: "328f1bc1-0fb7-4bcd-b646-374917218331",
     hwVersionCharacteristicId: "abe57162-bb8a-4689-a9df-1af2268bf398",
-    deviceIdCharacteristicId: "b19e6ca8-4d24-4e1b-9f66-5b3990eeac4f"
+    deviceIdCharacteristicId: "b19e6ca8-4d24-4e1b-9f66-5b3990eeac4f",
+    selectOptionId: "96935113-4379-41f7-9bc9-16a17941a505",
+    accessOptionId: "5b351efe-cd8d-471a-b4bc-5ad7d4f067e3"
 }
 
 export const BackendConfig = {
     backendDev: "https://192.168.1.20/api",
     backendLive: "https://kraftmaschine.org/api",
+    debugWebsocket: "wss://192.168.1.20/websocket",
     backendUrl: () => { 
         if(IS_PRODUCTION()){
             return BackendConfig.backendLive;

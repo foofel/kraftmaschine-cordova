@@ -1,5 +1,5 @@
 //import { GetLocalUploadSaves, DeleteLocalUploadSave, GetConfigObject, SaveConfigObject } from './storageinterface';
-import { AppContext } from '@/main';
+import { AppContext } from '@/appcontext';
 import { LocalBenchmarkSaveData, SelectedHolds, BenchmarkVisualHighscoreEntry } from '../components/typeexports';
 import { BackendConfig, RequiredBackendVersion } from '../config'
 

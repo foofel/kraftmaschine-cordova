@@ -1,4 +1,4 @@
-import { AppContext } from '@/main';
+import { AppContext } from '@/appcontext';
 import { compress, decompress } from 'lz-string';
 import { RemoteAPI } from './util';
 

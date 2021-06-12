@@ -19,8 +19,9 @@
 
 <script>
 import { VueNavigationMixin } from '@/components/vuenavigation'
-import { pipe, sum, guard, movingAverage, tared, taredByObject, clampPositive } from '../../core/messagetransformer';
-import { round } from '../../core/math';
+import { pipe, movingAverage, taredByObject } from '../../core/messagetransformer';
+import { round } from '@/core/math';
+import { Calibration } from '@/core/util/calibration';
 
 export default {
     name: "Scale",
@@ -34,25 +35,32 @@ export default {
             showSeperate: false,
             tempInfo: { temp: 0, humidity: 0, pressure: 0 },
             weightInfo: { left: 0, right: 0 },
-            tareWeights: { left: 0, right: 0 }
+            zeroWeights: { left: 0, right: 0 },
+            pipeline: pipe(movingAverage(20)),
+            calibrator: null
         };
     },
     mounted: function() {
-		console.log("MOUNTED SimpleWeightDisplay")
-		this.$ctx.hangboardConnector.registerWeightCallback(this.onWeightMessage, pipe(taredByObject(this.tareWeights), movingAverage(20)));
-		this.$ctx.hangboardConnector.registerTempSensorCallback(this.onTempSensorMessage);
-		/*this.onTare();
-		this.intervallId = setInterval(() => {
-			this.onTare();
-		}, 300 * 1000);*/
+		console.log("MOUNTED Scale");
+		this.$ctx.device.subscribe({ tag: "weight", cb: this.onWeightMessage });
+		this.$ctx.device.subscribe({ tag: "env", cb: this.onTempSensorMessage });
+		this.calibrator = new Calibration(this.$ctx.device, this.tareCallback, { left: 0, right: 0, combined: 0 });
     },
     beforeDestroy() {
-        console.log("DESTROYED SimpleWeightDisplay")
-		this.$ctx.hangboardConnector.removeWeightCallback(this.onWeightMessage);
-		this.$ctx.hangboardConnector.removeTempSensorCallback(this.onTempSensorMessage)
+        console.log("DESTROYED Scale");
+		this.$ctx.device.unsubscribe(this.onWeightMessage);
+		this.$ctx.device.unsubscribe(this.onTempSensorMessage)
     }, 
     methods: {
+        tareCallback(validDuration, progress, weights) {
+            console.log(validDuration, progress, weights);
+            if(progress >= 1) {
+                this.calibrator.destroy();
+                this.calibrator = null;
+            }
+        },
         onWeightMessage(msg) {
+            msg = this.pipeline(msg);
             this.weightInfo = msg;
         },
         onTempSensorMessage(msg) {
@@ -80,8 +88,7 @@ export default {
             this.showSeperate = !this.showSeperate
         }
     },
-	computed: {
-	}
+	computed: { }
 };
 </script>
 

@@ -11,7 +11,7 @@ import ProgressBar from '@/components/ProgressBar.vue'
 import { DataHistory, getAvg, LinearRegressionFromHistoryData } from '@/core/history';
 import { TareWeights } from '../typeexports';
 import { GlobalConfig } from '../../config';
-import { Calibration } from '../../core/calibration';
+import { Calibration } from '../../core/util/calibration';
 import { StopWatch } from '../../core/stopwatch';
 
 @Component({
@@ -41,7 +41,7 @@ export default class WeightCalibration extends Vue {
 
     mounted() {
         //this.progressBar = this.$refs.progress as ProgressBar;
-        if(this.calib === null) {
+        /*if(this.calib === null) {
             this.calib = new Calibration(this.hangboardConnector, 
                 (weights: TareWeights) => {
                     console.log("done");
@@ -63,7 +63,7 @@ export default class WeightCalibration extends Vue {
                     this.stopUpdate();
                 }
             );
-        }
+        }*/
     }
 
     beforeDestroy() {
