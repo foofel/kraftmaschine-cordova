@@ -37,8 +37,7 @@ import Vue from 'vue'
 import HeadlineView from '@/components/HeadlineView2.vue'
 import { VueNavigationMixin } from '../../components/vuenavigation';
 import { BackendConfig, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
-import { getStore } from '@/core/teststore';
-import { AppContext, gac } from '@/appcontext'
+//import { AppContext, gac } from '@/appcontext'
 
 export default {
     components: {
@@ -67,7 +66,7 @@ export default {
             this.$ctx.device.stopScan();
         }
     },
-    methods: { 
+    methods: {
         scanForDevices() {
             if(this.isScanning) {
                 return;
@@ -107,7 +106,7 @@ export default {
             if(this.isConnecting) {
                 return;
             }
-            const conInfo = this.$ctx.device.getConnectionInfo();
+            //const conInfo = this.$ctx.device.getConnectionInfo();
             const lastDevice = this.selectedDevice;
             if(this.selectedDevice) {
                 console.log("disconnected", dev);

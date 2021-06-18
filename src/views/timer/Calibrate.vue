@@ -25,7 +25,7 @@
                 <td class="w-20 pl-3">Tare</td>
                 <td class="pr-4">
                     <div class="p-1 w-full h-20 border-solid rounded-md border-2 border-coolGray-200">
-                        <WeightCalibrateGraph :opts="opts.tare" />
+                        <WeightCalibrateGraph :opts="opts.tare" @done="tareDone" />
                     </div>
                     <!--div class="p-1 w-full h-20 border-solid rounded-md border-2 border-coolGray-200 flex flex-col justify-end">
                         <div class="w-full h-1 border-b border-solid best-red"></div>
@@ -38,7 +38,7 @@
                 <td class="pl-3">Weight</td>
                 <td class="pr-4">
                     <div v-if="progressState >= 1" class="p-1 w-full h-20 border-solid rounded-md border-2 border-coolGray-200">
-                        <WeightCalibrateGraph :opts="opts.tare" />
+                        <WeightCalibrateGraph :opts="opts.weight" @done="weightDone" />
                     </div>
                     <div v-if="progressState < 1" class="p-1 w-full h-20 border-solid rounded-md border-2 border-coolGray-200 flex flex-col justify-end">
                         <div class="w-full h-1 border-b border-solid best-red"></div>
@@ -51,7 +51,7 @@
                 <td class="pl-3">Weight</td>
                 <td class="pr-4">
                     <div v-if="progressState >= 2" class="p-1 w-full h-20 border-solid rounded-md border-2 border-coolGray-200">
-                        <WeightCalibrateGraph :opts="opts.tare" />
+                        <WeightCalibrateGraph :opts="opts.weightedWeight" @done="weightedWeightDone" />
                     </div>
                     <div v-if="progressState < 2" class="p-1 w-full h-20 border-solid rounded-md border-2 border-coolGray-200 flex flex-col justify-end">
                         <div class="w-full h-1 border-b border-solid best-red"></div>
@@ -59,18 +59,18 @@
                 </td>
             </tr>
         </table>
-        <div class="mt-4 w-80 h-10 rounded-lg flex justify-center items-center text-white text-xl font-light skip-button">
-            Skip
+        <div class="mt-4 w-80 h-10 rounded-lg flex justify-center items-center text-white text-xl font-light skip-button" :class="{disabled: progressState < 1}" @click="skipLast()">
+            {{skipText}}
         </div>
     </div>
 </template>
 
 <script>
 import { VueNavigationMixin } from '@/components/vuenavigation';
-import WeightCalibrateGraph from '@/components/timer/WeightCalibrateGraph.vue'
+import WeightCalibrateGraph from '@/components/calibration/WeightCalibrateGraph.vue'
 
 export default {
-    name: "CalibrateView",
+    name: "Calibrate",
     mixins: [VueNavigationMixin],
     components: {
         WeightCalibrateGraph
@@ -78,24 +78,82 @@ export default {
     data: function() {
         return {
             progressState: 0,
+            skipText: "Skip",
+            skipTime: 3,
+            nextTimeout: 0,
+            nextIntervall: 0,
             opts: {
                 tare: {
                     name: 'tare',
-                    duration: 2
+                    duration: 2,
+                    waitText: "Clear board",
+                    progressText: "Wait: %.0f%%",
+                    stopAfterDone: true,
+                    result: null
                 },
-                weightRaw: {
+                weight: {
                     name: 'raw',
-                    duration: 2
+                    duration: 2,
+                    waitText: "Hang onto board",
+                    progressText: "Keep hanging: %.0f%%",
+                    stopAfterDone: true,
+                    result: null
                 },
-                weightWeight: {
+                weightedWeight: {
                     name: 'weightend',
+                    waitText: "Hang onto board with weight",
+                    progressText: "Keep hanging: %.0f%%", 
+                    stopAfterDone: true,
+                    result: null
                 }
+            }, 
+            results: {
+                tare: null,
+                weight: null,
+                weightedWeight: null
             }
         }
     },
     mounted() {
     },
+    beforeDestroy() {
+        clearTimeout(this.nextTimeout);
+        clearInterval(this.nextIntervall);
+    },
     methods: {
+        tareDone(weights) {
+            this.results.tare = weights;
+            console.log("tare done", this.opts.tare.result);
+            this.progressState = 1;
+        },
+        weightDone(weights) {
+            this.results.weight = weights;
+            console.log("tare done", this.opts.tare.result);
+            this.progressState = 2;
+        },
+        weightedWeightDone(weights) {
+            this.results.weightedWeight = weights;
+            console.log("tare done", this.opts.tare.result);
+            this.progressState = 3;
+            this.skipText = `Skip (${this.skipTime}s)`;
+            this.nextIntervall = setInterval(() => {
+                this.skipTime--;
+                this.skipText = `Skip (${this.skipTime}s)`;
+            }, 1000);
+            this.nextTimeout = setTimeout(() => {
+                this.showClock();
+            }, this.skipTime * 1000)
+        },
+        skipLast() {
+            this.showClock();
+            if(this.progressState > 1) {
+            }
+        },
+        showClock() {
+            console.log("show clock")
+            this.$attrs.setupModel.weights = this.results
+            this.$router.push({name: "timer.clock"});
+        }
     }
 }
 </script>
@@ -110,8 +168,13 @@ export default {
     }
 }
 .skip-button {
-    background: rgb(235,67,67);
+    background: #EB4343;
     background: linear-gradient(115deg, rgba(235,67,67,1) 85%, rgba(247,89,89,1) 85%);
+    &.disabled {
+        background: rgb(196, 196, 196);
+        background: linear-gradient(115deg, rgb(196, 196, 196) 85%, rgb(214, 214, 214) 85%);
+        color: #535353;
+    }
 }
 .best-red {
     //background-color: #EB4343;

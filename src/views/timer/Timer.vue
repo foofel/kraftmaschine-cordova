@@ -8,7 +8,7 @@
 import { VueNavigationMixin } from '@/components/vuenavigation'
 
 export default {
-    name: "TimerView",
+    name: "Timer",
     mixins: [VueNavigationMixin],
     components: {
     },
@@ -16,6 +16,7 @@ export default {
         return {
             setupModel: { 
                 timer: null,
+                weights: null
              }
         };
     },

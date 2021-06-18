@@ -17,6 +17,7 @@ export class WebsocketDevice implements DeviceInterface {
 
     socket:WebSocket|null = null;
     connectedEndpoint:ConnectResult|null = null;
+    isConnecting:boolean = false;
     subscriptions:Array<{channel:SubscribableDeviceChannel, cb:(data:ArrayBuffer) => void}> = []
 
     constructor() {}
@@ -26,11 +27,13 @@ export class WebsocketDevice implements DeviceInterface {
     }
 
     async connect(device:DeviceScanResult): Promise<ConnectResult> {
-        if(!this.connectedEndpoint){
+        if(!this.connectedEndpoint || this.isConnecting){
+            this.isConnecting = true;
             this.socket = new WebSocket(BackendConfig.debugWebsocket);
             this.socket.binaryType = 'arraybuffer';
             this.socket.onopen = (event:Event) => {
                 console.log("sensor reader websocket connected");           
+                this.isConnecting = false;
             }
             this.socket.onmessage = (event:MessageEvent) => {
                 const dv = new DataView(event.data);
@@ -45,10 +48,12 @@ export class WebsocketDevice implements DeviceInterface {
             }
             this.socket.onerror = (event:Event) => {
                 console.log("sensor connection error");
+                this.isConnecting = false;
                 this.disconnect();
             }
             this.socket.onclose = (event:CloseEvent) => {
                 console.log("sensor connection closed");
+                this.isConnecting = false;
                 this.disconnect();
             }
             this.connectedEndpoint = {
@@ -64,18 +69,17 @@ export class WebsocketDevice implements DeviceInterface {
             }
             return this.connectedEndpoint;
         } else {
-            console.log("alread connected");
             return this.connectedEndpoint;
         }
     }
 
     async disconnect(): Promise<boolean> {
-        if(this.socket) {
-            this.socket.close()
+        if(this.socket && !this.isConnecting) {
             this.socket.onopen = null;
             this.socket.onmessage = null;
             this.socket.onerror = null;
             this.socket.onclose = null;
+            this.socket.close()
             this.socket = null;
             this.connectedEndpoint = null;
             this.subscriptions = [];

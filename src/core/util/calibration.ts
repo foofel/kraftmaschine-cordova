@@ -7,18 +7,19 @@ export type CalibrationCallback = (validDuration:number, progress:number, weight
 
 export class Calibration {
 
-    collectionTime = 2;
     initialTime = 0.25;
     wobbleLimit = 0.05;
-    dataHistory: DataHistory = new DataHistory(this.collectionTime);
+    dataHistory: DataHistory;
     pipeline:MessageTransformerIntrerface;
 
     constructor(private scale: DeviceConnector, 
         private eventCb: CalibrationCallback,
-        private zeroCorrectrion: WeightData,
+        private collectionTime:number = 2,
         private minWeight: number = -Number.MAX_VALUE,
         private maxWeight: number = Number.MAX_VALUE,  
+        private zeroCorrectrion: WeightData = { left: 0, right: 0, combined: 0 },
     ){
+        this.dataHistory = new DataHistory(this.collectionTime);
         this.scale.subscribe({ tag: "weight", cb: this.onWeightMessage });
         this.pipeline = pipe(taredByObject(zeroCorrectrion));
     }

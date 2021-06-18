@@ -1,30 +1,40 @@
 <template>
-    <HeadlineView headlineText="Timer Setup">
-        <router-view /> <!-- :setupModel="this.$attrs.setupModel" -->
-    </HeadlineView>
+    <div class="w-full h-full">
+        <p>the clock</p>
+        <p>{{attrs}}</p>
+    </div>
 </template>
 
 <script>
-import HeadlineView from '@/components/HeadlineView2'
 import { VueNavigationMixin } from '@/components/vuenavigation'
+
 export default {
-    name: "SetupView",
+    name: "Clock",
     mixins: [VueNavigationMixin],
     components: {
-        HeadlineView
     },
     data: function() {
-        return {};
+        return {
+            setupModel: { 
+                timer: null,
+             }
+        };
     },
     mounted: function() {
         // set initial page stack route
+        const test = this.$attrs.setupModel;
+        debugger;
     },
     methods: {
     },
 	computed: {
+        attrs() {
+            return this.$attrs.setupModel;
+        }
 	}
 };
 </script>
 
 <style lang="scss" scoped>
+
 </style>

@@ -6,7 +6,7 @@
                 No device connection :(
             </div>
             <div class="flex-1">
-                <router-view ref="routeView" />
+                <router-view ref="routeView" :key="forceReloadKey" /> <!--  -->
                 <!--vue-page-stack>
                 </vue-page-stack-->
             </div>
@@ -68,7 +68,9 @@ export default {
     data: function() {
         return {
             isConnected: true,
-            visible: false
+            visible: false,
+            lastSelected: "",
+            forceReloadKey: ""
         };
     },
     created() {},
@@ -103,13 +105,21 @@ export default {
             return false;
         },
         selectPage(item) {
-            const target = `/view/${item}`
-            const sameTarget = this.$router.currentRoute.path.startsWith(target);
+            //const target = `/view/${item}`
             if(this.canChange()) {
-                if(sameTarget) {
-                    this.rndItemKey = Math.random().toString();
+                if(this.$router.currentRoute.name){
+                    const sameTarget = this.$router.currentRoute.name.startsWith(item);
+                    console.log(`request change from ${this.$router.currentRoute.name} to ${item}: sameTarget: ${sameTarget}`)
+                    if(sameTarget) {
+                        this.forceReloadKey = Math.random().toString();
+                    }
+                    if(this.$router.currentRoute.name !== item) {
+                        // actually this should not have any evvect but id does, i dont know why so we keep it for now as it works...
+                        this.$router.replace({ name: item }).catch((e)=> {});
+                    }
+                } else {
+                    this.$router.replace({ name: item });
                 }
-                this.$router.replace(item);
             }
         },
         toggleDrawer() {

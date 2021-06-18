@@ -1,18 +1,21 @@
 <template>
 <div class="root">
-    <div class="weight_box" @click="toggleLeftRightView()">
+    <div class="weight-box" @click="toggleLeftRightView()">
         <div id="cmbtest" class="combined">
             {{getCombined()}} kg
         </div>
-        <div class="weight_detail_box" v-bind:class="{visible: showSeperate}">
+        <div class="weight-detail-box" v-bind:class="{visible: showSeperate}">
             <div class="left">{{getLeft()}} kg</div>
             <div class="right">{{getRight()}} kg</div>
         </div>
     </div>
-    <div class="temp_detail_box center-in-columns clickable" @click="onTare()">
+    <div class="temp-detail-box center-in-columns clickable" @click="onTare()">
         <div class="temp">{{getTemp()}}°C</div>
         <div class="hum">{{getHum()}}%</div>
         <div class="hpa">{{hetHpa()}} hPa</div>
+    </div>
+    <div class="tare-box">
+        <div v-if="showTareBox" class="bar" :style="{ width: (tareProgress * 100) + '%' }"></div>
     </div>
 </div>
 </template>
@@ -37,26 +40,37 @@ export default {
             weightInfo: { left: 0, right: 0 },
             zeroWeights: { left: 0, right: 0 },
             pipeline: pipe(movingAverage(20)),
-            calibrator: null
+            calibrator: null,
+            tareProgress: 0
         };
     },
     mounted: function() {
 		console.log("MOUNTED Scale");
 		this.$ctx.device.subscribe({ tag: "weight", cb: this.onWeightMessage });
 		this.$ctx.device.subscribe({ tag: "env", cb: this.onTempSensorMessage });
-		this.calibrator = new Calibration(this.$ctx.device, this.tareCallback, { left: 0, right: 0, combined: 0 });
     },
     beforeDestroy() {
         console.log("DESTROYED Scale");
 		this.$ctx.device.unsubscribe(this.onWeightMessage);
 		this.$ctx.device.unsubscribe(this.onTempSensorMessage)
+        if(this.calibrator) {
+            this.calibrator.destroy();
+        }
     }, 
     methods: {
         tareCallback(validDuration, progress, weights) {
-            console.log(validDuration, progress, weights);
+            //console.log(validDuration, progress, weights);
+            this.tareProgress = progress;
             if(progress >= 1) {
                 this.calibrator.destroy();
                 this.calibrator = null;
+                this.zeroWeights = weights;
+                this.pipeline = pipe(taredByObject(this.zeroWeights), movingAverage(20));
+            }
+        },
+        onTare() {
+            if(!this.calibrator){
+                this.calibrator = new Calibration(this.$ctx.device, this.tareCallback);  
             }
         },
         onWeightMessage(msg) {
@@ -88,7 +102,11 @@ export default {
             this.showSeperate = !this.showSeperate
         }
     },
-	computed: { }
+	computed: {
+        showTareBox() {
+            return this.tareProgress >= 0 && this.tareProgress < 1;
+        }
+    }
 };
 </script>
 
@@ -100,9 +118,10 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 	position: relative;
 
-    .weight_box {
+    .weight-box {
         cursor: pointer;
         font-weight: 100;
         position:relative;
@@ -111,7 +130,7 @@ export default {
         -webkit-tap-highlight-color: rgba(0,0,0,0);
         -webkit-tap-highlight-color: transparent;
 
-        .weight_detail_box {
+        .weight-detail-box {
             padding-top: 5px;
             position:absolute;
             height: 50px;
@@ -136,23 +155,23 @@ export default {
 
         }
 
-        .weight_detail_box.visible {
+        .weight-detail-box.visible {
             transition: opacity 0.1s ease-in, bottom 0.1s ease-out;
             bottom: -50px;
             opacity: 1;
         }
         @media (orientation: landscape) {
-            .weight_detail_box {
+            .weight-detail-box {
                 bottom: -30px;
                 font-size: 4vw;
             }
-            .weight_detail_box.visible {
+            .weight-detail-box.visible {
                 bottom: -40px;
             }            
         }         
     }
 
-    .temp_detail_box {
+    .temp-detail-box {
         font-size: 3vw;
         padding-top: 5px;
         position:absolute;
@@ -168,8 +187,20 @@ export default {
             margin-left: 4vw;
         }	
     }
+
+    .tare-box {
+        position:absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        .bar {
+            height: 100%;
+            background-color: #EB4343;
+        }
+    }
     @media (orientation: landscape) {
-        .temp_detail_box {
+        .temp-detail-box {
             font-size: 3vw;
         }
     }    

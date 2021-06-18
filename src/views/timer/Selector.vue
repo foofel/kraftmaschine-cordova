@@ -23,7 +23,7 @@
 import { VueNavigationMixin } from '@/components/vuenavigation';
 
 export default {
-    name: "SelectorView",
+    name: "Selector",
     mixins: [VueNavigationMixin],
     data: function() {
         return {
@@ -36,7 +36,7 @@ export default {
     },
     methods: {
         onTimerSelected(selectedTimer) {
-            //this.$attrs.setupModel.timer = selectedTimer
+            this.$attrs.setupModel.timer = selectedTimer
             this.$router.push("calibrate")
             //this.$router.replace({name: 'lolcalb'})
         }

@@ -1,4 +1,4 @@
-import { ConnectionResult } from '@/core/bluetoothle'
+import { ConnectResult } from '@/core/connectivity/raw/deviceinterface'
 
 export interface SimpleTimer {
     sets:number;
@@ -54,7 +54,7 @@ export interface ApplicationStoreInterface {
         lastDeviceAddress: string;
         autoReconnect: boolean;
         knownDevices: Array<{ address: string, name: string, lastConnected: Date }>;
-        current: ConnectionResult
+        current: ConnectResult
     }
     trainings: {
         list: Array<number>

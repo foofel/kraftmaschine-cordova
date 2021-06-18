@@ -7,7 +7,7 @@
             <div>listeners: {{this.listeners}}</div>
             <div>left: {{left.toFixed(2)}} right: {{right.toFixed(2)}}</div>
             <div class="w-full h-20">
-                <WeightCalibrateGraph />
+                <WeightCalibrateGraph :opts="graphOpts" />
             </div>
         </div>
     </div>
@@ -16,7 +16,7 @@
 <script>
 import { StopWatch } from '@/core/stopwatch'
 import { passTrough } from '@/core/messagetransformer';
-import WeightCalibrateGraph from '@/components/timer/WeightCalibrateGraph.vue'
+import WeightCalibrateGraph from '@/components/calibration/WeightCalibrateGraph.vue'
 
 export default {
     name: "DebugOverlay",
@@ -40,7 +40,11 @@ export default {
             lastPackageId: -1,
             stopwatchMps: new StopWatch(),
             stopwatchLoss: new StopWatch(),
-            cb: null
+            cb: null,
+            graphOpts: {
+                duration: 10,
+                graphOnly: true
+            }
         };
     },
     mounted() {

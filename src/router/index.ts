@@ -10,10 +10,11 @@ import DebugView from '@/views/debug/DebugView.vue'
 //import DrawerView from '@/views/drawer/DrawerView.vue'
 import DrawerView from '@/views/drawer/DrawerView.vue'
 //import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
-import TimerView from '@/views/timer/TimerView.vue'
-import SetupView from '@/views/timer/SetupView.vue'
-import SelectorView from '@/views/timer/SelectorView.vue'
-import CalibrateView from '@/views/timer/CalibrateView.vue'
+import Timer from '@/views/timer/Timer.vue'
+import Setup from '@/views/timer/Setup.vue'
+import Selector from '@/views/timer/Selector.vue'
+import Calibrate from '@/views/timer/Calibrate.vue'
+import Clock from '@/views/timer/Clock.vue'
 //import TimerSelector from '@/components/hangboardtimer/TimerSelector.vue'
 //import SessionHistory from '@/components/trainhistory/SessionHistory.vue'
 //import BenchmarkMain from '@/components/benchmark/BenchmarkMain.vue'
@@ -35,41 +36,39 @@ import BluetoothConnectionSelector from '@/views/boardselector/BluetoothConnecti
 Vue.use(VueRouter)
 
 const routes = [
-	{
-		path: '/login', component: StartUp,
+	{ path: '/login', component: StartUp, name: "login",
 		children: [
 			{ path: 'select', component: SelectLogin,},
 			{ path: 'register', component: Register,},
 			{ path: 'login', component: Login,},
-			{ path: '*', redirect: 'select' } 			
+			{ path: '', redirect: 'select' } 			
 		]
 	},
 	{
-		path: '/view',
-		component: DrawerView,
+		path: '/view', component: DrawerView, name: "main",
 		meta: {
 			needAuth: true
 		},
 		children: [
-			{ path: 'scale', component: Scale },
-			//{ path: 'timer_old', component: TimerMain },
-			{
-				path: 'timer', component: TimerView,
+			{ path: 'scale', component: Scale, name: "scale" },
+			{ path: 'timer', component: Timer, name: "timer", 
+				redirect: { 
+					name: "timer.select" 
+				},
 				children: [
 					{
-						path: 'setup', component: SetupView,
+						path: 'setup', component: Setup,
 						children: [
-							{ path: 'select', component: SelectorView },
-							{ path: 'calibrate', component: CalibrateView },
-							{ path: '', redirect: 'select' }
+							{ path: 'select', component: Selector, name: 'timer.select' },
+							{ path: 'calibrate', component: Calibrate, name: 'timer.select' },
 						],
 					},
-					//{ path: 'timer', component: TimerMain },
-					{ path: '', redirect: 'setup' }
+					{ path: 'clock', component: Clock, name:"timer.clock" },
 				]
 			},
-			/*{ path: 'logbook', component: SessionHistory },
-			{ path: 'benchmark', component: BenchmarkMain},
+			//{ path: 'timer_old', component: TimerMain },
+			/*{ path: 'logbook', component: SessionHistory, name:"logbook" },
+			{ path: 'benchmark', component: BenchmarkMain, name:"benchmark" },
 			{ path: 'results', component: Highscore},
 			{ path: 'profile', component: AccountOptions},
 			{ path: 'profile/:id', component: ProfileView},
@@ -78,13 +77,12 @@ const routes = [
 			{ path: 'perks', component: PerksView},
 			{ path: 'options', component: ConfigEditorComponent },
 			{ path: 'trainplan', component: TrainPlanView},*/
-			{ path: 'debug', component: DebugView},
-			{ path: 'boardselector', component: BluetoothConnectionSelector},
+			{ path: 'debug', component: DebugView, name: "debug" },
+			{ path: 'boardselector', component: BluetoothConnectionSelector, name: "boardselector"},
 			{ path: '*', redirect: 'scale' } 
 		]
-	},{
-		path: '', redirect: '/view/boardselector'
-	} 
+	},
+	{ path: '', redirect: { name: "boardselector" } } 
 ]
 
 const router = new VueRouter({

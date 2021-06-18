@@ -5,8 +5,8 @@
 </template>
 
 <script>
-import SelectorView from '@/views/timer/SelectorView.vue'
-import CalibrateView from '@/views/timer/CalibrateView.vue'
+import SelectorView from '@/views/timer/Selector.vue'
+import CalibrateView from '@/views/timer/Calibrate.vue'
 
 const routes = {
     "/": SelectorView,
