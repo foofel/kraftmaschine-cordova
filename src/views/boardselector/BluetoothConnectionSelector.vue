@@ -36,7 +36,7 @@
 import Vue from 'vue'
 import HeadlineView from '@/components/HeadlineView2.vue'
 import { VueNavigationMixin } from '../../components/vuenavigation';
-import { RUNNING_ON_DEV_MACHINE } from '@/config';
+import { BackendConfig, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
 import { getStore } from '@/core/teststore';
 import { AppContext, gac } from '@/appcontext'
 
@@ -75,7 +75,7 @@ export default {
             console.log("start scan");
             this.devices = [];
             if(RUNNING_ON_DEV_MACHINE()) {
-                this.devices.push({ name: "websocket", address: "websocket" });
+                this.devices.push({ name: "websocket", address: BackendConfig.debugWebsocket });
                 return;
             }        
             this.isScanning = true;
@@ -104,31 +104,43 @@ export default {
             });
         },
         async deviceSelected(dev) {
-            if(this.isConnecting){
+            if(this.isConnecting) {
                 return;
             }
-            console.log("selected", dev);
-            this.isConnecting = true;
-            if(this.isScanning) {
-                this.$ctx.device.stopScan();
-            }
-            this.isScanning = false;
-            const res = await this.$ctx.device.connect(dev);
-            this.isConnecting = false;
-            if(res.success){
-                this.$store.connection.lastDeviceAddress = res.address;
-                const known = {
-                    address: res.address,
-                    name: dev.name,
-                    lastConnected: new Date()
+            const conInfo = this.$ctx.device.getConnectionInfo();
+            const lastDevice = this.selectedDevice;
+            if(this.selectedDevice) {
+                console.log("disconnected", dev);
+                const res = await this.$ctx.device.disconnect();
+                if(res) {
+                    this.$store.connection.current = null;
+                    this.selectedDevice = null;
                 }
-                this.$store.connection.knownDevices.push(known);
-                this.$store.connection.current = res;
-                this.selectedDevice = dev;
+            }
+            if(dev.address != lastDevice?.address) {
+                console.log("selected device", dev);
+                this.isConnecting = true;
+                if(this.isScanning) {
+                    this.$ctx.device.stopScan();
+                }
                 this.isScanning = false;
-            } else {
-                console.log("unable to connect to bluetooth device")
-                this.$notify({ title: 'no connection', text: "unable to connect to device, please retry", type: "error" })
+                this.isConnecting = true;
+                const res = await this.$ctx.device.connect(dev);
+                if(res.success) {
+                    this.$store.connection.lastDeviceAddress = res.address;
+                    const known = {
+                        address: res.address,
+                        name: dev.name,
+                        lastConnected: new Date()
+                    }
+                    this.$store.connection.knownDevices.push(known);
+                    this.$store.connection.current = res;
+                    this.selectedDevice = dev;
+                } else {
+                    console.log("unable to connect to bluetooth device")
+                    this.$notify({ title: 'no connection', text: "unable to connect to device, please retry", type: "error" })
+                }
+                this.isConnecting = false;
             }
         }
     }

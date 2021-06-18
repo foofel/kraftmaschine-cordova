@@ -45,14 +45,22 @@ export default {
     },
     mounted() {
         const self = this;
-        this.cb = (wm) => { 
+        /*this.cb = (wm) => { 
             this.onNewData(self, wm);
-        }
+        }*/
         this.$ctx.device.subscribe({ tag: "weight", cb: this.onNewData });
         this.intervall = setInterval(() => {
             this.listeners = [
                 this.$ctx.device.listener.weight.length
             ]
+            if(!this.$ctx.device.getConnectionInfo()) {
+                this.lastPackageId = -1;
+            }
+            if (this.stopwatchMps.elapsed() > 1) {
+                this.mps = this.packages;
+                this.packages = 0;
+                this.stopwatchMps.restart();
+            }        
             const now = new Date();
             this.losses = this.losses.filter((e) => (now - e.time) < 10000);
             const lastSecLosses = this.losses.filter((e) => (now - e.time) < 1000);
@@ -74,15 +82,6 @@ export default {
         onNewData(wm) {
             wm = passTrough(wm);
             this.packages++;
-            if (this.stopwatchMps.elapsed() > 1) {
-                this.mps = this.packages;
-                this.packages = 0;
-                this.stopwatchMps.restart();
-            }
-            if (this.stopwatchLoss.elapsed() > 10) {
-                this.loss = 0;
-                this.stopwatchLoss.restart();
-            }
             const packetId = wm.id;
             if(this.lastPackageId == -1) {
                 this.lastPackageId = packetId;
@@ -94,7 +93,6 @@ export default {
             const loss = pkgDist - 1;
             if(loss > 0) {
                 //console.log(`missed package(s): ${loss}`);
-                this.loss += loss;
                 this.lossTotal += loss;
                 this.losses.push({ amount: loss, time: new Date()});
             }

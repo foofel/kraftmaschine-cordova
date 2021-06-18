@@ -64,6 +64,7 @@ export class WebsocketDevice implements DeviceInterface {
             }
             return this.connectedEndpoint;
         } else {
+            console.log("alread connected");
             return this.connectedEndpoint;
         }
     }
@@ -71,8 +72,13 @@ export class WebsocketDevice implements DeviceInterface {
     async disconnect(): Promise<boolean> {
         if(this.socket) {
             this.socket.close()
+            this.socket.onopen = null;
+            this.socket.onmessage = null;
+            this.socket.onerror = null;
+            this.socket.onclose = null;
             this.socket = null;
             this.connectedEndpoint = null;
+            this.subscriptions = [];
             return true;
         }
         return false;
@@ -104,7 +110,7 @@ export class WebsocketDevice implements DeviceInterface {
     }
 
     isReady() {
-        return this.socket != null;
+        return this.connectedEndpoint != null;
     }
 
     getConnectionInfo() {

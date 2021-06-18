@@ -38,5 +38,5 @@ export interface DeviceInterface {
     read: (channel:DeviceChannel) => Promise<string>;
     write: (channel:DeviceChannel, data:ArrayBuffer) => Promise<boolean>;
     getConnectionInfo: () => ConnectResult|null;
-    isReady: () => boolean;    
+    isReady: () => boolean;
 }

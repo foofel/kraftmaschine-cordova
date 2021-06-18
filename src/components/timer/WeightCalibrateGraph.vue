@@ -44,7 +44,7 @@ export default {
                 x: { min: 0, max: 3, time: false },
                 y: { 
                     range: (u, min, max) => {
-                        return [min, Math.max(5, max)]
+                        return [min, Math.max(1, max)]
                     }
                 }
             },

@@ -96,6 +96,17 @@ export class DeviceConnector {
         return this.device.stopScan();
     }
     async connect(scanResult:DeviceScanResult): Promise<ConnectResult> {
+        // still connected
+        if(this.device.getConnectionInfo()){
+            return {
+                deviceId: "", 
+                address: "", 
+                hwVersion: "", 
+                mtu: 0, 
+                success: false, 
+                info: { leftCalibration: 0, rightCalibration: 0 }
+            };
+        }
         this.stopWatchdog();
         this.resetData();
         this.receivedPackagesInLastSecond = 0;
