@@ -7,7 +7,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import Button from '@/components/Button.vue'
-import { VueNavigation } from './vuenavigation';
+import { VueNavigation } from '@/core/util/vuenavigation';
 import { DataModelComponentDataInterface, DataModelComponentModelInterface, DataModelComponentValueInterface } from './typeexports';
 import DataEditorComponent from './DataEditorComponent.vue'
 import { ConfigData, ConfigFile, IteratableConfigData } from '../core/storageinterface';

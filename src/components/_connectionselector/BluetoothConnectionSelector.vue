@@ -51,7 +51,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import HeadlineView from '@/components/HeadlineView.vue'
 import { HangboardConnector } from '../../core/hangboardconnector';
-import { VueNavigation } from '../vuenavigation';
+import { VueNavigation } from '@/core/util/vuenavigation';
 import { ScanCallbackInterface } from '../../core/bluetoothle';
 import { ConfigFile } from '../../core/storageinterface';
 import { Hangboards, Hangboard } from '../typeexports';

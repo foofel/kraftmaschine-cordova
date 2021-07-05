@@ -29,7 +29,7 @@ import Benchmark from '@/components/benchmark/Benchmark.vue'
 import HeadlineView from '@/components/HeadlineView.vue'
 import Button from '@/components/Button.vue'
 import { BenchmarkSetupData, HighscoreEntry } from '../typeexports';
-import { VueNavigation } from '../vuenavigation';
+import { VueNavigation } from '@/core/util/vuenavigation';
 import { EasyRemoteApiHelpers, RemoteAPI, showToast } from '../../core/util';
 
 @Component({

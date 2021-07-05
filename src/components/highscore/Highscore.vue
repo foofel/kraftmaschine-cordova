@@ -103,7 +103,7 @@ import { RemoteAPI, EasyRemoteApiHelpers } from '../../core/util';
 import moment from 'moment';
 import { HANGTIMER_FINISHED } from '../../messages';
 import { StopWatch } from '../../core/stopwatch';
-import { VueNavigation } from '../vuenavigation';
+import { VueNavigation } from '@/core/util/vuenavigation';
 
 interface DisplayHighscoreEntry {
     data: HighscoreEntry;

@@ -70,7 +70,7 @@ import { HANGTIMER_FINISHED } from '../../messages';
 import { StopWatch } from '../../core/stopwatch';
 import CustomBarChart from '../hangboardtimer/CustomBarChart.vue';
 import HeadlineView from '../../components/HeadlineView.vue';
-import { VueNavigation } from '../vuenavigation';
+import { VueNavigation } from '@/core/util/vuenavigation';
 
 interface DisplaySaveDataEntry {
     data: LocalTrainingSaveData;

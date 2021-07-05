@@ -5,7 +5,7 @@ import { DeviceChannel, DeviceScanResult, ConnectResult, DeviceInterface, Subscr
 import { BleDevice } from '@/core/connectivity/raw/bledevice'
 import { WebsocketDevice } from '@/core/connectivity/raw/websocketdevice'
 import { RUNNING_ON_DEV_MACHINE } from '@/config'
-import { StopWatch } from '@/core/stopwatch';
+import { StopWatch } from '@/core/util/stopwatch';
 
 
 export interface WeightData {

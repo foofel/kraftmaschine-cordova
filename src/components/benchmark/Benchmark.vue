@@ -106,7 +106,7 @@ import { WeightMessage, ScaleOptions, WeightData } from '@/core/sensorreader';
 import { sum, round, pipe, guard, movingAverage, tared } from '@/core/messagetransformer';
 import { BenchmarkController, ProcessingEvent } from '@/components/benchmark/ts/BenchmarkController'
 import { SimpleBenchmarkController } from '@/components/benchmark/ts/SimpleBenchmarkController'
-import { DataHistory } from '../../core/history'
+import { DataHistory } from '../../core/util/datahistory'
 //import { AddLocalUploadSave, LocalUploadSave } from '../../core/storageinterface'
 import { getProp, getHoldString, makeid, findNextHighscoreUser } from '../../core/util'
 import { Hangboards, LocalBenchmarkSaveData, BenchmarkSetupData, BenchmarkVisualHighscoreEntry, BenchmarkVisualModel, BenchmarkVisualModelMarker, HighscoreEntry } from '../typeexports'
@@ -115,7 +115,7 @@ import GoalBar from './GoalBar.vue'
 import GoalClock from './GoalClock.vue'
 import { StopWatch } from '../../core/stopwatch'
 import { saveAs } from 'file-saver';
-import { avg } from '../../core/math'
+import { avg } from '../../core/util/math'
 
 /*const genHighscore = (num:number, length:number = 10) => {
     let randnBm = () : number => {

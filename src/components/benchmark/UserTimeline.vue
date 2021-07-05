@@ -44,7 +44,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { clamp, map } from '../../core/math';
+import { clamp, map } from '../../core/util/math';
 
 interface User {name: string; pos: number; time: number }
 

@@ -19,7 +19,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import HiDpiCanvas from '../HiDpiCanvas.vue'
 import { DrawContextInfo, BenchmarkVisualHighscoreEntry, BenchmarkVisualModel } from '../typeexports';
 import ProgressClockCanvas from '../hangboardtimer/ProgressClockCanvas.vue'
-import { clamp } from '../../core/math';
+import { clamp } from '../../core/util/math';
 import { UpdateLimiter, findNextHighscoreUser } from '../../core/util';
 import cloneDeep from 'lodash/cloneDeep';
 import { ConfigFile } from '@/core/storageinterface';

@@ -11,8 +11,8 @@
 <script>
 import UplotGraph from '@/components/graph/UplotGraph.vue'
 import HeadlineView from '@/components/HeadlineView2'
-import { VueNavigationMixin } from '@/components/vuenavigation'
-import { passTrough } from '@/core/messagetransformer';
+import { VueNavigationMixin } from '@/core/util/vuenavigation'
+import { passTrough } from '@/core/connectivity/messagetransformer';
 import { ChartColors } from '../../components/typeexports';
 import { sprintf } from "sprintf-js";
 
@@ -36,10 +36,10 @@ export default {
     }},    
     created() {
         const self = this;
-        this.cb = (wm) => { 
+        this.cb = (wm) => {
             self.$options.onNewData(self, wm);
         }
-        this.$root.hangboardConnector.registerWeightCallback(this.cb, passTrough);
+        this.$ctx.device.subscribe({ tag: "weight", cb: this.cb });
     },
     mounted() {
         const opts = {
@@ -96,7 +96,7 @@ export default {
         this.$options.startRedraw(this);
     },
     beforeDestroy() {
-        this.$root.hangboardConnector.removeWeightCallback(this.cb);
+        this.$ctx.device.unsubscribe(this.cb);
         this.stopUpdate = true;
         if(this.interval) {
             clearInterval(this.interval);

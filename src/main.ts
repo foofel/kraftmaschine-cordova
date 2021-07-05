@@ -2,16 +2,19 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 
-import { RemoteAPI, reauth, clearAllCookies } from './core/util'
+//import { RemoteAPI, reauth, clearAllCookies } from './core/util'
 //import { ConfigFile, StorageInterface } from '@/core/storageinterface';
 //import { ApplicationStoreInterface } from '@/core/applicationstore'
 //import { HangboardConnector } from './core/hangboardconnector'
 import { DeviceConnector } from './core/connectivity/deviceconnector'
-import { IndexedDBStorageImpl, writeConfigObject } from './core/persistentstore'
+import { IndexedDBStorageImpl, loadApplicationStore, saveApplicationStore } from '@/core/data/storage'
 import { RUNNING_ON_DEV_MACHINE } from './config'
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Observable } from '@/js/object-observer'
 import { AppContext } from '@/appcontext'
+import { clearAllCookies } from './core/util/util'
+import { debounce } from './core/util/debounce'
+import _ from "lodash";
 
 Vue.config.productionTip = false
 
@@ -50,18 +53,20 @@ async function startupApp() {
 	detectNotchs();
 	const storage = new IndexedDBStorageImpl();
 	AppContext.storage = storage;
-	const store = await storage.getApplicationStore();
-	const storeProxy = Observable.from(store);
-	//storeProxy.observe((e:any) => { console.log(e) })
-	console.log(store.user.id)
-	storeProxy.user.id = 15
-	console.log(store.user.id)
-	await writeConfigObject(storeProxy);
+	const store = await loadApplicationStore();
+	const observedStore = Observable.from(store);
+	const saveDebounced = _.debounce(() => {
+		console.log("saving app store:", observedStore.appOptions.debugOverlay.state);
+		saveApplicationStore(observedStore);
+	}, 100);	
+	observedStore.observe((e:any) => { 
+		saveDebounced();
+	});
 	AppContext.device = new DeviceConnector();
-	AppContext.backend = new RemoteAPI();
+	//AppContext.backend = new RemoteAPI();
 	//(window as any).StatusBar.backgroundColorByHexString('#99000000');
 	console.log("starting vue");
-	Vue.prototype.$store = storeProxy;
+	Vue.prototype.$store = observedStore;
 	Vue.prototype.$ctx = AppContext;
 	(window as any).myVue = new Vue({
 		router,
@@ -74,10 +79,10 @@ async function startupApp() {
 		//TODO: nitify vue
 	}, false);
 	document.addEventListener("resume", () => {
-		if (!reauth(AppContext.backend)) {
+		/*if (!reauth(AppContext.backend)) {
 			clearAllCookies();
 			window.location.reload(true);
-		}
+		}*/
 		//TODO: nitify vue
 	}, false);
 }

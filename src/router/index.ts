@@ -8,7 +8,7 @@ import Login from '@/views/startup/Login.vue'
 import Scale from '@/views/scale/Scale.vue'
 import DebugView from '@/views/debug/DebugView.vue'
 //import DrawerView from '@/views/drawer/DrawerView.vue'
-import DrawerView from '@/views/drawer/DrawerView.vue'
+import DrawerMenuView from '@/views/drawermenu/DrawerMenuView.vue'
 //import TimerMain from '@/components/hangboardtimer/TimerMain.vue'
 import Timer from '@/views/timer/Timer.vue'
 import Setup from '@/views/timer/Setup.vue'
@@ -45,7 +45,7 @@ const routes = [
 		]
 	},
 	{
-		path: '/view', component: DrawerView, name: "main",
+		path: '/view', component: DrawerMenuView, name: "main",
 		meta: {
 			needAuth: true
 		},

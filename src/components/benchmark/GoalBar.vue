@@ -10,7 +10,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import HiDpiCanvas from '../HiDpiCanvas.vue'
 import { DrawContextInfo, BenchmarkVisualHighscoreEntry, BenchmarkVisualModel, BenchmarkVisualModelMarker } from '../typeexports';
-import { clamp, map } from '../../core/math';
+import { clamp, map } from '../../core/util/math';
 import cloneDeep from 'lodash/cloneDeep';
 import { UpdateLimiter, findNextHighscoreUser } from '../../core/util';
 

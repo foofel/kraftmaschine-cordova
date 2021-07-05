@@ -9,11 +9,11 @@
 
 <script>
 import UplotGraph from '@/components/graph/UplotGraph.vue'
-import { passTrough } from '@/core/messagetransformer';
+import { passTrough } from '@/core/connectivity/messagetransformer';
 import { ChartColors } from '../typeexports';
 import { Calibration } from '@/core/util/calibration';
 import { sprintf } from "sprintf-js";
-import { DataHistory } from '@/core/history';
+import { DataHistory } from '@/core/util/datahistory';
 
 export default {
     name: "WeightCalibrateGraph",
@@ -26,15 +26,26 @@ export default {
         weightBuffer: [], //Array(240).fill(0),
         history: null
     },
-    data() { return {
-        bufferLengthSeconds: this.$props.opts?.duration || 2,
-        colorText: "0 0 0",
-        cb: null,
-        calibrator: null,
-        tareProgress: 0
-    }},
+    created() {
+        const opts = {
+            duration: 2,
+            graphOnly: false,
+            waitText: "",
+            progressText: "",
+            stopAfterDone: true
+        }
+    },
+    data() { 
+        return {
+            bufferLengthSeconds: this.$props.opts?.duration || 2,
+            colorText: "0 0 0",
+            cb: null,
+            calibrator: null,
+            tareProgress: 0
+        }
+    },
     mounted() {
-        console.log(this.$props);
+        //console.log(this.$props);
         this.$options.nonReactiveData.history = new DataHistory(this.bufferLengthSeconds);
         const opts = {
             series: [
@@ -51,10 +62,10 @@ export default {
                 { show: false },
             ],
             scales: {
-                x: { min: 0, max: 3, time: false },
+                x: { min: 0, max: this.bufferLengthSeconds, time: false },
                 y: { 
                     range: (u, min, max) => {
-                        return [min, Math.max(1, max)]
+                        return [0, Math.max(1, max)]
                     }
                 }
             },
@@ -73,7 +84,7 @@ export default {
             self.$options.onNewData(self, wm);
         }
         this.$ctx.device.subscribe({ tag: "weight", cb: this.cb });
-        if(!(this.$props.opts?.graphOnly || false)){
+        if(!(this.$props.opts?.graphOnly || false)) {
             this.calibrator = new Calibration(this.$ctx.device, this.tareCallback, this.$props.opts?.duration || 2, 0.2);
         }
     },

@@ -59,14 +59,14 @@
                 </td>
             </tr>
         </table>
-        <div class="mt-4 w-80 h-10 rounded-lg flex justify-center items-center text-white text-xl font-light skip-button" :class="{disabled: progressState < 1}" @click="skipLast()">
+        <div class="mt-4 w-80 h-10 rounded-lg cursor-pointer flex justify-center items-center text-white text-xl font-light skip-button" :class="{disabled: progressState < 1}" @click="skipLast()">
             {{skipText}}
         </div>
     </div>
 </template>
 
 <script>
-import { VueNavigationMixin } from '@/components/vuenavigation';
+import { VueNavigationMixin } from '@/core/util/vuenavigation';
 import WeightCalibrateGraph from '@/components/calibration/WeightCalibrateGraph.vue'
 
 export default {

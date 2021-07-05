@@ -21,9 +21,9 @@
 </template>
 
 <script>
-import { VueNavigationMixin } from '@/components/vuenavigation'
-import { pipe, movingAverage, taredByObject } from '../../core/messagetransformer';
-import { round } from '@/core/math';
+import { VueNavigationMixin } from '@/core/util/vuenavigation'
+import { pipe, movingAverage, taredByObject } from '@/core/connectivity/messagetransformer';
+import { round } from '@/core/util/math';
 import { Calibration } from '@/core/util/calibration';
 
 export default {

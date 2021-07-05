@@ -1,7 +1,7 @@
 import { HangboardConnector } from "@/core/hangboardconnector";
 import { pipe, tared, passTrough } from '@/core/messagetransformer';
 import { WeightMessage, ScaleOptions } from '@/core/sensorreader';
-import { LinearRegressionFromData } from '@/core/history';
+import { LinearRegressionFromData } from '@/core/util/datahistory';
 import { BenchmarkGraphData, TareWeights } from '@/components/typeexports';
 import { LinRegType, avg } from '@/core/math';
 

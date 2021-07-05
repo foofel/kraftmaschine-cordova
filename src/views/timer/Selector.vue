@@ -3,7 +3,7 @@
         <div class="w-full h-full flex items-center flex-col gap-2 text-2xl font-light">
             <div class="h-14"></div>
             <div
-                class="flex items-center w-3/4 button justify-center"
+                class="flex items-center w-3/4 button justify-center cursor-pointer"
                 v-for="timer in timers"
                 @click="onTimerSelected(timer)"
                 :key="timer.id"
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { VueNavigationMixin } from '@/components/vuenavigation';
+import { VueNavigationMixin } from '@/core/util/vuenavigation';
 
 export default {
     name: "Selector",

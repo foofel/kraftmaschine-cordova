@@ -6,7 +6,7 @@
 
 <script>
 import HeadlineView from '@/components/HeadlineView2'
-import { VueNavigationMixin } from '@/components/vuenavigation'
+import { VueNavigationMixin } from '@/core/util/vuenavigation'
 export default {
     name: "Setup",
     mixins: [VueNavigationMixin],

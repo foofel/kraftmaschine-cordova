@@ -1,6 +1,6 @@
 <template>
-    <div @click="toggleSize" :class="{ minimized: minimized }" class="debug-overlay">
-        <div :class="{ hidden: minimized }" class="w-full h-full text-white p-1">
+    <div v-if="isVisible" @click="toggleSize" :class="{ minimized: isMinimized }" class="debug-overlay cursor-pointer">
+        <div v-if="!isMinimized" class="w-full h-full text-white p-1">
             <div>device: {device}</div>
             <div>mps: {{mps}}</div>
             <div>loss: {{loss1s}} / {{loss10s}} / {{lossTotal}}</div>
@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import { StopWatch } from '@/core/stopwatch'
-import { passTrough } from '@/core/messagetransformer';
+import { StopWatch } from '@/core/util/stopwatch'
+import { passTrough } from '@/core/connectivity/messagetransformer'
 import WeightCalibrateGraph from '@/components/calibration/WeightCalibrateGraph.vue'
 
 export default {
@@ -25,7 +25,6 @@ export default {
     },
     data: function() {
         return {
-            minimized: false,
             device: "",
             mps: 0,
             loss1s: 0,
@@ -44,7 +43,8 @@ export default {
             graphOpts: {
                 duration: 10,
                 graphOnly: true
-            }
+            },
+            overlayState: this.$store.appOptions.debugOverlay
         };
     },
     mounted() {
@@ -81,7 +81,12 @@ export default {
     },
     methods: {
         toggleSize() {
-            this.minimized = !this.minimized;
+            if(this.overlayState.state == "minimized") {
+                this.overlayState.state = "normal";
+            } else {
+                this.overlayState.state = "minimized";
+            }
+            this.$store.appOptions.debugOverlay.state = this.overlayState.state;
         },
         onNewData(wm) {
             wm = passTrough(wm);
@@ -105,7 +110,14 @@ export default {
             this.right = wm.right;
         }
     },
-	computed: {}
+	computed: {
+        isVisible() {
+            return this.overlayState.show;
+        },
+        isMinimized() {
+            return this.overlayState.state == "minimized";
+        }
+    }
 };
 </script>
 

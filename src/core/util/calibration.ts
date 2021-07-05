@@ -1,6 +1,6 @@
-import { pipe, MessageTransformerIntrerface, taredByObject } from '@/core/messagetransformer';
-import { DataHistory } from '@/core/history';
-import { linearRegression } from '@/core/math'
+import { pipe, MessageTransformerIntrerface, taredByObject } from '@/core/connectivity/messagetransformer';
+import { DataHistory } from '@/core/util/datahistory';
+//import { linearRegression } from '@/core/util/math'
 import { DeviceConnector, WeightData, WeightMessage } from '@/core/connectivity/deviceconnector';
 
 export type CalibrationCallback = (validDuration:number, progress:number, weights: WeightData) => void;

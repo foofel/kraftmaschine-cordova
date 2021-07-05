@@ -1,7 +1,7 @@
 import { DeviceScanResult, ConnectResult, DeviceInterface, DeviceChannel, SubscribableDeviceChannel } from '@/core/connectivity/raw/deviceinterface'
 import { write, isLocationEnabled, requestLocation, hasPermission, requestPermission, stopScan, subscribe, unsubscribe,  isInitialized, initialize, isEnabled, enable, close, connect, isBonded, bond, isDiscovered, discover, mtu, read } from '@/core/connectivity/raw/blepromisify'
 import { BLEServiceInfo } from '@/config'
-import { asyncBarrier } from '@/core/util'
+import { asyncBarrier } from '@/core/util/util'
 import Vue from 'vue'
 
 export const DeviceChannelBLEMapping = {

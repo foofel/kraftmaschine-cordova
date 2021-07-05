@@ -59,11 +59,11 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { ConfigFile } from '../../core/storageinterface';
-import { EasyRemoteApiHelpers, clearAllCookies } from '../../core/util';
+import { ConfigFile } from '@/core/storageinterface';
+import { EasyRemoteApiHelpers, clearAllCookies } from '@/core/util/util';
 import Button from '@/components/Button.vue'
 import { GlobalConfig, AppVersion } from '../../config';
-import { VueNavigation } from '../vuenavigation';
+import { VueNavigation } from '@/core/util/vuenavigation';
 import HeadlineView from '@/components/HeadlineView.vue'
 
 @Component({ 

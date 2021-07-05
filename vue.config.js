@@ -3,14 +3,18 @@ const fs = require('fs');
 
 function httpMode() {
   if (process.env.FORCE_HTTP) {
-    return { port: 8880 }
+    return { 
+      port: 8881,
+      host: 'localhost'
+    }
   } else {
     return {
       https: {
         key: fs.readFileSync('../../../utility/localhost-ca/localhost.key'),
         cert: fs.readFileSync('../../../utility/localhost-ca/localhost.crt'),
       },
-      port: 8880
+      port: 8880,
+      host: 'localhost'
     }  
   }
 }

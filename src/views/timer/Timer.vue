@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { VueNavigationMixin } from '@/components/vuenavigation'
+import { VueNavigationMixin } from '@/core/util/vuenavigation'
 
 export default {
     name: "Timer",

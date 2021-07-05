@@ -35,7 +35,7 @@
 <script>
 import Vue from 'vue'
 import HeadlineView from '@/components/HeadlineView2.vue'
-import { VueNavigationMixin } from '../../components/vuenavigation';
+import { VueNavigationMixin } from '@/core/util/vuenavigation';
 import { BackendConfig, GlobalConfig, RUNNING_ON_DEV_MACHINE } from '@/config';
 //import { AppContext, gac } from '@/appcontext'
 
