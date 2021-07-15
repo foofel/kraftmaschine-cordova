@@ -1,9 +1,9 @@
 <svg width="354" height="85" viewBox="0 0 354 85" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="board">
 <g id="bg">
-<rect id="Rectangle 114" width="354" height="85" rx="3" fill="#BE986D"/>
-<rect id="Rectangle 113" width="354" height="66" rx="3" fill="#D2A87D"/>
-<rect id="Rectangle 112" width="354" height="44" rx="3" fill="#E8C9AB"/>
+<rect id="aa" width="354" height="85" rx="3" fill="#BE986D"/>
+<rect id="ab" width="354" height="66" rx="3" fill="#D2A87D"/>
+<rect id="ac" width="354" height="44" rx="3" fill="#E8C9AB"/>
 </g>
 <g id="pockets">
 <rect id="hold-6" x="5" y="30" width="43" height="11" rx="5.5" fill="#846342"/>

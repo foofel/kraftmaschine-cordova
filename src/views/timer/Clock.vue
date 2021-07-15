@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-full">
+    <div class="w-full h-full flex flex-col">
         <div class="w-full h-14 flex pl-16 pr-4">
             <div class="flex items-center">
                 <div>
@@ -34,19 +34,39 @@
             </div>
         </div>
         <div>
-            <div class="mt-2 mb-2 pl-4 pr-4">
-                <WeightBar ref="weightBar" />
+            <div class="mt-6 mb-6 pl-4 pr-4">
+                <WeightBar :activationFactor="0.94" :maxWeight="weightBarMax" ref="weightBar" />
             </div>
         </div>
-        <div>
-            <div class="h-20 bg-cyan-200">
-                <ProgressGraph ref="progressGraph" />
+        <div class="flex-1">
+            <div class="h-full w-full flex flex-col">
+                <div class="flex-1 pl-2 pr-5" style="min-height: 50px;">
+                    <ProgressGraph ref="progressGraph" />
+                </div>
+                <div class="font-medium text-sm flex justify-end">
+                    <div class="mr-5">
+                        Active: 97.4% (172.5s)
+                    </div>
+                </div>
             </div>
-            <div>active %</div>
         </div>
-        <div>hold view</div>
-        <div>env</div>
-        <p>the clock</p>
+        <div class="flex flex-col justify-center pt-5">
+            <div class="pl-8 pr-8">
+                <!--img class="w-full" src="@/assets/boards/board.svg" ref="hangboard"-->
+                <BoardSvg1 ref="hangboard" />
+                <div class="flex justify-between mt-3 font-medium text-sm">
+                    <div>Left: 25mm</div>
+                    <div>Right: 25mm</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-center pt-2 pb-2">
+            <div class="flex font-light text-sm">
+                <div>{{temp}}</div>
+                <div class="ml-5">{{hum}}</div>
+                <div class="ml-5">{{hpa}}</div>
+            </div>
+        </div>
         <!--p>{{attrs}}</p-->
     </div>
 </template>
@@ -56,6 +76,8 @@ import { VueNavigationMixin } from '@/core/util/vuenavigation'
 import ProgressClockCanvas from '@/components/timer/ProgressClockCanvas.vue'
 import WeightBar from '@/components/timer/WeightBar.vue'
 import ProgressGraph from '@/components/timer/ProgressGraph.vue'
+import BoardSvg1 from '@/assets/boards/board.svg'
+import { clampPositive, passTrough, pipe, taredByObject } from '@/core/connectivity/messagetransformer'
 
 
 export const ClockColors = {
@@ -74,12 +96,14 @@ export default {
     components: {
         ProgressClockCanvas,
         WeightBar,
-        ProgressGraph
+        ProgressGraph,
+        BoardSvg1
     },
     data() {
         return {
             setupModel: { 
                 timer: null,
+                weights: null
             },
             clockData: [
                 { foreground: "blue", background: "lightgray", fill: 0.5, radius: 1, width: 1 },
@@ -94,39 +118,149 @@ export default {
             progressData: {
                 sets: [
                     [
-                        { length: 8, active: 4, passive: 2 },
-                        { length: 8, active: 4, passive: 2 },
-                        { length: 8, active: 4, passive: 2 },
-                        { length: 8, active: 4, passive: 2 },                        
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },    
+                        { length: 7, active: 4, passive: 2 },                                          
                     ],
                     [
-                        { length: 8, active: 4, passive: 2 },
-                        { length: 8, active: 4, passive: 2 },
-                        { length: 8, active: 4, passive: 2 },
-                        { length: 8, active: 4, passive: 2 },                        
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 0, passive: 7 },   
+                        { length: 7, active: 7, passive: 0 },                                        
                     ],
+                    [
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 2, passive: 2 },
+                        { length: 7, active: 6, passive: 0 },
+                        { length: 7, active: 7, passive: 0 }, 
+                        { length: 7, active: 0, passive: 4 },                                              
+                    ],
+                    [
+                        { length: 7, active: 0, passive: 7 },
+                        { length: 7, active: 0, passive: 0 },
+                        { length: 7, active: 4, passive: 0 },
+                        { length: 7, active: 4, passive: 2 }, 
+                        { length: 7, active: 4, passive: 2 },                                               
+                    ],       
+                    [
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 }, 
+                        { length: 7, active: 4, passive: 2 },                                             
+                    ],  
+                    [
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 },
+                        { length: 7, active: 4, passive: 2 }, 
+                        { length: 7, active: 4, passive: 2 },                                             
+                    ],                                                                           
                 ]
-            }
+            },
+            msgPipe: null
         };
+    },
+    created() {
+        this.setupModel = {
+            "timer":{
+                "name":"Basic 7s/5s",
+                "board":0,
+                "timer":{
+                    "type":"simple",
+                    "timer":{
+                        "active":7,
+                        "passive":5,
+                        "pause":180,
+                        "repeats":5,
+                        "sets":6,
+                        "cooldown":10,
+                        "warmup":10
+                    }
+                }
+            },
+            "weights":{
+                "tare":{
+                    "left":0.18250217166257385,
+                    "right":0.18478604789459238,
+                    "combined":0
+                },
+                "weight":{
+                    "left":5,
+                    "right":5,
+                    "combined":0
+                },
+                "weightedWeight":{
+                    "left":5,
+                    "right":5,
+                    "combined":0
+                }
+            }
+        }
     },
     mounted() {
         const updater = () => {
             this.clockData[0].fill = (Math.sin(performance.now() / 10000) + 1) / 2;
             this.clockData[1].fill = (Math.sin(performance.now() / 12000) + 1) / 2;
             this.clockData[2].fill = (Math.sin(performance.now() / 14000) + 1) / 2;
-            this.clockData[3].fill = (Math.sin(performance.now() / 16000) + 1) / 2;            
-            this.$refs.clock.updateData(this.clockData);
-            this.weightData.left = (Math.sin(performance.now() / 2000) + 1) / 2 * 50;
-            this.weightData.right = (Math.sin(performance.now() / 3000) + 1) / 2 * 50;
-            this.$refs.weightBar.updateData(this.weightData);
+            this.clockData[3].fill = (Math.sin(performance.now() / 16000) + 1) / 2;
+            if(this.$refs.clock) {
+                this.$refs.clock.updateData(this.clockData);
+            }
+            //this.weightData.left = (Math.sin(performance.now() / 21000) + 1) / 2 * 50;
+            //this.weightData.right = (Math.sin(performance.now() / 22000) + 1) / 2 * 50;
+            //this.$refs.weightBar.updateData(this.weightData);
+            const repCount = 36; // magic knowledge
+            let count = 0;
+            const time = performance.now() / 2000;
+            for(let i = 0; i < this.progressData.sets.length; i++) {
+                const set = this.progressData.sets[i];
+                for(let k = 0; k < set.length; k++) {
+                    const rep = set[k];
+                    const val = (Math.sin(count / repCount * Math.PI * 2 + time) + 1) / 2;
+                    rep.active = val * (rep.length - 1)
+                    rep.passive = (rep.length - 1) - rep.active;
+                    count++;
+                }
+            }
             this.$refs.progressGraph.updateData(this.progressData);
             requestAnimationFrame(updater);
         }
         requestAnimationFrame(updater);
+        const svg = this.$refs.hangboard;
+        svg.querySelectorAll("#hold-1, #hold-5").forEach ((e) => {
+            e.style = "fill:red;"; 
+        });
+        this.msgPipe = pipe(taredByObject(this.setupModel.weights.tare), clampPositive);
+        this.$ctx.device.subscribe({ tag: "weight", cb: this.onWeightMessage });
     },
-    beforeDestroy() {},
-    methods: {},
-	computed: {}
+    beforeDestroy() {
+        this.$ctx.device.unsubscribe(this.onWeightMessage);
+    },
+    methods: {
+        onWeightMessage(msg) {
+            msg = this.msgPipe(msg);
+            this.weightData = msg;
+            this.$refs.weightBar.updateData(msg);
+        }
+    },
+	computed: {
+        temp() {
+            return "0.0°C";
+        },
+        hum() {
+            return "0RH%";
+        },
+        hpa() {
+            return "0hPa";
+        },
+        weightBarMax() {
+            return this.setupModel.weights.weightedWeight.left + this.setupModel.weights.weightedWeight.right;
+        }
+    }
 };
 </script>
 

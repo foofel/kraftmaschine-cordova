@@ -55,16 +55,20 @@
             </div>
         </div>
         <div class="absolute burger-helper cursor-pointer select-none" @click="toggleDrawer()">
-            <img src="@/assets/drawer/burger.svg" width="22" height="18" >
+            <!--img src="@/assets/drawer/burger.svg" width="22" height="18" -->
+            <BurgerMenu width="22" height="18" />
         </div>
     </div>
 </template>
 
 <script>
+import BurgerMenu from '@/assets/drawer/burger.svg'
 export default {
     name: "DrawerMenuView",
     mixins: [],
-    components: { },
+    components: {
+        BurgerMenu
+    },
     data: function() {
         return {
             isConnected: true,
