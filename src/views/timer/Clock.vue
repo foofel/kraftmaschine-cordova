@@ -35,7 +35,7 @@
         </div>
         <div>
             <div class="mt-6 mb-6 pl-4 pr-4">
-                <WeightBar :activationFactor="0.94" :maxWeight="weightBarMax" ref="weightBar" />
+                <WeightBar :activationFactor="activationFactor" :maxWeight="weightBarMax" ref="weightBar" />
             </div>
         </div>
         <div class="flex-1">
@@ -53,7 +53,7 @@
         <div class="flex flex-col justify-center pt-5">
             <div class="pl-8 pr-8">
                 <!--img class="w-full" src="@/assets/boards/board.svg" ref="hangboard"-->
-                <BoardSvg1 ref="hangboard" />
+                <BoardSvg1 ref="hangboard" width="100%" preserveAspectRatio="xMidYMid meet" />
                 <div class="flex justify-between mt-3 font-medium text-sm">
                     <div>Left: 25mm</div>
                     <div>Right: 25mm</div>
@@ -161,7 +161,8 @@ export default {
                     ],                                                                           
                 ]
             },
-            msgPipe: null
+            activationFactor: 0.94,
+            msgPipe: null,
         };
     },
     created() {
@@ -200,8 +201,16 @@ export default {
                 }
             }
         }
+        // if we direclty loaded the clock without the caliobrate/setup use the debug data
+        if(this.$attrs.setupModel.timer) {
+            this.setupModel = this.$attrs.setupModel;
+        }
     },
     mounted() {
+        this.msgPipe = pipe(taredByObject(this.setupModel.weights.tare), clampPositive);
+        this.$ctx.device.subscribe({ tag: "weight", cb: this.onWeightMessage });
+        
+        // debug movement for the object that are not yet plugged in
         const updater = () => {
             this.clockData[0].fill = (Math.sin(performance.now() / 10000) + 1) / 2;
             this.clockData[1].fill = (Math.sin(performance.now() / 12000) + 1) / 2;
@@ -230,12 +239,12 @@ export default {
             requestAnimationFrame(updater);
         }
         requestAnimationFrame(updater);
+
+        // example on how to colorize the svg data
         const svg = this.$refs.hangboard;
         svg.querySelectorAll("#hold-1, #hold-5").forEach ((e) => {
             e.style = "fill:red;"; 
-        });
-        this.msgPipe = pipe(taredByObject(this.setupModel.weights.tare), clampPositive);
-        this.$ctx.device.subscribe({ tag: "weight", cb: this.onWeightMessage });
+        });        
     },
     beforeDestroy() {
         this.$ctx.device.unsubscribe(this.onWeightMessage);
