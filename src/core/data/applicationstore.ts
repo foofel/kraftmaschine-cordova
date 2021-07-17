@@ -113,15 +113,32 @@ export function defaultApplicationStoreObject(): ApplicationStoreInterface {
         },
         timers:  {
             timer: [
-                { name: "Basic 7s/5s", board: 0, timer: { type: "simple", timer: { active:7, passive:5, pause: 180, repeats:5, sets: 6, cooldown:10, warmup: 10 }, holdLeft: 9, holdRight: 12 } },
+                { 
+                    name: "Basic 7s/5s", 
+                    board: 0, 
+                    timer: { 
+                        type: "simple", 
+                        timer: { 
+                            active:7, 
+                            passive:5, 
+                            pause: 180, 
+                            repeats:5, 
+                            sets: 6, 
+                            cooldown:10, 
+                            warmup: 10 
+                        }, 
+                        holdLeft: 9, 
+                        holdRight: 12 
+                    } 
+                },
                 { name: "Basic 6s/4s", board: 0, timer: { type: "simple", timer: { active:6, passive:4, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 }, holdLeft: 9, holdRight: 12 } },
                 { name: "Basic 7s/3s", board: 0, timer: { type: "simple", timer: { active:7, passive:3, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 }, holdLeft: 9, holdRight: 12 } },
                 { name: "Max 10s", board: 0, timer: { type: "simple", timer: { active:7, passive:5, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 }, holdLeft: 9, holdRight: 12 } },
                 { name: "Max 3s Alt", board: 0, timer: { type: "custom", timer: [
-                    { state: "warmup", duration: 10, holdLeft: 9, holdRight: 12 },
+                    { state: "warmup", duration: 10, holdLeft: 0, holdRight: 0 },
                     { state: "active", duration: 3, holdLeft: 9, holdRight: 12 },
-                    { state: "pause", duration: 180, holdLeft: null, holdRight: null },
-                    { state: "cooldown", duration: 10, holdLeft: null, holdRight: null },
+                    { state: "pause", duration: 180, holdLeft: 0, holdRight: 0 },
+                    { state: "cooldown", duration: 10, holdLeft: 0, holdRight: 0 },
                 ]}},
                 { name: "Max 5s Alt", board: 0, timer: { type: "simple", timer: { active:7, passive:5, pause: 180, repeats:6, sets: 6, cooldown:10, warmup: 10 }, holdLeft: 9, holdRight: 12 } },
             ],

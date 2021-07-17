@@ -8,9 +8,9 @@ import { timeSeconds } from '../util/util';
 export type TimerMetrics = {
     duration: number;
     sets: number;
+    reps: number;
     setLength: Array<number>;
     setStart: Array<number>;
-    reps: number;
     repsInSet: Array<number>;
 }
 
@@ -21,42 +21,42 @@ export type ExedcutorTimerSlot = TimerSlot & {
     set: number;
 }
 
-export type ExecutorTimer = {
+export type ExecutableTimer = {
     slots:Array<ExedcutorTimerSlot>;
     metrics: TimerMetrics;
 }
 
-export function BuildExecutorTimer(setup:TimerSetup): ExecutorTimer {
-    const addSlot = (a:Array<ExedcutorTimerSlot>, slot:ExedcutorTimerSlot) => {
-        a.push(slot);
-        return slot.startTime + slot.duration;
-    }
-    let execTimer:ExecutorTimer = { 
+export function BuildExecutorTimer(setup:TimerSetup): ExecutableTimer {
+    const execTimer:ExecutableTimer = { 
         slots: [], 
         metrics: {
             duration: 0,
             sets: 0,
+            reps: 0,
             setLength: [],
             setStart: [],
-            reps: 0,
             repsInSet: []
         }
+    }
+    const addSlot = (a:Array<ExedcutorTimerSlot>, slot:ExedcutorTimerSlot) => {
+        a.push(slot);
+        return slot.startTime + slot.duration;
     }    
     if(setup.timer.type == "custom") {
         const timer = setup.timer.timer;
         let duration = 0;
         let setStart = 0;
-        let sets = 0;
+        let setcount = 0;
         let repcount = 0;
         let repcount_set = 0;
         let prevState:TimerSlotState|"" = "";
         for(let i = 0; i < timer.length; i++) {
-            let slot = timer[i];
+            const slot = timer[i];
             // the set counts from the first active slot until the break slot
             // the break slot does not count into the active time but counts
             // to the set
             if(slot.state == "active" && prevState == "") {
-                sets++;
+                setcount++;
                 setStart = duration;
                 execTimer.metrics.setStart.push(setStart);
             } else if(slot.state == "pause" || slot.state == "cooldown") {
@@ -71,45 +71,95 @@ export function BuildExecutorTimer(setup:TimerSetup): ExecutorTimer {
                 repcount_set++;
             }            
             if(slot.state == "cooldown") {
-                sets = 0;
-                repcount = 0;
+                //setcount = 0;
+                //repcount = 0;
             }
             duration = addSlot(execTimer.slots, { 
                 ...slot, 
                 rep: repcount,
                 repInSet: repcount_set,
-                set: sets,
-                startTime: duration 
+                set: setcount,
+                startTime: duration,
             });
         }
-        execTimer.metrics.sets = sets;
+        execTimer.metrics.sets = setcount;
         execTimer.metrics.duration = duration;
         execTimer.metrics.reps = repcount;
     } else if(setup.timer.type == "simple") {
         const timer = setup.timer.timer;
         const left = setup.timer.holdLeft;
-        const right = setup.timer.holdLeft;
+        const right = setup.timer.holdRight;
+        let repcount = 0;
         let duration = 0;
         let setStart = 0;
-        duration = addSlot(execTimer.slots, { state: "warmup", duration: timer.warmup, holdLeft: left, holdRight: right }, duration);
+        let repcount_set = 0;
+        duration = addSlot(execTimer.slots, { 
+            state: "warmup", 
+            duration: timer.warmup, 
+            holdLeft: left, 
+            holdRight: right, 
+            startTime: duration, 
+            rep: 0,
+            repInSet: 0, 
+            set: 0
+        });
         for(let i = 0; i < timer.sets; i++) {
             setStart = duration;
+            execTimer.metrics.setStart.push(setStart);
             for(let k = 0; k < timer.repeats; k++) {
-                duration = addSlot(execTimer.slots, { state: "active", duration: timer.active, holdLeft: left, holdRight: right }, duration);
+                duration = addSlot(execTimer.slots, { 
+                    state: "active", 
+                    duration: timer.active, 
+                    holdLeft: left, 
+                    holdRight: right, 
+                    startTime: duration, 
+                    rep: repcount,
+                    repInSet: repcount_set, 
+                    set: i
+                });          
                 if(k != timer.repeats - 1) {
-                    duration = addSlot(execTimer.slots, { state: "passive", duration: timer.passive, holdLeft: left, holdRight: right }, duration);
+                    duration = addSlot(execTimer.slots, { 
+                        state: "passive", 
+                        duration: timer.passive, 
+                        holdLeft: left, 
+                        holdRight: right, 
+                        startTime: duration, 
+                        rep: repcount,
+                        repInSet: repcount_set, 
+                        set: i 
+                    });
                 }
+                repcount++;
+                repcount_set++;                
             }
             execTimer.metrics.setLength.push(duration - setStart);
             execTimer.metrics.repsInSet.push(timer.repeats);
             if(i != timer.sets - 1) {
-                duration = addSlot(execTimer.slots, { state: "pause", duration: timer.pause, holdLeft: left, holdRight: right }, duration);
+                duration = addSlot(execTimer.slots, { 
+                    state: "pause", 
+                    duration: timer.pause, 
+                    holdLeft: left, 
+                    holdRight: right, 
+                    startTime: duration, 
+                    rep: 0,
+                    repInSet: 0,
+                    set: i
+                });
             }
+            repcount_set = 0;
         }
-        //actions.push({ state: "cooldown", duration: 10, holdLeft: left, holdRight: right });
-        duration = addSlot(execTimer.slots, { state: "cooldown", duration: timer.cooldown, holdLeft: left, holdRight: right }, duration);
+        duration = addSlot(execTimer.slots, { 
+            state: "cooldown", 
+            duration: timer.cooldown, 
+            holdLeft: left, 
+            holdRight: right, 
+            startTime: duration, 
+            rep: 0,
+            repInSet: 0, 
+            set: 0
+        });
         execTimer.metrics.duration = duration;
-        execTimer.metrics.reps = timer.repeats;
+        execTimer.metrics.reps = repcount;
         execTimer.metrics.sets = timer.sets;
     }
     return execTimer;
@@ -131,7 +181,7 @@ export type SlotSearchResult = {
     slotIndex:number;
 }
 
-export function FindCurrentSlot(timer: ExecutorTimer, time: number): SlotSearchResult {
+export function FindCurrentSlot(timer: ExecutableTimer, time: number): SlotSearchResult {
     time = clamp(time, 0, timer.metrics.duration);
     const init:SlotSearchResult = {
         rep: { value: 0, length: 0, elapsed: 0 },
@@ -145,11 +195,22 @@ export function FindCurrentSlot(timer: ExecutorTimer, time: number): SlotSearchR
     for(let i = 0; i < timer.slots.length; i++) {
         const slot = timer.slots[i];
         if(time >= slot.startTime && time < slot.startTime + slot.duration) {
-            const setLength = timer.metrics.setLength[slot.set];
-            const setStart = timer.metrics.setStart[slot.set];
+            let setLength = 0;
+            let setStart = 0;
+            if(slot.state === 'warmup' || slot.state === "cooldown") {
+                setLength = slot.duration;
+                setStart = slot.startTime;
+            } else {
+                setLength = timer.metrics.setLength[slot.set];
+                setStart = timer.metrics.setStart[slot.set];
+            }
             return {
                 // rep number and set number
-                rep: { value: slot.repInSet, length: slot.duration, elapsed: time - slot.startTime },
+                rep: { 
+                    value: slot.repInSet, 
+                    length: slot.duration, 
+                    elapsed: time - slot.startTime 
+                },
                 set: { 
                     value: slot.set, 
                     length: setLength,
@@ -167,7 +228,7 @@ export function FindCurrentSlot(timer: ExecutorTimer, time: number): SlotSearchR
 }
 
 
-export type NotifyType = "vibrate" | "vibrate_last" | "beep" | "beep_last";
+export type NotifyType = "vibrate" | "vibrate_last" | "beep" | "beep_last" | "timer_changed" | "holds_update";
 export type NotifyCallback = (type: NotifyType) => void;
 
 export interface RepActiveTime {
@@ -182,34 +243,50 @@ export type CalibrationResult = {
 }
 
 export type ExecutorTimerSetup = {
-    setup: TimerSetup;
+    timerSetup: TimerSetup;
     calibration: CalibrationResult;
     activationFactor:number;
+    cb:NotifyCallback;
 }
 
 class BeepHelper {
-    beepExecuted:boolean = false;
-    timeIndex:number = 0;
     done:boolean = false;
-    constructor(private beepTimes:Array<{ time:number, duration: number }>, private offset:number = 0) {
-        this.beepTimes = beepTimes.sort((a, b) => a.time - b.time);
+    beepTimes:Array<{ time:number, duration: number, executed: boolean }> = [];
+    constructor(beepTimes:Array<{ time:number, duration: number}>) {
+        for(let i = 0; i < beepTimes.length; i++) {
+            this.beepTimes.push({ ...beepTimes[i], executed: false });
+        }
+        this.beepTimes = this.beepTimes.sort((a, b) => a.time - b.time);
     }
-    updateTime(time:number) {
-        if(!this.done && time < (this.beepTimes[this.timeIndex].time + this.offset)) {
-            this.timeIndex = this.beepTimes.findIndex((e) => e.time < time);
-            if(this.timeIndex == -1) {
+    reset() {
+        this.done = false;
+        for(let i = 0; i < this.beepTimes.length; i++) {
+            this.beepTimes[i].executed = false;
+        }
+    }
+    isDone() {
+        return this.done;
+    }
+    checkForBeep(time:number):number {
+        const beepIndex = this.beepTimes.findIndex((e) => e.time > time);
+        const beep = this.beepTimes[beepIndex];
+        if(!beep.executed) {
+            if(beepIndex == 0) {
                 this.done = true;
             }
-            return true;
+            beep.executed = true;
+            console.log(`[BEEP] index: ${beepIndex} => ${beep.time} @ ${time}`);
+            return this.beepTimes[beepIndex].duration;
+        } else {
+            return 0;
         }
-        return false;
     }
 }
 
 export class TimerExecutor
 {
     setup:ExecutorTimerSetup;
-    timer:ExecutorTimer;
+    timer:ExecutableTimer;
     runnerInterval:number = 0;
     lastWeightMsg:WeightMessage = {
         left: 0,
@@ -225,19 +302,20 @@ export class TimerExecutor
     goodwillUsed:boolean = false;
     wasWaitingForGoodwill:boolean = false
     waitForGoodwill:boolean = false;
-    //lastSlot:ExedcutorTimerSlot;
+    lastTickSlot:SlotSearchResult;
     activeTime:RepActiveTime = { active: 0, inactive: 0 };
     activeTimes:Array<RepActiveTime> = []
     state:TimerState = "init";
     startTime:number = 0;
     totalElapsed:number = 0;
     lastElapsed:number = 0;
+    elapsedInState:number = 0;
     running:boolean = false;
     beeper:BeepHelper;
 
     constructor(setup:ExecutorTimerSetup) {
         this.setup = setup;
-        this.timer = BuildExecutorTimer(setup.setup);
+        this.timer = BuildExecutorTimer(setup.timerSetup);
         this.lastTickTime = timeSeconds();
         this.beeper = new BeepHelper([
             { time: 10, duration: 0.1 },
@@ -245,7 +323,8 @@ export class TimerExecutor
             { time: 2, duration: 0.1 },
             { time: 1, duration: 0.1 },
             { time: 0, duration: 0.2 }
-        ], 0)
+        ]);
+        this.lastTickSlot = FindCurrentSlot(this.timer, 0);
         this.runnerInterval = setInterval(() => {
             const now = timeSeconds();
             const elapsed = now - this.lastTickTime;
@@ -256,18 +335,19 @@ export class TimerExecutor
             if(this.waitForGoodwill) {
                 this.remainingGoodwillTime -= elapsed;
                 //TODO: goodwill callback
-                if(this.remainingGoodwillTime <= 0) {
+                if(this.remainingGoodwillTime <= 0 || this.isOverActivationWeight()) {
                     this.waitForGoodwill = false;
                     this.goodwillUsed = true;
                 }
-                console.log(`[TR] timer blocked by goodwill ${this.remainingGoodwillTime}`);
+                //console.log(`[TR] timer blocked by goodwill ${this.remainingGoodwillTime}`);
+                this.setup.cb("timer_changed");
                 return;
             }            
             if(!this.wasWaitingForGoodwill) {
                 this.totalElapsed += elapsed;
                 this.lastElapsed = elapsed;                
                 this.wasWaitingForGoodwill = false;
-                console.log(`[TR] goodwill ended, reusing previous times`);
+                //console.log(`[TR] goodwill ended, reusing previous times`);
             }
             const consumedTick = this.executeUpdateTick(this.totalElapsed, this.lastElapsed);
         }, 10);
@@ -277,17 +357,29 @@ export class TimerExecutor
         if(currentSlot.state === "done") {
             clearInterval(this.runnerInterval);
             this.runnerInterval = 0;
+            this.state = currentSlot.state;
+            this.lastTickSlot = currentSlot;
+            this.setup.cb("timer_changed");
             return true;
-        }
+        }  
 
         // handling the active/inactive time accumulation
-        if(currentSlot.state == "active" && this.state !== "active") {
+        if(currentSlot.state === "active" && this.state !== "active") {
             console.log("[TR] entering active state");
             this.activeTime = { active: 0, inactive: 0 };
-            if(!this.isOverActivationWeight() && !this.goodwillUsed) {
+            if(!this.isOverActivationWeight() && !this.goodwillUsed && !this.waitForGoodwill) {
                 // abort current tick and restart after the goodwill is done
+                // or the activation weight is reached
                 this.waitForGoodwill = true;
                 this.remainingGoodwillTime = this.goodwillTime;
+                // - do last beep on goodwill start and not state enter
+                // - the last beep happens on the state change (if we have a beep on 0) as we will
+                //   never actually meet the last time perfectly. to make it more robust we check if,
+                //   against all odds, the last beep was actually executed               
+                if(!this.beeper.isDone()) {
+                    this.setup.cb("beep_last");
+                    this.setup.cb("vibrate_last");
+                }                
                 console.log("[TR] activating goodwill timer");
                 return false;
             }
@@ -303,87 +395,57 @@ export class TimerExecutor
         else if(currentSlot.state === "active" && !this.isOverActivationWeight()) {
             this.activeTime.inactive += tick
         }        
-        else if(currentSlot.state != "active" && this.state != "active") {
+        else if(currentSlot.state !== "active" && this.state === "active") {
             console.log("[TR] leaving active state");
             if(this.isOverActivationWeight()) {
                 this.activeTime.active += tick;
             } else {
                 this.activeTime.inactive += tick;
             }
-            this.activeTimes.push(this.activeTime);
+            const timeCap = this.lastTickSlot.rep.length;
+            const overshot = currentSlot.rep.elapsed;
+            const active = this.activeTime.active - (this.isOverActivationWeight() ? overshot : 0);
+            const inactive = this.activeTime.inactive - (!this.isOverActivationWeight() ? overshot : 0);
+            this.activeTimes.push({
+                active: clamp(active , 0, timeCap),
+                inactive: clamp(inactive , 0, timeCap)
+            });
             this.activeTime = { active: 0, inactive: 0 };
             this.goodwillUsed = false;
-        }
-        const elapsedRep = total - this.timer.slots[currentSlot.slotIndex].startTime;
-        if(this.beeper.updateTime(elapsedRep)) {
-            // do beep
+            this.beeper.reset();
+            this.setup.cb("holds_update");
         }
 
-        // handling the beeping thingy
-        if(this.state == "init" || (this.state !== "active" && currentSlot.state === "active")) {
-            this.nextBeep = roundDown(Math.min(this.beepStartTime, timerState.repLength), this.beepIntervall);
-            this.nextAdvancedBeep =  this.nextBeep + this.beepTimeOffset > timerState.repLength 
-                                    ? this.nextBeep - this.beepIntervall + this.beepTimeOffset
-                                    : this.nextBeep + this.beepTimeOffset
-        }
-        if(this.state == "passive" || currentSlot.state === "pause" || currentSlot.state === "warmup") {
-            const remainingTime = timerState.repLength - timerState.repElapsed
-            if(remainingTime < this.beepStartTime + this.beepTimeOffset) {
-                // the last beep/vibrate logic is seperate
-                if(this.nextAdvancedBeep > 0) {
-                    const transitionAdvanced = this.nextAdvancedBeep;
-                    if(remainingTime < transitionAdvanced) {
-                        this.nextAdvancedBeep -= this.beepIntervall; //round(remainingTime, this.beepIntervall) - this.beepIntervall + this.beepTimeOffset;
-                        if(this.nextAdvancedBeep > 0) {
-                            this.beepCallback("BEEP");
-                            //console.log("BEEP", remainingTime, this.nextAdvancedBeep);
-                        } else {
-                            this.beepCallback("BEEP_LAST");
-                            //console.log("BEEP_LAST", remainingTime, this.nextAdvancedBeep);
-                        }
-                    }
-                }                
-                if(this.nextBeep > 0) {
-                    const transitionNormal = this.nextBeep;
-                    //console.log(remainingTime, transitionNormal);
-                    if(remainingTime < transitionNormal) {
-                        this.beepCallback("VIBRATE");
-                        this.nextBeep -= this.beepIntervall;// round(remainingTime, this.beepIntervall) - this.beepIntervall;
-                        //console.log("VIBRATE", remainingTime, this.nextBeep);
-                    }
-                }
+        // this is the beep/vibrate stuff
+        const remainingInState = currentSlot.rep.length - currentSlot.rep.elapsed;
+        const nextState = this.timer.slots[currentSlot.slotIndex + 1];
+        if(nextState && nextState.state == "active") {
+            const beepDuration = this.beeper.checkForBeep(remainingInState)
+            if(beepDuration > 0) {
+                this.setup.cb("beep");
+                this.setup.cb("vibrate");
             }
-            //console.log(this.nextBeep, this.nextAdvancedBeep);
-        }
-        if((this.state === "passive" || this.state === "pause" || this.state === "warmup") && currentSlot.state === "active") {
-            if(this.beepTimeOffset === 0) {
-                this.beepCallback("BEEP_LAST");
-                //console.log("BEEP_LAST");
-            }
-            this.beepCallback("VIBRATE_LAST");
-            //console.log("VIBRATE_LAST");
-        }        
-
+        }  
 
         this.state = currentSlot.state;
+        this.lastTickSlot = currentSlot;
+        this.setup.cb("timer_changed");
         return true;
     }
 
-    private onActive() {}
-    private onPassive() {}
-    private onBreak() {}
-
     start(): void {
+        this.lastTickTime = timeSeconds();
         this.running = true;
     }
     stop(): void {
         this.running = false;
     }
     destroy() {
+        this.stop();
         clearInterval(this.runnerInterval);
         this.runnerInterval = 0;  
     }
-    isStarted(): boolean {
+    isRunning(): boolean {
         return this.running;
     }
     injectMessage(msg:WeightMessage): void {
@@ -395,14 +457,108 @@ export class TimerExecutor
     getActivationWeight() {
         return this.setup.calibration.weight.combined * this.setup.activationFactor;
     }
-    getElapsedTime() {
-        return Math.min(this.totalElapsed, this.timer.metrics.duration);
+    overallElapsed() {
+        return clamp(this.totalElapsed, 0, this.timer.metrics.duration);
     }
-    /*getActiveSlot() {
-        return this.lastSlot;
-    }*/
-    getRemainingGoodwillTime() {
-        return this.remainingGoodwillTime
+    overallRemaining() {
+        return clamp(this.timer.metrics.duration - this.overallElapsed(), 0, this.timer.metrics.duration);
+    }    
+    overallProgress() {
+        return clamp(this.overallElapsed() / this.timer.metrics.duration, 0, this.timer.metrics.duration);
+    }
+    setElapsed() {
+        if(this.lastTickSlot){
+            return this.lastTickSlot.set.elapsed;
+        }
+        return 0;
+    }
+    setProgress() {
+        if(this.lastTickSlot){
+            return clamp(this.lastTickSlot.set.elapsed / this.lastTickSlot.set.length, 0, 1);
+        }
+        return 0;
+    }
+    setCurrent() {
+        if(this.lastTickSlot){
+            return this.lastTickSlot.set.value;
+        }
+        return 0;
+    }
+    setCount() {
+        return this.timer.metrics.sets;
+        return 0;
+    }    
+    repElapsed() {
+        if(this.lastTickSlot){
+            return this.lastTickSlot.rep.elapsed;
+        }
+        return 0;
+    }
+    repRemaining() {
+        if(this.lastTickSlot){
+            return clamp(this.lastTickSlot.rep.length - this.lastTickSlot.rep.elapsed, 0, this.lastTickSlot.rep.length);
+        }
+        return 0;
+    }
+    repProgress() {
+        if(this.lastTickSlot) {
+            // if we change to the next active state the elapsed for the previus tick may not fill the 
+            // current rep to 100%, as we now block with the goodwill this would leed to a non 100%
+            // filled rep circle, so if the goodwill is active and the rep progres is requested we just
+            // say its at 100%
+            if(this.isGoodwillActive()){
+                return 1;
+            }
+            return clamp(this.lastTickSlot.rep.elapsed / this.lastTickSlot.rep.length, 0, 1);
+        }
+        return 0;
+    }
+    repCurrent() {
+        if(this.lastTickSlot){
+            return this.lastTickSlot.rep.value;
+        }
+        return 0;
+    }
+    repCount() {
+        if(this.lastTickSlot){
+            return this.timer.metrics.repsInSet[this.lastTickSlot.set.value];
+        }
+        return 0;
+    }
+    getNextHolds() {
+        // either return the current needed holds if we are in an active set or the holds
+        // for the next active set. if no current slot exists check the first to states for 
+        // active or warmup
+        if(this.lastTickSlot) {
+            if(this.lastTickSlot.state == "active") {
+                const currentSlot = this.timer.slots[this.lastTickSlot.rep.value];
+                return [currentSlot.holdLeft, currentSlot.holdRight];
+            } else {
+                const rep = this.lastTickSlot.rep.value;
+                const nextSlot = this.timer.slots[Math.min(rep+1, this.timer.slots.length)];
+                return [nextSlot.holdLeft, nextSlot.holdRight];
+            }
+        } else {
+            if(this.timer.slots[0].state == "active") {
+                const currentSlot = this.timer.slots[0];
+                return [currentSlot.holdLeft, currentSlot.holdRight];
+            } else {
+                const nextSlot = this.timer.slots[Math.min(1, this.timer.slots.length)];
+                return [nextSlot.holdLeft, nextSlot.holdRight];
+            }
+        }
+    }
+    getCurrentState() {
+        return this.state;
+    }
+    getCurrentSlot() {
+        return this.lastTickSlot;
+    }
+    goodwillElapsed() {
+        return this.goodwillTime - this.remainingGoodwillTime;
+    }
+    goodwillProgress() {
+        return (this.goodwillTime - this.remainingGoodwillTime) / this.goodwillTime * 1.001;
     }
     isGoodwillActive() {
         return this.waitForGoodwill;

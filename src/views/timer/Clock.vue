@@ -5,21 +5,27 @@
                 <div>
                     <div class="flex justify-center m-b-fix">SET</div>
                     <div class="border-warmGray-400 b-b-1"></div>
-                    <div class="flex justify-center m-t-fix">3/7</div>
+                    <div class="flex justify-center m-t-fix">
+                        {{currentSet}}/{{this.timerData.sets}}
+                    </div>
                 </div>
             </div>
             <div class="flex justify-center items-center flex-1">
                 <div>
                     <div class="flex justify-center m-b-fix">REMAINING</div>
                     <div class="b-b-1 border-warmGray-400"></div>
-                    <div class="flex justify-center m-t-fix">12:34:45</div>
+                    <div class="flex justify-center m-t-fix">
+                        {{remainingOverallTime}}
+                    </div>
                 </div>                
             </div>
             <div class="flex items-center">
                 <div>
                     <div class="flex justify-center m-b-fix">WEIGHT</div>
                     <div class="b-b-1 border-warmGray-400"></div>
-                    <div class="flex justify-center m-t-fix">112%</div>
+                    <div class="flex justify-center m-t-fix">
+                        {{this.timerData.trainWeightRel.toFixed(0)}}%
+                    </div>
                 </div>                  
             </div>
         </div>
@@ -27,9 +33,15 @@
             <div class="clock-size relative">
                 <ProgressClockCanvas class="absolute" ref="clock" />
                 <div class="absolute w-full h-full flex justify-center items-center flex-col">
-                    <div class="text-2xl mb-6">REP 3/7</div>
-                    <div class="text-6xl">00:00.0</div>
-                    <div class="text-2xl mt-6">READY!</div>
+                    <div class="text-2xl mb-6">
+                        REP {{currentRep}}/{{this.timerData.reps}}
+                    </div>
+                    <div class="text-6xl">
+                        {{remainingRepTime}}
+                    </div>
+                    <div class="text-2xl mt-6">
+                        {{this.timerData.stateName}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -50,15 +62,14 @@
                 </div>
             </div>
         </div>
-        <div class="flex flex-col justify-center pt-5">
-            <div class="pl-8 pr-8">
-                <!--img class="w-full" src="@/assets/boards/board.svg" ref="hangboard"-->
-                <BoardSvg1 ref="hangboard" width="100%" preserveAspectRatio="xMidYMid meet" />
+        <div class="flex flex-col justify-center pt-5" @click="muhclick">
+            <div class="pl-8 pr-8 inline-block">
+                <BoardSvg1 ref="hangboard" width="100%" />
                 <div class="flex justify-between mt-3 font-medium text-sm">
                     <div>Left: 25mm</div>
                     <div>Right: 25mm</div>
-                </div>
-            </div>
+                </div>                 
+            </div>           
         </div>
         <div class="flex justify-center pt-2 pb-2">
             <div class="flex font-light text-sm">
@@ -67,7 +78,6 @@
                 <div class="ml-5">{{hpa}}</div>
             </div>
         </div>
-        <!--p>{{attrs}}</p-->
     </div>
 </template>
 
@@ -77,7 +87,9 @@ import ProgressClockCanvas from '@/components/timer/ProgressClockCanvas.vue'
 import WeightBar from '@/components/timer/WeightBar.vue'
 import ProgressGraph from '@/components/timer/ProgressGraph.vue'
 import BoardSvg1 from '@/assets/boards/board.svg'
-import { clampPositive, passTrough, pipe, taredByObject } from '@/core/connectivity/messagetransformer'
+import { clampPositive, pipe, taredByObject } from '@/core/connectivity/messagetransformer'
+import { TimerExecutor } from '@/core/timer/executor'
+import moment from 'moment';
 
 
 export const ClockColors = {
@@ -105,15 +117,54 @@ export default {
                 timer: null,
                 weights: null
             },
+            timerData: {
+                reps: 7,
+                currentRep: 3,
+                repRemainingTime: 0,
+                sets: 7,
+                currentSet: 3,
+                overallRemainingTime: 1323.543,
+                weight: 87.32,
+                bodyWeightRel: 112.1223,
+                trainWeightRel: 112.1223,
+                stateName: "LolState"
+            },
             clockData: [
-                { foreground: "blue", background: "lightgray", fill: 0.5, radius: 1, width: 1 },
-                { foreground: "black", background: "lightgray", fill: 0.5, radius: 0.95, width: 1 },
-                { foreground: "#36A2EB", background: "lightgray", fill: 0.2, radius: 0.9, width: 4 },
-                { foreground: "red", background: "white", fill: 0.5, radius: 0.82, width: 1 }
+                { foreground: "black", background: "lightgray", fill: 0.75, radius: 1, width: 1 },
+                { foreground: "black", background: "lightgray", fill: 0.75, radius: 0.95, width: 1 },
+                { foreground: "#36A2EB", background: "lightgray", fill: 0.75, radius: 0.9, width: 4 },
+                { foreground: "red", background: "white", fill: 0.75, radius: 0.82, width: 1 }
             ],
+            clockConfig: {
+                stateNameLookup: {
+                    "INIT": "READY!", 
+                    "WARMUP": "WARMUP", 
+                    "ACTIVE": "ACTIVE",
+                    "PASSIVE": "REST",
+                    "PAUSE": "BREAK",
+                    "COOLDOWN": "COOLDOWN",
+                    "DONE": "FINISHED!"
+                },
+                stateColorLookup: {
+                    "init": "gray",
+                    "warmup": "#149BB5",
+                    "active": "green",
+                    "passive": "#F8BD0F",
+                    "pause": "#fc29f0",
+                    "cooldown": "#149BB5",
+                    "goodwill": "red",
+                    "done": "#149BB5"
+                }                
+            },
             weightData: {
                 left: 0,
-                right: 0
+                right: 0,
+                combined: 0
+            },
+            envData: {
+                temp: 0,
+                humidity: 0,
+                pressure: 0
             },
             progressData: {
                 sets: [
@@ -161,43 +212,49 @@ export default {
                     ],                                                                           
                 ]
             },
+            svgInfo: {
+                prevElements: [],
+            },
             activationFactor: 0.94,
             msgPipe: null,
+            timerExecutor: null
         };
     },
     created() {
         this.setupModel = {
             "timer":{
                 "name":"Basic 7s/5s",
-                "board":0,
+                "board":1,
                 "timer":{
                     "type":"simple",
                     "timer":{
-                        "active":7,
-                        "passive":5,
-                        "pause":180,
-                        "repeats":5,
-                        "sets":6,
-                        "cooldown":10,
-                        "warmup":10
-                    }
-                }
+                        "active":4,
+                        "passive":2,
+                        "pause":10,
+                        "repeats":2,
+                        "sets":3,
+                        "cooldown":5,
+                        "warmup":5
+                    },
+                    "holdLeft": 9,
+                    "holdRight": 12 
+                },
             },
             "weights":{
                 "tare":{
                     "left":0.18250217166257385,
                     "right":0.18478604789459238,
-                    "combined":0
+                    "combined":0.36728821955
                 },
                 "weight":{
-                    "left":5,
-                    "right":5,
-                    "combined":0
+                    "left":1,
+                    "right":1,
+                    "combined":2
                 },
                 "weightedWeight":{
-                    "left":5,
-                    "right":5,
-                    "combined":0
+                    "left":1,
+                    "right":1,
+                    "combined":2
                 }
             }
         }
@@ -209,19 +266,17 @@ export default {
     mounted() {
         this.msgPipe = pipe(taredByObject(this.setupModel.weights.tare), clampPositive);
         this.$ctx.device.subscribe({ tag: "weight", cb: this.onWeightMessage });
-        
+        this.$ctx.device.subscribe({ tag: "env", cb: this.onEnvSensorMessage });
+        this.timerExecutor = new TimerExecutor({
+            timerSetup: this.setupModel.timer,
+            calibration: this.setupModel.weights,
+            activationFactor:this.activationFactor,
+            cb: this.onTimerEvent
+        });
+        this.updateDataFromTimer();
+        this.updateHoldsFromTimer();
         // debug movement for the object that are not yet plugged in
         const updater = () => {
-            this.clockData[0].fill = (Math.sin(performance.now() / 10000) + 1) / 2;
-            this.clockData[1].fill = (Math.sin(performance.now() / 12000) + 1) / 2;
-            this.clockData[2].fill = (Math.sin(performance.now() / 14000) + 1) / 2;
-            this.clockData[3].fill = (Math.sin(performance.now() / 16000) + 1) / 2;
-            if(this.$refs.clock) {
-                this.$refs.clock.updateData(this.clockData);
-            }
-            //this.weightData.left = (Math.sin(performance.now() / 21000) + 1) / 2 * 50;
-            //this.weightData.right = (Math.sin(performance.now() / 22000) + 1) / 2 * 50;
-            //this.$refs.weightBar.updateData(this.weightData);
             const repCount = 36; // magic knowledge
             let count = 0;
             const time = performance.now() / 2000;
@@ -239,35 +294,119 @@ export default {
             requestAnimationFrame(updater);
         }
         requestAnimationFrame(updater);
-
-        // example on how to colorize the svg data
-        const svg = this.$refs.hangboard;
-        svg.querySelectorAll("#hold-1, #hold-5").forEach ((e) => {
-            e.style = "fill:red;"; 
-        });        
+        //this.timerExecutor.start();
     },
     beforeDestroy() {
         this.$ctx.device.unsubscribe(this.onWeightMessage);
+        this.$ctx.device.unsubscribe(this.onTempSensorMessage);
+        this.timerExecutor.destroy();
     },
     methods: {
         onWeightMessage(msg) {
             msg = this.msgPipe(msg);
             this.weightData = msg;
             this.$refs.weightBar.updateData(msg);
+            this.timerExecutor.injectMessage(msg);
+        },
+        onEnvSensorMessage(msg) {
+
+        },
+        onTimerEvent(event) {
+            if(event == "beep") {
+                console.log("beep");
+            } else if(event == "beep_last") {
+                console.log("beep_last");
+            } else if(event == "holds_update") {
+                this.updateHoldsFromTimer();
+            } else if(event == "timer_changed") {
+                this.updateDataFromTimer();
+                this.updateClockFromTimer();
+            }
+        },
+        muhclick() {
+            if(!this.timerExecutor.isRunning()){
+                this.timerExecutor.start();
+            } else {
+                this.timerExecutor.stop();
+            }
+        },
+        updateHoldsFromTimer() {
+            this.svgInfo.prevElements.forEach((e) => {
+                e.elem.style = e.style;
+            });
+            this.svgInfo.prevElements = []
+            const holds = this.timerExecutor.getNextHolds();
+            if(holds) {
+                console.log(`hold change @ '${this.timerExecutor.getCurrentState()}' to ${holds}`);
+                const holdsSelector = holds.map(e => `#hold-${e}`).join(",");
+                const svg = this.$refs.hangboard;
+                const svgElements = svg.querySelectorAll(holdsSelector)
+                svgElements.forEach ((e) => {
+                    this.svgInfo.prevElements.push({
+                        elem: e,
+                        style: e.style
+                    });
+                    e.style = "fill:red;"; 
+                });
+            }            
+        },
+        updateDataFromTimer() {
+            this.timerData.reps = this.timerExecutor.repCount();
+            this.timerData.currentRep = this.timerExecutor.repCurrent();
+            this.timerData.repRemainingTime = this.timerExecutor.repRemaining();
+            this.timerData.sets = this.timerExecutor.setCount();
+            this.timerData.currentSet = this.timerExecutor.setCurrent();
+            this.timerData.overallRemainingTime = this.timerExecutor.overallRemaining();
+            this.timerData.stateName = this.timerExecutor.getCurrentState();          
+            this.timerData.bodyWeightRel = this.weightData.combined / this.setupModel.weights.weightedWeight.combined;
+            this.timerData.trainWeightRel = this.weightData.combined / this.setupModel.weights.weightedWeight.combined;
+        },
+        updateClockFromTimer() {
+            // update clock (overall, set, rep, goodwill)
+            this.clockData[0].fill = this.timerExecutor.overallProgress();
+            this.clockData[1].fill = this.timerExecutor.setProgress();
+            this.clockData[2].fill = this.timerExecutor.repProgress();
+            this.clockData[2].foreground = this.clockConfig.stateColorLookup[this.timerData.stateName];
+            if(this.timerExecutor.isGoodwillActive()) {
+                const goodwillProgress = this.timerExecutor.goodwillProgress();
+                this.clockData[3].fill = goodwillProgress;
+            } else {
+                this.clockData[3].fill = 0;
+            }
+            if(this.$refs.clock) {
+                this.$refs.clock.updateData(this.clockData);
+            }   
         }
     },
 	computed: {
         temp() {
-            return "0.0°C";
+            return `${this.envData.temp.toFixed(1)}°C`;
         },
         hum() {
-            return "0RH%";
+            return `${this.envData.humidity.toFixed(0)}RH%`;
         },
         hpa() {
-            return "0hPa";
+            return `${this.envData.pressure.toFixed(0)}hPa"`; 
         },
         weightBarMax() {
-            return this.setupModel.weights.weightedWeight.left + this.setupModel.weights.weightedWeight.right;
+            return this.setupModel.weights.weightedWeight.combined;
+        },
+        remainingOverallTime() {
+            return moment.utc(this.timerData.overallRemainingTime * 1000).format("HH:mm:ss")
+        },
+        remainingRepTime() {
+            return moment.utc(this.timerData.repRemainingTime * 1000).format("mm:ss.S")
+        },
+        currentSet() {
+            return this.timerData.currentSet + 1;          
+        },
+        currentRep() {
+            if(this.timerData.stateName == "warmup" || this.timerData.stateName == "pause") {
+                return 0;
+            }
+            else {
+                return this.timerData.currentRep + 1;
+            }
         }
     }
 };
@@ -284,7 +423,7 @@ export default {
     border-bottom-width: 1px;
 }
 .clock-size {
-    width: calc(min(100vw, 100vh) - 2em);
-    height: calc(min(100vw, 100vh) - 2em);
+    width: calc(min(min(100vw, 100vh), 512px) - 2em);
+    height: calc(min(min(100vw, 100vh), 512px) - 2em);
 }
 </style>

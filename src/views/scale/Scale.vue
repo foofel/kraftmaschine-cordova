@@ -52,7 +52,7 @@ export default {
     beforeDestroy() {
         console.log("DESTROYED Scale");
 		this.$ctx.device.unsubscribe(this.onWeightMessage);
-		this.$ctx.device.unsubscribe(this.onTempSensorMessage)
+		this.$ctx.device.unsubscribe(this.onTempSensorMessage);
         if(this.calibrator) {
             this.calibrator.destroy();
         }
